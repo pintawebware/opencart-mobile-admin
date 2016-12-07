@@ -48,5 +48,10 @@ class ModelModuleApimoduleApimodule extends Model
         return $product_data;
 
     }
+    public function Login($username, $password) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE username = '" . $username . "' AND (password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('" . $this->db->escape(htmlspecialchars($password, ENT_QUOTES)) . "'))))) OR password = '" . $this->db->escape(md5($password)) . "') AND status = '1'");
+
+        return $query->row;
+    }
 
 }

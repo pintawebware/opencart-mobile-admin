@@ -47,6 +47,11 @@ class ControllerModuleApimoduleApimodule extends Controller
     public function index()
     {
         header("Access-Control-Allow-Origin: *");
+        $error = $this->valid();
+        if($error != null){
+            echo json_encode($error);
+            return;
+        }
 
         $this->load->model('module/apimodule/apimodule');
         $data['orders'] = $this->model_module_apimodule_apimodule->getOrders();
@@ -55,7 +60,7 @@ class ControllerModuleApimoduleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/order  getOrderById
+     * @api {get} index.php?route=module/apimodule/apimodule/order  getOrderById
      * @apiName GetOrderById
      * @apiGroup All
      *
@@ -98,6 +103,11 @@ class ControllerModuleApimoduleApimodule extends Controller
     {
         $id = $_REQUEST['id'];
         header("Access-Control-Allow-Origin: *");
+        $error = $this->valid();
+        if($error != null){
+            echo json_encode($error);
+            return;
+        }
 
         $this->load->model('module/apimodule/apimodule');
         $data['order'] = $this->model_module_apimodule_apimodule->getOrderById($id);
@@ -128,6 +138,11 @@ class ControllerModuleApimoduleApimodule extends Controller
     public function status()
     {
         header("Access-Control-Allow-Origin: *");
+        $error = $this->valid();
+        if($error != null){
+            echo json_encode($error);
+            return;
+        }
 
         $statusId = $_REQUEST['status_id'];
         $orderID = $_REQUEST['order_id'];
@@ -141,7 +156,7 @@ class ControllerModuleApimoduleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/product  getProduct
+     * @api {get} index.php?route=module/apimodule/apimodule/product  getProduct
      * @apiName getProduct
      * @apiGroup All
      *
@@ -179,6 +194,11 @@ class ControllerModuleApimoduleApimodule extends Controller
     public function product()
     {
         header("Access-Control-Allow-Origin: *");
+        $error = $this->valid();
+        if($error != null){
+            echo json_encode($error);
+            return;
+        }
         $id = $_REQUEST['product_id'];
 
         $this->load->model('catalog/product');
@@ -189,7 +209,7 @@ class ControllerModuleApimoduleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/products  getProducts
+     * @api {get} index.php?route=module/apimodule/apimodule/products  getProducts
      * @apiName getProducts
      * @apiGroup All
      *
@@ -243,9 +263,14 @@ class ControllerModuleApimoduleApimodule extends Controller
     public function products()
     {
         header("Access-Control-Allow-Origin: *");
-        if($_REQUEST['page']){
+        $error = $this->valid();
+        if($error != null){
+            echo json_encode($error);
+            return;
+        }
+        if ($_REQUEST['page']) {
             $page = ($_REQUEST['page'] - 1) * 5;
-        }else{
+        } else {
             $page = 0;
         }
         $this->load->model('module/apimodule/apimodule');
@@ -254,5 +279,60 @@ class ControllerModuleApimoduleApimodule extends Controller
         echo json_encode($products);
 
     }
+
+    /**
+     * @api {post} index.php?route=module/apimodule/apimodule/login  Login
+     * @apiName Login
+     * @apiGroup All
+     *
+     * @apiParam {String} username User unique username.
+     * @apiParam {Number} password User's  password.
+     *
+     * @apiSuccess {String} token  Token.
+
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *         "token" : "e9cf23a55429aa79c3c1651fe698ed7b"
+     *
+     *    }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Incorrect username or password"
+     *     }
+     *
+     */
+    public function login()
+    {
+        header("Access-Control-Allow-Origin: *");
+        //$this->session->data['token'] = $token;
+        $this->load->model('module/apimodule/apimodule');
+        $user = $this->model_module_apimodule_apimodule->Login($this->request->post['username'], $this->request->post['password']);
+        //$password = sha1($user['salt'].sha1($user['salt'].htmlspecialchars($this->request->post['password'], ENT_QUOTES)));
+        if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
+            echo 'Incorrect username or password';
+            return;
+        }
+        $token = $this->createToken();
+        echo json_encode(['token'=>$token]);
+    }
+
+    private function createToken()
+    {
+        return md5(date("d.m.y") . "apimobile");
+    }
+
+    private function valid()
+    {
+        if (!isset($_REQUEST['token'])) {
+            return 'You need to be logged!';
+        }elseif ($_REQUEST['token'] != $this->createToken()) {
+            return 'Your token is no longer relevant!';
+        }
+    }
+
+
 }
 
