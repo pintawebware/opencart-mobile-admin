@@ -315,8 +315,15 @@ class ControllerModuleApimoduleApimodule extends Controller
             echo 'Incorrect username or password';
             return;
         }
-        $token = $this->createToken();
-        echo json_encode(['token'=>$token]);
+      //  $token = $this->createToken();
+        $token = $this->model_module_apimodule_apimodule->getUserToken($user['user_id']);
+        if(!isset($token['token'])){
+            $token = token(32);
+            $this->model_module_apimodule_apimodule->setUserToken($user['user_id'], $token);
+        }
+        $token = $this->model_module_apimodule_apimodule->getUserToken($user['user_id']);
+        echo json_encode($token);
+
     }
 
     private function createToken()

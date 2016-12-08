@@ -53,5 +53,17 @@ class ModelModuleApimoduleApimodule extends Model
 
         return $query->row;
     }
+    public function setUserToken($id, $token){
+
+        $sql="INSERT INTO " . DB_PREFIX . "user_token_mob_api (user_id, token)  VALUES (" . $id . ",\"" . $token ." \") ";
+
+        $query = $this->db->query($sql);
+        return $query;
+    }
+    public function getUserToken($id){
+        $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api WHERE user_id = " . $id );
+
+        return $query->row;
+    }
 
 }
