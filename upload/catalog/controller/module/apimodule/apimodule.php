@@ -3,59 +3,62 @@
 class ControllerModuleApimoduleApimodule extends Controller
 {
     /**
-     * @api {get} index.php?route=module/apimodule  getOrders
+     * @api {get} index.php?route=module/apimodule/orders  getOrders
      * @apiName GetOrders
      * @apiGroup All
      *
      *
-     * @apiSuccess {String} firstname Firstname of the client.
-     * @apiSuccess {String} lastname  Lastname of the client.
+
      * @apiSuccess {Number} order_id  ID of the order.
-     * @apiSuccess {Number} store_id  ID of the store.
-     * @apiSuccess {String} email     Client's email.
-     * @apiSuccess {String} telephone  Client's phone.
-     * @apiSuccess {String} payment_company  Company of the User.
-     * @apiSuccess {String} payment_address_1  First payment address.
-     * @apiSuccess {String} payment_city  Payment city.
-     * @apiSuccess {String} payment_method  Payment method.
-     * @apiSuccess {String} shipping_method  Shipping method.
+     * @apiSuccess {Number} order_number  Number of the order.
+     * @apiSuccess {String} fio     Client's FIO.
+     * @apiSuccess {String} status  Status of the order.
      * @apiSuccess {String} total  Total sum of the order.
+     * @apiSuccess {String} date_added  Date added of the order.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *   {
-     *      "0" : "Array"
+     *      "1" : "Array"
      *      {
      *         "order_id" : "1"
-     *         "store_id" : "0"
-     *         "firstname" : "Anton"
-     *         "lastname" :"Kiselev"
-     *         "email" : "anton.kiselev@pinta.com.ua"
-     *         "telephone" : "+380985739209"
-     *         "payment_firstname" : "Anton"
-     *         "payment_lastname" : "Kiselev"
-     *         "payment_company" : "Pinta"
-     *         "payment_address_1" : "address"
-     *         "payment_city" : "dnepropetrovsk"
-     *         "payment_method" : "Оплата при доставке"
-     *         "shipping_method" : "Доставка с фиксированной стоимостью доставки"
+     *         "order_number" : "1"
+     *         "fio" : "Anton Kiselev"
+     *         "status" : "Сделка завершена"
      *         "total" : "106.0000"
+     *         "date_added" : "2016-12-09 16:17:02"
      *        }
      *    }
      *
      */
-    public function index()
+    public function orders()
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
-        if($error != null){
+        if ($error != null) {
             echo json_encode($error);
             return;
         }
 
         $this->load->model('module/apimodule/apimodule');
-        $data['orders'] = $this->model_module_apimodule_apimodule->getOrders();
-        echo json_encode($data['orders']);
+        $orders = $this->model_module_apimodule_apimodule->getOrders();
+
+        foreach ($orders as $order){
+            $data[$order['order_id']]['order_number'] = $order['order_id'];
+            $data[$order['order_id']]['order_id'] = $order['order_id'];
+            if(isset($order['firstname']) && isset($order['lastname'])){
+                $data[$order['order_id']]['fio'] = $order['firstname'] .' '. $order['lastname'];
+            }else{
+                $data[$order['order_id']]['fio'] = $order['payment_firstname'] .' '. $order['payment_lastname'];
+            }
+            $data[$order['order_id']]['status'] = $order['name'];
+            $data[$order['order_id']]['total'] = $order['total'];
+            $data[$order['order_id']]['date_added'] = $order['date_added'];
+
+
+        }
+        echo json_encode ($data);
+        return;
 
     }
 
@@ -104,7 +107,7 @@ class ControllerModuleApimoduleApimodule extends Controller
         $id = $_REQUEST['id'];
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
-        if($error != null){
+        if ($error != null) {
             echo json_encode($error);
             return;
         }
@@ -139,7 +142,7 @@ class ControllerModuleApimoduleApimodule extends Controller
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
-        if($error != null){
+        if ($error != null) {
             echo json_encode($error);
             return;
         }
@@ -195,7 +198,7 @@ class ControllerModuleApimoduleApimodule extends Controller
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
-        if($error != null){
+        if ($error != null) {
             echo json_encode($error);
             return;
         }
@@ -264,7 +267,7 @@ class ControllerModuleApimoduleApimodule extends Controller
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
-        if($error != null){
+        if ($error != null) {
             echo json_encode($error);
             return;
         }
@@ -289,7 +292,6 @@ class ControllerModuleApimoduleApimodule extends Controller
      * @apiParam {Number} password User's  password.
      *
      * @apiSuccess {String} token  Token.
-
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -315,9 +317,9 @@ class ControllerModuleApimoduleApimodule extends Controller
             echo 'Incorrect username or password';
             return;
         }
-      //  $token = $this->createToken();
+        //  $token = $this->createToken();
         $token = $this->model_module_apimodule_apimodule->getUserToken($user['user_id']);
-        if(!isset($token['token'])){
+        if (!isset($token['token'])) {
             $token = token(32);
             $this->model_module_apimodule_apimodule->setUserToken($user['user_id'], $token);
         }
@@ -333,13 +335,29 @@ class ControllerModuleApimoduleApimodule extends Controller
 
     private function valid()
     {
-        if (!isset($_REQUEST['token'])) {
-            return 'You need to be logged!';
-        }elseif ($_REQUEST['token'] != $this->createToken()) {
-            return 'Your token is no longer relevant!';
+
+        if (!isset($_REQUEST['token']) || $_REQUEST['token'] == '') {
+            $error = 'You need to be logged!';
+        } else {
+            $this->load->model('module/apimodule/apimodule');
+            $tokens = $this->model_module_apimodule_apimodule->getTokens();
+            if (count($tokens)>0) {
+                foreach ($tokens as $token) {
+                    if ($_REQUEST['token'] == $token['token']) {
+                        $error = null;
+                    } else {
+                        $error = 'Your token is no longer relevant!';
+                    }
+                }
+            }else{
+                $error = 'You need to be logged!';
+            }
         }
+        return $error;
     }
 
-
 }
+
+
+
 

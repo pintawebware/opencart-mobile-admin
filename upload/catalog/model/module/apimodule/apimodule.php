@@ -6,7 +6,8 @@ class ModelModuleApimoduleApimodule extends Model
     public function getOrders()
     {
         $orders = array();
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order ORDER BY order_id");
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o  INNER JOIN " . DB_PREFIX . "order_status  ORDER BY o.order_id");
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id  ORDER BY o.order_id");
         // foreach ($query->rows as $result) {
         //   $orders[] = $result;
         //}
@@ -66,4 +67,9 @@ class ModelModuleApimoduleApimodule extends Model
         return $query->row;
     }
 
+    public function getTokens(){
+        $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api " );
+
+        return $query->rows;
+    }
 }
