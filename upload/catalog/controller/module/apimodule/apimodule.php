@@ -134,7 +134,7 @@ class ControllerModuleApimoduleApimodule extends Controller
             } else {
                 echo json_encode('Can not found order with id = ' . $id);
             }
-        }else{
+        } else {
             echo json_encode('You have not specified ID');
         }
     }
@@ -160,7 +160,7 @@ class ControllerModuleApimoduleApimodule extends Controller
      *         "shipping_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
      *        }
      */
-    public function paymentanddelivery ()
+    public function paymentanddelivery()
     {
         header("Access-Control-Allow-Origin: *");
 
@@ -191,26 +191,140 @@ class ControllerModuleApimoduleApimodule extends Controller
                     $data['shipping_address'] .= $order[0]['shipping_address_1'];
                 }
                 if (isset($order[0]['shipping_address_2']) && $order[0]['shipping_address_2'] != '') {
-                    $data['shipping_address'] .= ', '. $order[0]['shipping_address_2'];
+                    $data['shipping_address'] .= ', ' . $order[0]['shipping_address_2'];
                 }
                 if (isset($order[0]['shipping_city'])) {
-                    $data['shipping_address'] .= ', '. $order[0]['shipping_city'];
+                    $data['shipping_address'] .= ', ' . $order[0]['shipping_city'];
                 }
                 if (isset($order[0]['shipping_country'])) {
-                    $data['shipping_address'] .= ', '. $order[0]['shipping_country'];
+                    $data['shipping_address'] .= ', ' . $order[0]['shipping_country'];
                 }
                 if (isset($order[0]['shipping_zone'])) {
-                    $data['shipping_address'] .= ', '. $order[0]['shipping_zone'];
+                    $data['shipping_address'] .= ', ' . $order[0]['shipping_zone'];
                 }
                 echo json_encode($data);
 
             } else {
                 echo json_encode('Can not found order with id = ' . $id);
             }
-        }else{
+        } else {
             echo json_encode('You have not specified ID');
         }
     }
+
+    /**
+     * @api {get} index.php?route=module/apimodule/apimodule/orderproducts  getOrderProducts
+     * @apiName getOrderProducts
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     * @apiParam {ID} id unique order id.
+     *
+     * @apiSuccess {Url} image  Picture of the product.
+     * @apiSuccess {Number} quantity  Quantity of the product.
+     * @apiSuccess {String} name     Name of the product.
+     * @apiSuccess {String} model  Model of the product.
+     * @apiSuccess {Number} Price  Price of the product.
+     * @apiSuccess {Number} total_order_price  Total sum of the order.
+     * @apiSuccess {Number} total  Sum of product's prices.
+     * @apiSuccess {Number} shipping_price  Cost of the shipping.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *      "0" : "Array"
+     *      {
+     *         "image" : "http://opencart/image/catalog/demo/htc_touch_hd_1.jpg"
+     *         "name" : "HTC Touch HD"
+     *         "model" : "Product 1"
+     *         "quantity" : "3"
+     *         "price" : "100.0000"
+     *        }
+     *      "1" : "Array"
+     *      {
+     *         "image" : "http://opencart/image/catalog/demo/iphone_1.jpg"
+     *         "name" : "iPhone"
+     *         "model" : "Product 11"
+     *         "quantity" : "1"
+     *         "price" : "500.0000"
+     *        }
+     *       "total_order_price" : "Array"
+     *      {
+     *         "total" : "800"
+     *         "shipping_price" : "50.0000"
+     *        }
+     *
+     *    }
+     *
+     */
+
+    public function orderproducts()
+    {
+        header("Access-Control-Allow-Origin: *");
+
+        if (isset($_REQUEST['id']) && $_REQUEST['id'] != '') {
+            $id = $_REQUEST['id'];
+
+            $error = $this->valid();
+            if ($error != null) {
+                echo json_encode($error);
+                return;
+            }
+
+            $this->load->model('module/apimodule/apimodule');
+            $products = $this->model_module_apimodule_apimodule->getOrderProducts($id);
+
+
+            if (count($products) > 0) {
+                $data = array();
+                for ($i = 0; $i < count($products); $i++) {
+
+                    if (isset($products[$i]['store_url']) && $products[$i]['image'] && $products[$i]['image'] != '') {
+                        $data[$i]['image'] = $products[$i]['store_url'] . 'image/' . $products[$i]['image'];
+                    }
+                    if (isset($products[$i]['name']) && $products[$i]['name'] != '') {
+                        $data[$i]['name'] = $products[$i]['name'];
+                    }
+                    if (isset($products[$i]['model']) && $products[$i]['model'] != '') {
+                        $data[$i]['model'] = $products[$i]['model'];
+                    }
+                    if (isset($products[$i]['quantity']) && $products[$i]['quantity'] != '') {
+                        $data[$i]['quantity'] = $products[$i]['quantity'];
+                    }
+                    if (isset($products[$i]['price']) && $products[$i]['price'] != '') {
+                        $data[$i]['price'] = $products[$i]['price'];
+                    }
+
+                    $discount_price = $this->model_module_apimodule_apimodule->getProductDiscount($products[$i]['product_id'], $products[$i]['quantity']);
+                    if (isset($discount_price['price']) && $discount_price['price'] != '') {
+                        $data[$i]['discount_price'] = $discount_price['price'];
+                        $discount = (($products[$i]['price']) - $discount_price['price']) / ($products[$i]['price']);
+                        $data[$i]['discount'] = ($discount * 100) . '%';
+
+                    }
+                    $a = $products[$i]['price'] * $products[$i]['quantity'];
+                    if ($i > 0) {
+                        $a = $a + $products[$i]['price'] * $products[$i]['quantity'];
+                    }
+                    $data['total_order_price'] = array(
+                       // 'total' => $a + $products[$i]['value'],
+                        'total' => $a,
+                        'shipping_price' => $products[$i]['value']
+                    );
+
+                }
+
+
+                // echo json_encode($data);
+                print_r($data);
+            } else {
+                echo json_encode('Can not found order with id = ' . $id);
+            }
+        } else {
+            echo json_encode('You have not specified ID');
+        }
+    }
+
 
     /**
      * @api {get} index.php?route=module/apimodule/status  changeStatus
@@ -230,7 +344,8 @@ class ControllerModuleApimoduleApimodule extends Controller
      *    }
      *
      */
-    public function status()
+    public
+    function status()
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
@@ -286,7 +401,8 @@ class ControllerModuleApimoduleApimodule extends Controller
      *    }
      *
      */
-    public function product()
+    public
+    function product()
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
@@ -355,7 +471,8 @@ class ControllerModuleApimoduleApimodule extends Controller
      *    }
      *
      */
-    public function products()
+    public
+    function products()
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
@@ -398,7 +515,8 @@ class ControllerModuleApimoduleApimodule extends Controller
      *     }
      *
      */
-    public function login()
+    public
+    function login()
     {
         header("Access-Control-Allow-Origin: *");
         //$this->session->data['token'] = $token;
@@ -420,12 +538,14 @@ class ControllerModuleApimoduleApimodule extends Controller
 
     }
 
-    private function createToken()
+    private
+    function createToken()
     {
         return md5(date("d.m.y") . "apimobile");
     }
 
-    private function valid()
+    private
+    function valid()
     {
 
         if (!isset($_REQUEST['token']) || $_REQUEST['token'] == '') {

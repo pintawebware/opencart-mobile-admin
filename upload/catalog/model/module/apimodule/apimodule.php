@@ -63,14 +63,32 @@ class ModelModuleApimoduleApimodule extends Model
         return $query;
     }
     public function getUserToken($id){
+
         $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api WHERE user_id = " . $id );
 
         return $query->row;
     }
 
     public function getTokens(){
+
         $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api " );
 
         return $query->rows;
+    }
+
+
+    public function getOrderProducts($id) {
+
+        $query = $this->db->query("SELECT * FROM (SELECT image, product_id FROM " . DB_PREFIX . "product  ) AS p LEFT JOIN (SELECT order_id, product_id, model, quantity, price,  name FROM " . DB_PREFIX . "order_product WHERE order_id = " . $id . " ) AS o ON o.product_id = p.product_id LEFT JOIN (SELECT store_url, order_id, total FROM " . DB_PREFIX . "ORDER WHERE order_id = " . $id . " ) t2 ON o.order_id = t2.order_id LEFT JOIN (SELECT order_id, code, value FROM " . DB_PREFIX . "order_total WHERE code = 'shipping' AND order_id = " . $id . " ) t5 ON o.order_id = t5.order_id WHERE o.order_id = " . $id );
+
+        return $query->rows;
+    }
+
+
+    public function getProductDiscount($id, $quantity){
+
+        $query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_discount AS pd2 WHERE pd2.product_id = " . $id . " AND pd2.quantity <= " . $quantity . " AND pd2.date_start < NOW() AND pd2.date_end > NOW() LIMIT 1");
+
+        return $query->row;
     }
 }
