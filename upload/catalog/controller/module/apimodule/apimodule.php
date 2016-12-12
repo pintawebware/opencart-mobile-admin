@@ -7,13 +7,14 @@ class ControllerModuleApimoduleApimodule extends Controller
      * @apiName GetOrders
      * @apiGroup All
      *
+     * @apiParam {Token} token your unique token.
      *
      * @apiSuccess {Number} order_id  ID of the order.
      * @apiSuccess {Number} order_number  Number of the order.
      * @apiSuccess {String} fio     Client's FIO.
      * @apiSuccess {String} status  Status of the order.
-     * @apiSuccess {String} total  Total sum of the order.
-     * @apiSuccess {String} date_added  Date added of the order.
+     * @apiSuccess {Number} total  Total sum of the order.
+     * @apiSuccess {Date} date_added  Date added of the order.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -66,13 +67,16 @@ class ControllerModuleApimoduleApimodule extends Controller
      * @apiName getOrderInfo
      * @apiGroup All
      *
+     * @apiParam {Number} order_id unique order ID.
+     * @apiParam {Token} token your unique token.
      *
-     * @apiSuccess {Number} order_id  ID of the order.
      * @apiSuccess {Number} order_number  Number of the order.
      * @apiSuccess {String} fio     Client's FIO.
      * @apiSuccess {String} status  Status of the order.
-     * @apiSuccess {String} total  Total sum of the order.
-     * @apiSuccess {String} date_added  Date added of the order.
+     * @apiSuccess {String} email  Client's email.
+     * @apiSuccess {Number} phone  Client's phone.
+     * @apiSuccess {Number} total  Total sum of the order.
+     * @apiSuccess {Date} date_added  Date added of the order.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -136,12 +140,86 @@ class ControllerModuleApimoduleApimodule extends Controller
     }
 
     /**
+     * @api {get} index.php?route=module/apimodule/apimodule/paymentanddelivery  getOrderPaymentAndDelivery
+     * @apiName getOrderPaymentAndDelivery
+     * @apiGroup All
+     *
+     * @apiParam {Number} order_id unique order ID.
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {String} payment_method     Payment method.
+     * @apiSuccess {String} shipping_method  Shipping method.
+     * @apiSuccess {String} shipping_address  Shipping address.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *
+     *      {
+     *         "payment_method" : "Оплата при доставке"
+     *         "shipping_method" : "Доставка с фиксированной стоимостью доставки"
+     *         "shipping_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
+     *        }
+     */
+    public function paymentanddelivery ()
+    {
+        header("Access-Control-Allow-Origin: *");
+
+        if (isset($_REQUEST['id']) && $_REQUEST['id'] != '') {
+            $id = $_REQUEST['id'];
+
+            $error = $this->valid();
+            if ($error != null) {
+                echo json_encode($error);
+                return;
+            }
+
+            $this->load->model('module/apimodule/apimodule');
+            $order = $this->model_module_apimodule_apimodule->getOrderById($id);
+
+
+            if (count($order) > 0) {
+
+                $data['shipping_address'] = '';
+
+                if (isset($order[0]['payment_method'])) {
+                    $data['payment_method'] = $order[0]['payment_method'];
+                }
+                if (isset($order[0]['shipping_method'])) {
+                    $data['shipping_method'] = $order[0]['shipping_method'];
+                }
+                if (isset($order[0]['shipping_address_1']) && $order[0]['shipping_address_1'] != '') {
+                    $data['shipping_address'] .= $order[0]['shipping_address_1'];
+                }
+                if (isset($order[0]['shipping_address_2']) && $order[0]['shipping_address_2'] != '') {
+                    $data['shipping_address'] .= ', '. $order[0]['shipping_address_2'];
+                }
+                if (isset($order[0]['shipping_city'])) {
+                    $data['shipping_address'] .= ', '. $order[0]['shipping_city'];
+                }
+                if (isset($order[0]['shipping_country'])) {
+                    $data['shipping_address'] .= ', '. $order[0]['shipping_country'];
+                }
+                if (isset($order[0]['shipping_zone'])) {
+                    $data['shipping_address'] .= ', '. $order[0]['shipping_zone'];
+                }
+                echo json_encode($data);
+
+            } else {
+                echo json_encode('Can not found order with id = ' . $id);
+            }
+        }else{
+            echo json_encode('You have not specified ID');
+        }
+    }
+
+    /**
      * @api {get} index.php?route=module/apimodule/status  changeStatus
      * @apiName changeStatus
      * @apiGroup All
      *
-     **@apiParam {Number} order_id unique order ID.
+     * @apiParam {Number} order_id unique order ID.
      * @apiParam {Number} status_id new status ID.
+     * @apiParam {Token} token your unique token.
      *
      * @apiSuccess {String} status Updated status of the order.
      *
