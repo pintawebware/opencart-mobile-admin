@@ -3,12 +3,11 @@
 class ControllerModuleApimoduleApimodule extends Controller
 {
     /**
-     * @api {get} index.php?route=module/apimodule/orders  getOrders
+     * @api {get} index.php?route=module/apimodule/apimodule/orders  getOrders
      * @apiName GetOrders
      * @apiGroup All
      *
      *
-
      * @apiSuccess {Number} order_id  ID of the order.
      * @apiSuccess {Number} order_number  Number of the order.
      * @apiSuccess {String} fio     Client's FIO.
@@ -43,13 +42,13 @@ class ControllerModuleApimoduleApimodule extends Controller
         $this->load->model('module/apimodule/apimodule');
         $orders = $this->model_module_apimodule_apimodule->getOrders();
 
-        foreach ($orders as $order){
+        foreach ($orders as $order) {
             $data[$order['order_id']]['order_number'] = $order['order_id'];
             $data[$order['order_id']]['order_id'] = $order['order_id'];
-            if(isset($order['firstname']) && isset($order['lastname'])){
-                $data[$order['order_id']]['fio'] = $order['firstname'] .' '. $order['lastname'];
-            }else{
-                $data[$order['order_id']]['fio'] = $order['payment_firstname'] .' '. $order['payment_lastname'];
+            if (isset($order['firstname']) && isset($order['lastname'])) {
+                $data[$order['order_id']]['fio'] = $order['firstname'] . ' ' . $order['lastname'];
+            } else {
+                $data[$order['order_id']]['fio'] = $order['payment_firstname'] . ' ' . $order['payment_lastname'];
             }
             $data[$order['order_id']]['status'] = $order['name'];
             $data[$order['order_id']]['total'] = $order['total'];
@@ -57,67 +56,82 @@ class ControllerModuleApimoduleApimodule extends Controller
 
 
         }
-        echo json_encode ($data);
+        echo json_encode($data);
         return;
 
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/apimodule/order  getOrderById
-     * @apiName GetOrderById
+     * @api {get} index.php?route=module/apimodule/apimodule/getorderinfo  getOrderInfo
+     * @apiName getOrderInfo
      * @apiGroup All
      *
-     ** @apiParam {Number} id Order unique ID.
      *
-     * @apiSuccess {String} firstname Firstname of the client.
-     * @apiSuccess {String} lastname  Lastname of the client.
      * @apiSuccess {Number} order_id  ID of the order.
-     * @apiSuccess {Number} store_id  ID of the store.
-     * @apiSuccess {String} email     Client's email.
-     * @apiSuccess {String} telephone  Client's phone.
-     * @apiSuccess {String} payment_company  Company of the User.
-     * @apiSuccess {String} payment_address_1  First payment address.
-     * @apiSuccess {String} payment_city  Payment city.
-     * @apiSuccess {String} payment_method  Payment method.
-     * @apiSuccess {String} shipping_method  Shipping method.
+     * @apiSuccess {Number} order_number  Number of the order.
+     * @apiSuccess {String} fio     Client's FIO.
+     * @apiSuccess {String} status  Status of the order.
      * @apiSuccess {String} total  Total sum of the order.
+     * @apiSuccess {String} date_added  Date added of the order.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
-     *   {
-     *         "order_id" : "1"
-     *         "store_id" : "0"
-     *         "firstname" : "Anton"
-     *         "lastname" :"Kiselev"
-     *         "email" : "anton.kiselev@pinta.com.ua"
-     *         "telephone" : "+380985739209"
-     *         "payment_firstname" : "Anton"
-     *         "payment_lastname" : "Kiselev"
-     *         "payment_company" : "Pinta"
-     *         "payment_address_1" : "address"
-     *         "payment_city" : "dnepropetrovsk"
-     *         "payment_method" : "Оплата при доставке"
-     *         "shipping_method" : "Доставка с фиксированной стоимостью доставки"
-     *         "total" : "106.0000"
-     *    }
      *
+     *      {
+     *         "order_number" : "1"
+     *         "fio" : "Anton Kiselev"
+     *         "status" : "Сделка завершена"
+     *         "email" : "client@mail.ru"
+     *         "phone" : "056 000-11-22"
+     *         "total" : "106.0000"
+     *         "date_added" : "2016-12-09 16:17:02"
+     *        }
      */
-    public function order()
+    public function getorderinfo()
     {
-        $id = $_REQUEST['id'];
         header("Access-Control-Allow-Origin: *");
-        $error = $this->valid();
-        if ($error != null) {
-            echo json_encode($error);
-            return;
-        }
 
-        $this->load->model('module/apimodule/apimodule');
-        $data['order'] = $this->model_module_apimodule_apimodule->getOrderById($id);
-        if ($data['order']) {
-            echo json_encode($data['order']);
-        } else {
-            echo json_encode('Order with id(' . $id . ') not found.');
+        if (isset($_REQUEST['id']) && $_REQUEST['id'] != '') {
+            $id = $_REQUEST['id'];
+
+            $error = $this->valid();
+            if ($error != null) {
+                echo json_encode($error);
+                return;
+            }
+
+            $this->load->model('module/apimodule/apimodule');
+            $order = $this->model_module_apimodule_apimodule->getOrderById($id);
+
+            if (count($order) > 0) {
+                $data['order_number'] = $order[0]['order_id'];
+
+                if (isset($order[0]['firstname']) && isset($order[0]['lastname'])) {
+                    $data['fio'] = $order[0]['firstname'] . ' ' . $order[0]['lastname'];
+                } else {
+                    $data['fio'] = $order[0]['payment_firstname'] . ' ' . $order[0]['payment_lastname'];
+                }
+                if (isset($order[0]['email'])) {
+                    $data['email'] = $order[0]['email'];
+                }
+                if (isset($order[0]['telephone'])) {
+                    $data['telephone'] = $order[0]['telephone'];
+                }
+
+                $data['date_added'] = $order[0]['date_added'];
+
+                if (isset($order[0]['total'])) {
+                    $data['total'] = $order[0]['total'];
+                }
+                if (isset($order[0]['name'])) {
+                    $data['status'] = $order[0]['name'];
+                }
+                echo json_encode($data);
+            } else {
+                echo json_encode('Can not found order with id = ' . $id);
+            }
+        }else{
+            echo json_encode('You have not specified ID');
         }
     }
 
@@ -341,7 +355,7 @@ class ControllerModuleApimoduleApimodule extends Controller
         } else {
             $this->load->model('module/apimodule/apimodule');
             $tokens = $this->model_module_apimodule_apimodule->getTokens();
-            if (count($tokens)>0) {
+            if (count($tokens) > 0) {
                 foreach ($tokens as $token) {
                     if ($_REQUEST['token'] == $token['token']) {
                         $error = null;
@@ -349,7 +363,7 @@ class ControllerModuleApimoduleApimodule extends Controller
                         $error = 'Your token is no longer relevant!';
                     }
                 }
-            }else{
+            } else {
                 $error = 'You need to be logged!';
             }
         }

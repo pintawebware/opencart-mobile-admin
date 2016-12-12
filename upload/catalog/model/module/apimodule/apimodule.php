@@ -6,7 +6,7 @@ class ModelModuleApimoduleApimodule extends Model
     public function getOrders()
     {
         $orders = array();
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o  INNER JOIN " . DB_PREFIX . "order_status  ORDER BY o.order_id");
+       // $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o  INNER JOIN " . DB_PREFIX . "order_status  ORDER BY o.order_id");
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id  ORDER BY o.order_id");
         // foreach ($query->rows as $result) {
         //   $orders[] = $result;
@@ -17,7 +17,8 @@ class ModelModuleApimoduleApimodule extends Model
 
     public function getOrderById($id)
     {
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order WHERE order_id = " . $id . " ORDER BY order_id");
+       // $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order WHERE order_id = " . $id . " ORDER BY order_id");
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id WHERE order_id = " . $id . " ORDER BY order_id");
         return $query->rows;
     }
 
