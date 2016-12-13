@@ -286,6 +286,60 @@ class ControllerModuleApimoduleApimodule extends Controller
     }
 
     /**
+     * @api {get} index.php?route=module/apimodule/apimodule/orderstatuses  OrderStatusList
+     * @apiName OrderStatusList
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {String} name     Status of the order.
+     * @apiSuccess {Number} order_status_id  ID of the status of the order.
+     * @apiSuccess {Date} language_id  ID of the language of the status name .
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *       {
+     *          "0" : "Array"
+     *              {
+     *                  "name" : "Отменено"
+     *                  "order_status_id" : "7"
+     *                  "language_id" : "1"
+     *              }
+     *          "1" : "Array"
+     *              {
+     *                  "name" : "Сделка завершена"
+     *                  "order_status_id" : "5"
+     *                  "language_id" : "1"
+     *              }
+     *          "2" : "Array"
+     *              {
+     *                  "name" : "Ожидание"
+     *                  "order_status_id" : "1"
+     *                  "language_id" : "1"
+     *              }
+     */
+    public function orderstatuses()
+    {
+
+        header("Access-Control-Allow-Origin: *");
+
+        $error = $this->valid();
+        if ($error != null) {
+            echo json_encode($error);
+            return;
+        }
+
+        $this->load->model('module/apimodule/apimodule');
+        $statuses = $this->model_module_apimodule_apimodule->OrderStatusList();
+
+
+        if (count($statuses) > 0) {
+            print_r($statuses);
+        }
+
+    }
+
+    /**
      * @api {get} index.php?route=module/apimodule/apimodule/orderproducts  getOrderProducts
      * @apiName getOrderProducts
      * @apiGroup All
@@ -400,7 +454,7 @@ class ControllerModuleApimoduleApimodule extends Controller
 
 
     /**
-     * @api {get} index.php?route=module/apimodule/status  changeStatus
+     * @api {get} index.php?route=module/apimodule/apimodule/status  changeStatus
      * @apiName changeStatus
      * @apiGroup All
      *
@@ -417,8 +471,7 @@ class ControllerModuleApimoduleApimodule extends Controller
      *    }
      *
      */
-    public
-    function status()
+    public function status()
     {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
@@ -426,16 +479,161 @@ class ControllerModuleApimoduleApimodule extends Controller
             echo json_encode($error);
             return;
         }
+        if (isset($_REQUEST['status_id']) && $_REQUEST['status_id'] != '' && isset($_REQUEST['order_id']) && $_REQUEST['order_id'] != '') {
+            $statusId = $_REQUEST['status_id'];
+            $orderID = $_REQUEST['order_id'];
 
-        $statusId = $_REQUEST['status_id'];
-        $orderID = $_REQUEST['order_id'];
-        $this->load->model('module/apimodule/apimodule');
-        $data['status'] = $this->model_module_apimodule_apimodule->changeStatus($orderID, $statusId);
-        if ($data['status']) {
-            echo json_encode($data['status']);
+            $this->load->model('module/apimodule/apimodule');
+            $data['status'] = $this->model_module_apimodule_apimodule->changeStatus($orderID, $statusId);
+            if ($data['status']) {
+                echo json_encode($data['status']);
+            } else {
+                echo json_encode('Can not change status');
+            }
         } else {
-            echo json_encode('Can not change status');
+            echo json_encode('Missing some params');
         }
+    }
+
+    /**
+     * @api {get} index.php?route=module/apimodule/apimodule/setstatus  OrderStatusSet
+     * @apiName OrderStatusSet
+     * @apiGroup All
+     *
+     * @apiParam {String} name Name for the new status.
+     * @apiParam {Number} language_id unique language ID(default = 1).
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {String} status New status of the order.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *         "name" : "Оплачено"
+     *    }
+     *
+     */
+
+    public function setstatus()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $error = $this->valid();
+        if ($error != null) {
+            echo json_encode($error);
+            return;
+        }
+        if (isset($_REQUEST['name']) && $_REQUEST['name'] != '') {
+            $name = $_REQUEST['name'];
+            if (isset($_REQUEST['language_id']) && $_REQUEST['language_id'] != '') {
+                $languageID = $_REQUEST['language_id'];
+            } else {
+                $languageID = 1;
+            }
+
+            $this->load->model('module/apimodule/apimodule');
+            $data['status'] = $this->model_module_apimodule_apimodule->OrderStatusSet($name, $languageID);
+            if ($data['status']) {
+                echo json_encode($data['status']);
+            } else {
+                echo json_encode('Can set change status');
+            }
+        } else {
+            echo json_encode('Missing some params');
+        }
+    }
+
+    /**
+     * @api {get} index.php?route=module/apimodule/apimodule/delivery  ChangeOrderDelivery
+     * @apiName ChangeOrderDelivery
+     * @apiGroup All
+     *
+     * @apiParam {String} address New shipping address.
+     * @apiParam {String} city New shipping city.
+     * @apiParam {Number} order_id unique order ID.
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {Boolean} response Status of change address.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *         "true"
+     *    }
+     *
+     */
+
+    public function delivery(){
+        header("Access-Control-Allow-Origin: *");
+        $error = $this->valid();
+        if ($error != null) {
+            echo json_encode($error);
+            return;
+        }
+
+        if (isset($_REQUEST['address']) && $_REQUEST['address'] != '' && isset($_REQUEST['order_id'])) {
+            $address = $_REQUEST['address'];
+            $order_id = $_REQUEST['order_id'];
+            if (isset($_REQUEST['city']) && $_REQUEST['city'] != '') {
+                $city = $_REQUEST['city'];
+            } else {
+                $city = false;
+            }
+
+            $this->load->model('module/apimodule/apimodule');
+            $data = $this->model_module_apimodule_apimodule->ChangeOrderDelivery($address, $city, $order_id);
+            if ($data) {
+                echo json_encode($data);
+            } else {
+                echo json_encode('Can not set status');
+            }
+        } else {
+            echo json_encode('Missing some params');
+        }
+    }
+
+    /**
+     * @api {get} index.php?route=module/apimodule/apimodule/addcomment  AddComment
+     * @apiName AddComment
+     * @apiGroup All
+     *
+     * @apiParam {String} comment New comment for order status.
+     * @apiParam {Number} order_id unique order ID.
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {Boolean} response Status of adding comment.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *         "true"
+     *    }
+     *
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "error": "UserNotFound"
+     *     }
+     *
+     */
+
+    public function addcomment(){
+        header("Access-Control-Allow-Origin: *");
+
+        $error = $this->valid();
+        if ($error != null) {
+            echo json_encode($error);
+            return;
+        }
+        if (isset($_REQUEST['comment']) && $_REQUEST['comment'] != '' && isset($_REQUEST['order_id'])) {
+            $comment = $_REQUEST['comment'];
+            $order_id = $_REQUEST['order_id'];
+            $this->load->model('module/apimodule/apimodule');
+            $data = $this->model_module_apimodule_apimodule->AddComment($order_id, $comment);
+            echo json_encode($data);
+        } else {
+            echo json_encode('Missing some params');
+        }
+        return;
     }
 
     /**
