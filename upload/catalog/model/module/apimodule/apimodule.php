@@ -91,4 +91,10 @@ class ModelModuleApimoduleApimodule extends Model
 
         return $query->row;
     }
+
+    public function getOrderHistory(){
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_history h  LEFT JOIN " . DB_PREFIX . "order_status s ON h.order_status_id = s.order_status_id WHERE h.order_id = 1 AND s.name IS NOT NULL ORDER BY h.date_added DESC");
+
+        return $query->rows;
+    }
 }

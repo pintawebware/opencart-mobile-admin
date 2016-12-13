@@ -213,6 +213,79 @@ class ControllerModuleApimoduleApimodule extends Controller
     }
 
     /**
+     * @api {get} index.php?route=module/apimodule/apimodule/orderhistory  getOrderHistory
+     * @apiName getOrderHistory
+     * @apiGroup All
+     *
+     * @apiParam {Number} id unique order ID.
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {String} name     Status of the order.
+     * @apiSuccess {Number} order_status_id  ID of the status of the order.
+     * @apiSuccess {Date} date_added  Date of adding status of the order.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *       {
+     *          "0" : "Array"
+     *              {
+     *                  "name" : "Отменено"
+     *                  "order_status_id" : "7"
+     *                  "date_added" : "2016-12-13 08:27:48."
+     *              }
+     *          "1" : "Array"
+     *              {
+     *                  "name" : "Сделка завершена"
+     *                  "order_status_id" : "5"
+     *                  "date_added" : "2016-12-25 09:30:10."
+     *              }
+     *          "2" : "Array"
+     *              {
+     *                  "name" : "Ожидание"
+     *                  "order_status_id" : "1"
+     *                  "date_added" : "2016-12-01 11:25:18."
+     *              }
+     */
+
+    public function orderhistory()
+    {
+
+        header("Access-Control-Allow-Origin: *");
+
+        if (isset($_REQUEST['id']) && $_REQUEST['id'] != '') {
+            $id = $_REQUEST['id'];
+
+            $error = $this->valid();
+            if ($error != null) {
+                echo json_encode($error);
+                return;
+            }
+
+            $this->load->model('module/apimodule/apimodule');
+            $statuses = $this->model_module_apimodule_apimodule->getOrderHistory();
+
+            $data = array();
+
+            if (count($statuses) > 0) {
+                for ($i = 0; $i < count($statuses); $i++) {
+
+                    $data[$i]['name'] = $statuses[$i]['name'];
+                    $data[$i]['order_status_id'] = $statuses[$i]['order_status_id'];
+                    $data[$i]['date_added'] = $statuses[$i]['date_added'];
+
+                }
+
+                echo json_encode($data);
+
+            } else {
+                echo json_encode('Can not found order with id = ' . $id);
+            }
+        } else {
+            echo json_encode('You have not specified ID');
+        }
+    }
+
+    /**
      * @api {get} index.php?route=module/apimodule/apimodule/orderproducts  getOrderProducts
      * @apiName getOrderProducts
      * @apiGroup All
@@ -307,7 +380,7 @@ class ControllerModuleApimoduleApimodule extends Controller
                         $a = $a + $products[$i]['price'] * $products[$i]['quantity'];
                     }
                     $data['total_order_price'] = array(
-                       // 'total' => $a + $products[$i]['value'],
+                        // 'total' => $a + $products[$i]['value'],
                         'total' => $a,
                         'shipping_price' => $products[$i]['value']
                     );
