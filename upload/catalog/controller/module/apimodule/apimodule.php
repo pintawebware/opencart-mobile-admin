@@ -19,7 +19,7 @@ class ControllerModuleApimoduleApimodule extends Controller
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *   {
-     *      "1" : "Array"
+     *      "0" : "Array"
      *      {
      *         "order_id" : "1"
      *         "order_number" : "1"
@@ -28,7 +28,22 @@ class ControllerModuleApimoduleApimodule extends Controller
      *         "total" : "106.0000"
      *         "date_added" : "2016-12-09 16:17:02"
      *        }
+     *      "1" : "Array"
+     *      {
+     *         "order_id" : "2"
+     *         "order_number" : "2"
+     *         "fio" : "Vlad Kochergin"
+     *         "status" : "В обработке"
+     *         "total" : "506.0000"
+     *         "date_added" : "2016-10-19 16:00:00"
+     *        }
      *    }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Not one order"
+     *     }
+     *
      *
      */
     public function orders()
@@ -42,22 +57,25 @@ class ControllerModuleApimoduleApimodule extends Controller
 
         $this->load->model('module/apimodule/apimodule');
         $orders = $this->model_module_apimodule_apimodule->getOrders();
+        if (count($orders) > 0) {
+            foreach ($orders as $order) {
+                $data[$order['order_id']]['order_number'] = $order['order_id'];
+                $data[$order['order_id']]['order_id'] = $order['order_id'];
+                if (isset($order['firstname']) && isset($order['lastname'])) {
+                    $data[$order['order_id']]['fio'] = $order['firstname'] . ' ' . $order['lastname'];
+                } else {
+                    $data[$order['order_id']]['fio'] = $order['payment_firstname'] . ' ' . $order['payment_lastname'];
+                }
+                $data[$order['order_id']]['status'] = $order['name'];
+                $data[$order['order_id']]['total'] = $order['total'];
+                $data[$order['order_id']]['date_added'] = $order['date_added'];
 
-        foreach ($orders as $order) {
-            $data[$order['order_id']]['order_number'] = $order['order_id'];
-            $data[$order['order_id']]['order_id'] = $order['order_id'];
-            if (isset($order['firstname']) && isset($order['lastname'])) {
-                $data[$order['order_id']]['fio'] = $order['firstname'] . ' ' . $order['lastname'];
-            } else {
-                $data[$order['order_id']]['fio'] = $order['payment_firstname'] . ' ' . $order['payment_lastname'];
+
             }
-            $data[$order['order_id']]['status'] = $order['name'];
-            $data[$order['order_id']]['total'] = $order['total'];
-            $data[$order['order_id']]['date_added'] = $order['date_added'];
-
-
+            echo json_encode($data);
+        } else {
+            echo json_encode('Not one order');
         }
-        echo json_encode($data);
         return;
 
     }
@@ -90,6 +108,11 @@ class ControllerModuleApimoduleApimodule extends Controller
      *         "total" : "106.0000"
      *         "date_added" : "2016-12-09 16:17:02"
      *        }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Can not found order with id = 5"
+     *     }
      */
     public function getorderinfo()
     {
@@ -159,7 +182,13 @@ class ControllerModuleApimoduleApimodule extends Controller
      *         "shipping_method" : "Доставка с фиксированной стоимостью доставки"
      *         "shipping_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
      *        }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "You have not specified ID"
+     *     }
      */
+
     public function paymentanddelivery()
     {
         header("Access-Control-Allow-Origin: *");
@@ -245,6 +274,12 @@ class ControllerModuleApimoduleApimodule extends Controller
      *                  "order_status_id" : "1"
      *                  "date_added" : "2016-12-01 11:25:18."
      *              }
+     *       }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Can not found any statuses for order with id = 5"
+     *     }
      */
 
     public function orderhistory()
@@ -278,7 +313,7 @@ class ControllerModuleApimoduleApimodule extends Controller
                 echo json_encode($data);
 
             } else {
-                echo json_encode('Can not found order with id = ' . $id);
+                echo json_encode('Can not found any statuses for order with id = ' . $id);
             }
         } else {
             echo json_encode('You have not specified ID');
@@ -317,6 +352,12 @@ class ControllerModuleApimoduleApimodule extends Controller
      *                  "order_status_id" : "1"
      *                  "language_id" : "1"
      *              }
+     *       }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Your token is no longer relevant!"
+     *     }
      */
     public function orderstatuses()
     {
@@ -382,6 +423,11 @@ class ControllerModuleApimoduleApimodule extends Controller
      *        }
      *
      *    }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Can not found any products in order with id = 10"
+     *     }
      *
      */
 
@@ -423,29 +469,42 @@ class ControllerModuleApimoduleApimodule extends Controller
                     }
 
                     $discount_price = $this->model_module_apimodule_apimodule->getProductDiscount($products[$i]['product_id'], $products[$i]['quantity']);
+
                     if (isset($discount_price['price']) && $discount_price['price'] != '') {
                         $data[$i]['discount_price'] = $discount_price['price'];
                         $discount = (($products[$i]['price']) - $discount_price['price']) / ($products[$i]['price']);
                         $data[$i]['discount'] = ($discount * 100) . '%';
-
+                        $discount_sum = ($products[$i]['price'] - $discount_price['price']) * $products[$i]['quantity'];
+                    }else{
+                        $discount_sum = 0;
                     }
                     $a = $products[$i]['price'] * $products[$i]['quantity'];
+
                     if ($i > 0) {
                         $a = $a + $products[$i]['price'] * $products[$i]['quantity'];
+                        if(isset($discount_price['price']) && $discount_price['price'] != ''){
+                            $total_discount_sum =  $total_discount_sum + ($products[$i]['price'] * $products[$i]['quantity']);
+                        }
+                    }else{
+                        $total_discount_sum = $discount_sum;
                     }
-                    $data['total_order_price'] = array(
-                        // 'total' => $a + $products[$i]['value'],
-                        'total' => $a,
-                        'shipping_price' => $products[$i]['value']
-                    );
+                    $shipping_price = $products[$i]['value'];
+
 
                 }
+                $data['total_order_price'] = array(
+                    'total_discount' => $total_discount_sum,
+                    'total_price' => $a,
+                    'shipping_price' => $shipping_price,
+                    'total'=> $a + $shipping_price
+                );
 
 
-                // echo json_encode($data);
-                print_r($data);
+                 //echo json_encode($data);
+                 print_r($data);
+
             } else {
-                echo json_encode('Can not found order with id = ' . $id);
+                echo json_encode('Can not found any products in order with id = ' . $id);
             }
         } else {
             echo json_encode('You have not specified ID');
@@ -469,6 +528,11 @@ class ControllerModuleApimoduleApimodule extends Controller
      *   {
      *         "name" : "Сделка завершена"
      *    }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Missing some params"
+     *     }
      *
      */
     public function status()
@@ -511,6 +575,11 @@ class ControllerModuleApimoduleApimodule extends Controller
      *   {
      *         "name" : "Оплачено"
      *    }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Can not set status"
+     *     }
      *
      */
 
@@ -535,7 +604,7 @@ class ControllerModuleApimoduleApimodule extends Controller
             if ($data['status']) {
                 echo json_encode($data['status']);
             } else {
-                echo json_encode('Can set change status');
+                echo json_encode('Can not set  status');
             }
         } else {
             echo json_encode('Missing some params');
@@ -559,10 +628,16 @@ class ControllerModuleApimoduleApimodule extends Controller
      *   {
      *         "true"
      *    }
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Can not change address"
+     *     }
      *
      */
 
-    public function delivery(){
+    public function delivery()
+    {
         header("Access-Control-Allow-Origin: *");
         $error = $this->valid();
         if ($error != null) {
@@ -584,7 +659,7 @@ class ControllerModuleApimoduleApimodule extends Controller
             if ($data) {
                 echo json_encode($data);
             } else {
-                echo json_encode('Can not set status');
+                echo json_encode('Can not change address');
             }
         } else {
             echo json_encode('Missing some params');
@@ -611,12 +686,13 @@ class ControllerModuleApimoduleApimodule extends Controller
      * @apiErrorExample Error-Response:
      *
      *     {
-     *       "error": "UserNotFound"
+     *       "Missing some params"
      *     }
      *
      */
 
-    public function addcomment(){
+    public function addcomment()
+    {
         header("Access-Control-Allow-Origin: *");
 
         $error = $this->valid();
@@ -636,132 +712,6 @@ class ControllerModuleApimoduleApimodule extends Controller
         return;
     }
 
-    /**
-     * @api {get} index.php?route=module/apimodule/apimodule/product  getProduct
-     * @apiName getProduct
-     * @apiGroup All
-     *
-     ** @apiParam {Number} id Product unique ID.
-     *
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {Number} store_id  ID of the store.
-     * @apiSuccess {url}    image     Product image.
-     * @apiSuccess {Number} price     Product price.
-     * @apiSuccess {Number} quantity  Product quantity.
-     * @apiSuccess {String} description  Product description.
-     * @apiSuccess {String} name  Product name.
-     * @apiSuccess {Number} price  Product  price.
-     * @apiSuccess {Number} rating  Product rating.
-     * @apiSuccess {String} stock_status  Product status in shop.
-     * @apiSuccess {Number} viewed  Count of product views.
-     * @apiSuccess {Number} weight  Weight of the  product.
-     *
-     * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
-     *         "product_id" : "28"
-     *         "image" : "catalog/demo/htc_touch_hd_1.jpg"
-     *         "price" :"100.0000"
-     *         "quantity" : "939"
-     *         "description" : "HTC Touch - in High Definition."
-     *         "name" : "HTC Touch HD"
-     *         "rating" : "5"
-     *         "stock_status" : "В наличии"
-     *         "viewed" : "350"
-     *         "weight" : "133.00000000"
-     *    }
-     *
-     */
-    public
-    function product()
-    {
-        header("Access-Control-Allow-Origin: *");
-        $error = $this->valid();
-        if ($error != null) {
-            echo json_encode($error);
-            return;
-        }
-        $id = $_REQUEST['product_id'];
-
-        $this->load->model('catalog/product');
-
-        $product = $this->model_catalog_product->getProduct($id);
-        echo json_encode($product);
-
-    }
-
-    /**
-     * @api {get} index.php?route=module/apimodule/apimodule/products  getProducts
-     * @apiName getProducts
-     * @apiGroup All
-     *
-     * @apiParam {Number} page Number of pagination pages.
-     *
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {Number} store_id  ID of the store.
-     * @apiSuccess {url}    image     Product image.
-     * @apiSuccess {Number} price     Product price.
-     * @apiSuccess {Number} quantity  Product quantity.
-     * @apiSuccess {String} description  Product description.
-     * @apiSuccess {String} name  Product name.
-     * @apiSuccess {Number} price  Product  price.
-     * @apiSuccess {Number} rating  Product rating.
-     * @apiSuccess {String} stock_status  Product status in shop.
-     * @apiSuccess {Number} viewed  Count of product views.
-     * @apiSuccess {Number} weight  Weight of the  product.
-     *
-     * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
-     *      "0" : "Array"
-     *      {
-     *         "product_id" : "28"
-     *         "image" : "catalog/demo/htc_touch_hd_1.jpg"
-     *         "price" :"100.0000"
-     *         "quantity" : "939"
-     *         "description" : "HTC Touch - in High Definition."
-     *         "name" : "HTC Touch HD"
-     *         "rating" : "5"
-     *         "stock_status" : "В наличии"
-     *         "viewed" : "350"
-     *         "weight" : "210.00000000"
-     *        }
-     *      "1" : "Array"
-     *      {
-     *         "product_id" : "30"
-     *         "image" : "catalog/demo/palm_treo_pro_1.jpg"
-     *         "price" :"150.0000"
-     *         "quantity" : "999"
-     *         "description" : "HRedefine your workday with the Palm Treo Pro smartphone."
-     *         "name" : "Palm Treo Pro"
-     *         "rating" : "0"
-     *         "stock_status" : "Ожидание 2-3 дня"
-     *         "viewed" : "39"
-     *         "weight" : "30.00000000"
-     *        }
-     *    }
-     *
-     */
-    public
-    function products()
-    {
-        header("Access-Control-Allow-Origin: *");
-        $error = $this->valid();
-        if ($error != null) {
-            echo json_encode($error);
-            return;
-        }
-        if ($_REQUEST['page']) {
-            $page = ($_REQUEST['page'] - 1) * 5;
-        } else {
-            $page = 0;
-        }
-        $this->load->model('module/apimodule/apimodule');
-
-        $products = $this->model_module_apimodule_apimodule->getProducts($page);
-        echo json_encode($products);
-
-    }
 
     /**
      * @api {post} index.php?route=module/apimodule/apimodule/login  Login
@@ -786,19 +736,18 @@ class ControllerModuleApimoduleApimodule extends Controller
      *     }
      *
      */
-    public
-    function login()
+    public function login()
     {
         header("Access-Control-Allow-Origin: *");
-        //$this->session->data['token'] = $token;
+
         $this->load->model('module/apimodule/apimodule');
         $user = $this->model_module_apimodule_apimodule->Login($this->request->post['username'], $this->request->post['password']);
-        //$password = sha1($user['salt'].sha1($user['salt'].htmlspecialchars($this->request->post['password'], ENT_QUOTES)));
+
         if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
             echo 'Incorrect username or password';
             return;
         }
-        //  $token = $this->createToken();
+
         $token = $this->model_module_apimodule_apimodule->getUserToken($user['user_id']);
         if (!isset($token['token'])) {
             $token = token(32);
@@ -809,14 +758,8 @@ class ControllerModuleApimoduleApimodule extends Controller
 
     }
 
-    private
-    function createToken()
-    {
-        return md5(date("d.m.y") . "apimobile");
-    }
 
-    private
-    function valid()
+    private function valid()
     {
 
         if (!isset($_REQUEST['token']) || $_REQUEST['token'] == '') {

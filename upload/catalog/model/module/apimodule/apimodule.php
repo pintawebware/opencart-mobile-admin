@@ -31,22 +31,6 @@ class ModelModuleApimoduleApimodule extends Model
 
     }
 
-    public function getProducts($page)
-    {
-        $sql = "SELECT p.product_id";
-        $sql .= " FROM " . DB_PREFIX . "product p";
-        $sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
-        $sql .= " GROUP BY p.product_id";
-        $sql .= " ORDER BY p.product_id ASC";
-        $sql .= " LIMIT 5 OFFSET ". $page ;
-        $query =  $this->db->query($sql);
-        $this->load->model('catalog/product');
-        foreach ($query->rows as $result) {
-            $product_data[$result['product_id']] = $this->model_catalog_product->getProduct($result['product_id']);
-        }
-        return $product_data;
-
-    }
     public function Login($username, $password) {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE username = '" . $username . "' AND (password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('" . $this->db->escape(htmlspecialchars($password, ENT_QUOTES)) . "'))))) OR password = '" . $this->db->escape(md5($password)) . "') AND status = '1'");
 
