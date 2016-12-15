@@ -24,69 +24,97 @@ class ModelModuleApimoduleApimodule extends Model
         $setStatus = $this->db->query("UPDATE " . DB_PREFIX . "order SET order_status_id = " . $statusId . " WHERE order_id = " . $orderID);
         if ($setStatus === true) {
             $getStatus = $this->db->query("SELECT name FROM " . DB_PREFIX . "order_status AS s LEFT JOIN " . DB_PREFIX . "order AS o ON o.order_status_id = s.order_status_id WHERE o.order_id = " . $orderID);
-            $this->db->query("INSERT INTO " . DB_PREFIX . "order_history (order_id, order_status_id, date_added)  VALUES (" . $orderID . "," . $statusId .", NOW() ) ");
+            $this->db->query("INSERT INTO " . DB_PREFIX . "order_history (order_id, order_status_id, date_added)  VALUES (" . $orderID . "," . $statusId . ", NOW() ) ");
 
         }
         return $getStatus->row;
 
     }
 
-    public function Login($username, $password) {
+    public function getProducts($page)
+    {
+        $sql = "SELECT p.product_id";
+        $sql .= " FROM " . DB_PREFIX . "product p";
+        $sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
+        $sql .= " GROUP BY p.product_id";
+        $sql .= " ORDER BY p.product_id ASC";
+        $sql .= " LIMIT 5 OFFSET " . $page;
+        $query = $this->db->query($sql);
+        $this->load->model('catalog/product');
+        foreach ($query->rows as $result) {
+            $product_data[$result['product_id']] = $this->model_catalog_product->getProduct($result['product_id']);
+        }
+        return $product_data;
+
+    }
+
+    public function Login($username, $password)
+    {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE username = '" . $username . "' AND (password = SHA1(CONCAT(salt, SHA1(CONCAT(salt, SHA1('" . $this->db->escape(htmlspecialchars($password, ENT_QUOTES)) . "'))))) OR password = '" . $this->db->escape(md5($password)) . "') AND status = '1'");
 
         return $query->row;
     }
-    public function setUserToken($id, $token){
 
-        $sql="INSERT INTO " . DB_PREFIX . "user_token_mob_api (user_id, token)  VALUES (" . $id . ",\"" . $token ." \") ";
+    public function setUserToken($id, $token)
+    {
+
+        $sql = "INSERT INTO " . DB_PREFIX . "user_token_mob_api (user_id, token)  VALUES (" . $id . ",\"" . $token . " \") ";
 
         $query = $this->db->query($sql);
         return $query;
     }
-    public function getUserToken($id){
 
-        $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api WHERE user_id = " . $id );
+    public function getUserToken($id)
+    {
+
+        $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api WHERE user_id = " . $id);
 
         return $query->row;
     }
 
-    public function getTokens(){
+    public function getTokens()
+    {
 
-        $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api " );
-
-        return $query->rows;
-    }
-
-
-    public function getOrderProducts($id) {
-
-        $query = $this->db->query("SELECT * FROM (SELECT image, product_id FROM " . DB_PREFIX . "product  ) AS p LEFT JOIN (SELECT order_id, product_id, model, quantity, price,  name FROM " . DB_PREFIX . "order_product WHERE order_id = " . $id . " ) AS o ON o.product_id = p.product_id LEFT JOIN (SELECT store_url, order_id, total FROM " . DB_PREFIX . "ORDER WHERE order_id = " . $id . " ) t2 ON o.order_id = t2.order_id LEFT JOIN (SELECT order_id, code, value FROM " . DB_PREFIX . "order_total WHERE code = 'shipping' AND order_id = " . $id . " ) t5 ON o.order_id = t5.order_id WHERE o.order_id = " . $id );
+        $query = $this->db->query("SELECT token FROM " . DB_PREFIX . "user_token_mob_api ");
 
         return $query->rows;
     }
 
 
-    public function getProductDiscount($id, $quantity){
+    public function getOrderProducts($id)
+    {
+
+        $query = $this->db->query("SELECT * FROM (SELECT image, product_id FROM " . DB_PREFIX . "product  ) AS p LEFT JOIN (SELECT order_id, product_id, model, quantity, price,  name FROM " . DB_PREFIX . "order_product WHERE order_id = " . $id . " ) AS o ON o.product_id = p.product_id LEFT JOIN (SELECT store_url, order_id, total FROM " . DB_PREFIX . "ORDER WHERE order_id = " . $id . " ) t2 ON o.order_id = t2.order_id LEFT JOIN (SELECT order_id, code, value FROM " . DB_PREFIX . "order_total WHERE code = 'shipping' AND order_id = " . $id . " ) t5 ON o.order_id = t5.order_id WHERE o.order_id = " . $id);
+
+        return $query->rows;
+    }
+
+
+    public function getProductDiscount($id, $quantity)
+    {
 
         $query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_discount AS pd2 WHERE pd2.product_id = " . $id . " AND pd2.quantity <= " . $quantity . " AND pd2.date_start < NOW() AND pd2.date_end > NOW() LIMIT 1");
 
         return $query->row;
     }
 
-    public function getOrderHistory(){
+    public function getOrderHistory()
+    {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_history h  LEFT JOIN " . DB_PREFIX . "order_status s ON h.order_status_id = s.order_status_id WHERE h.order_id = 1 AND s.name IS NOT NULL ORDER BY h.date_added DESC");
 
         return $query->rows;
     }
 
-    public function OrderStatusList(){
+    public function OrderStatusList()
+    {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status");
 
         return $query->rows;
     }
 
-    public function OrderStatusSet($name, $languageID){
-        $setStatus = $this->db->query("INSERT INTO " . DB_PREFIX . "order_status (language_id, name)  VALUES (" . $languageID . ",\"" . $name ."\" ) ");
+    public function OrderStatusSet($name, $languageID)
+    {
+        $setStatus = $this->db->query("INSERT INTO " . DB_PREFIX . "order_status (language_id, name)  VALUES (" . $languageID . ",\"" . $name . "\" ) ");
 
         if ($setStatus === true) {
             $getStatus = $this->db->query("SELECT name FROM " . DB_PREFIX . "order_status  ORDER BY order_status_id DESC LIMIT 1");
@@ -95,12 +123,13 @@ class ModelModuleApimoduleApimodule extends Model
         return $getStatus->row;
     }
 
-    public function ChangeOrderDelivery($address, $city, $order_id){
+    public function ChangeOrderDelivery($address, $city, $order_id)
+    {
 
         $sql = "UPDATE " . DB_PREFIX . "order SET shipping_address_1 = \"" . $address . "\" ";
-        if($city !== false){
-            $sql .= " , shipping_city = \"" . $city . "\" WHERE order_id = \"" . $order_id ."\"";
-        }else{
+        if ($city !== false) {
+            $sql .= " , shipping_city = \"" . $city . "\" WHERE order_id = \"" . $order_id . "\"";
+        } else {
             $sql .= " WHERE order_id = \"" . $order_id . "\"";
         }
 
@@ -109,11 +138,79 @@ class ModelModuleApimoduleApimodule extends Model
         return $setStatus;
     }
 
-    public function AddComment($order_id, $comment){
+    public function AddComment($order_id, $comment)
+    {
 
         $statusID = $this->db->query("SELECT order_status_id FROM " . DB_PREFIX . "order  WHERE order_id = " . $order_id)->row['order_status_id'];
-        $setComment = $this->db->query("INSERT INTO " . DB_PREFIX . "order_history (order_id, order_status_id, comment, date_added)  VALUES (" . $order_id . ", ". $statusID .",\"" . $comment ."\", NOW() ) ");
+        $setComment = $this->db->query("INSERT INTO " . DB_PREFIX . "order_history (order_id, order_status_id, comment, date_added)  VALUES (" . $order_id . ", " . $statusID . ",\"" . $comment . "\", NOW() ) ");
 
         return $setComment;
     }
+
+    public function getTotalSales($data = array())
+    {
+        $sql = "SELECT SUM(total) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'";
+
+        if (!empty($data['this_year'])) {
+            $sql .= " AND DATE_FORMAT(date_added,'%Y') = DATE_FORMAT(NOW(),'%Y')";
+        }
+
+        $query = $this->db->query($sql);
+
+        return $query->row['total'];
+    }
+
+    public function getTotalOrders($data = array())
+    {
+        if (isset($data['filter'])) {
+            $sql = "SELECT date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'";
+
+            if($data['filter'] == 'day'){
+                $sql .= " AND DATE(date_added) = DATE(NOW())";
+            }elseif ($data['filter'] == 'week') {
+                $date_start = strtotime('-' . date('w') . ' days');
+                $sql .= "AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') ";
+            }elseif ($data['filter'] == 'month') {
+                $sql .= "AND DATE(date_added) >= '" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "' ";
+            }elseif ($data['filter'] == 'year') {
+                $sql .= "AND YEAR(date_added) = YEAR(NOW())";
+            }else{
+                return false;
+            }
+        }else{
+            $sql = "SELECT COUNT(*) FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'";
+        }
+
+        $query = $this->db->query($sql);
+
+        return $query->rows;
+    }
+
+    public function getTotalCustomers($data = array())
+    {
+
+        if (isset($data['filter'])) {
+            $sql = "SELECT date_added FROM `" . DB_PREFIX . "customer` ";
+            if($data['filter'] == 'day'){
+                $sql .= " WHERE DATE(date_added) = DATE(NOW())";
+            }elseif ($data['filter'] == 'week') {
+                $date_start = strtotime('-' . date('w') . ' days');
+                $sql .= "WHERE DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') ";
+            }elseif ($data['filter'] == 'month') {
+                $sql .= "WHERE DATE(date_added) >= '" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "' ";
+            }elseif ($data['filter'] == 'year') {
+                $sql .= "WHERE YEAR(date_added) = YEAR(NOW()) ";
+            }else{
+                return false;
+            }
+        }else{
+            $sql = "SELECT COUNT(*) FROM `" . DB_PREFIX . "customer` ";
+        }
+
+        $query = $this->db->query($sql);
+
+        return $query->rows;
+    }
+
+
 }

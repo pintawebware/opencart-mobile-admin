@@ -475,17 +475,17 @@ class ControllerModuleApimoduleApimodule extends Controller
                         $discount = (($products[$i]['price']) - $discount_price['price']) / ($products[$i]['price']);
                         $data[$i]['discount'] = ($discount * 100) . '%';
                         $discount_sum = ($products[$i]['price'] - $discount_price['price']) * $products[$i]['quantity'];
-                    }else{
+                    } else {
                         $discount_sum = 0;
                     }
                     $a = $products[$i]['price'] * $products[$i]['quantity'];
 
                     if ($i > 0) {
                         $a = $a + $products[$i]['price'] * $products[$i]['quantity'];
-                        if(isset($discount_price['price']) && $discount_price['price'] != ''){
-                            $total_discount_sum =  $total_discount_sum + ($products[$i]['price'] * $products[$i]['quantity']);
+                        if (isset($discount_price['price']) && $discount_price['price'] != '') {
+                            $total_discount_sum = $total_discount_sum + ($products[$i]['price'] * $products[$i]['quantity']);
                         }
-                    }else{
+                    } else {
                         $total_discount_sum = $discount_sum;
                     }
                     $shipping_price = $products[$i]['value'];
@@ -496,12 +496,12 @@ class ControllerModuleApimoduleApimodule extends Controller
                     'total_discount' => $total_discount_sum,
                     'total_price' => $a,
                     'shipping_price' => $shipping_price,
-                    'total'=> $a + $shipping_price
+                    'total' => $a + $shipping_price
                 );
 
 
-                 //echo json_encode($data);
-                 print_r($data);
+                //echo json_encode($data);
+                print_r($data);
 
             } else {
                 echo json_encode('Can not found any products in order with id = ' . $id);
@@ -756,6 +756,147 @@ class ControllerModuleApimoduleApimodule extends Controller
         $token = $this->model_module_apimodule_apimodule->getUserToken($user['user_id']);
         echo json_encode($token);
 
+    }
+
+    /**
+     * @api {get} index.php?route=module/apimodule/apimodule/shortreview  getShortReview
+     * @apiName getShortReview
+     * @apiGroup All
+     *
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {Number} total_sales  Total number of sales.
+     * @apiSuccess {Number} sale_year_total Total number of sales of current year.
+     * @apiSuccess {Number} orders_total Total number of orders.
+     * @apiSuccess {Number} clients_total Total number of client.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *       {
+     *         "total_sales" : "999"
+     *         "sale_year_total" : "555"
+     *         "orders_total" : "600"
+     *         "clients_total" : "455"
+     *   }
+     *
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "You need to be logged!"
+     *     }
+     *
+     */
+
+    public function shortreview()
+    {
+        header("Access-Control-Allow-Origin: *");
+
+        $error = $this->valid();
+        if ($error != null) {
+            echo json_encode($error);
+            return;
+        }
+
+        $this->load->model('module/apimodule/apimodule');
+
+        $sale_total = $this->model_module_apimodule_apimodule->getTotalSales();
+        if ($sale_total > 1000000000000) {
+            $data['$total_sales'] = round($sale_total / 1000000000000, 1) . 'T';
+        } elseif ($sale_total > 1000000000) {
+            $data['$total_sales'] = round($sale_total / 1000000000, 1) . 'B';
+        } elseif ($sale_total > 1000000) {
+            $data['$total_sales'] = round($sale_total / 1000000, 1) . 'M';
+        } elseif ($sale_total > 1000) {
+            $data['$total_sales'] = round($sale_total / 1000, 1) . 'K';
+        } else {
+            $data['total_sales'] = round($sale_total);
+        }
+        $sale_year_total = $this->model_module_apimodule_apimodule->getTotalSales(array('this_year' => true));
+        if ($sale_year_total > 1000000000000) {
+            $data['sale_year_total'] = round($sale_year_total / 1000000000000, 1) . 'T';
+        } elseif ($sale_total > 1000000000) {
+            $data['sale_year_total'] = round($sale_year_total / 1000000000, 1) . 'B';
+        } elseif ($sale_total > 1000000) {
+            $data['sale_year_total'] = round($sale_year_total / 1000000, 1) . 'M';
+        } elseif ($sale_total > 1000) {
+            $data['sale_year_total'] = round($sale_year_total / 1000, 1) . 'K';
+        } else {
+            $data['sale_year_total'] = round($sale_year_total);
+        }
+        $orders_total = $this->model_module_apimodule_apimodule->getTotalOrders();
+        $data['orders_total'] = $orders_total[0]['COUNT(*)'];
+        $clients_total = $this->model_module_apimodule_apimodule->getTotalCustomers();
+        $data['clients_total'] = $clients_total[0]['COUNT(*)'];
+
+
+        echo json_encode($data);
+    }
+
+    /**
+     * @api {get} index.php?route=module/apimodule/apimodule/statistic  getDashboardStatistic
+     * @apiName getDashboardStatistic
+     * @apiGroup All
+     *
+     * @apiParam {String} filter Period for filter.
+     * @apiParam {Token} token your unique token.
+     *
+     * @apiSuccess {Date} Date of register client.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *       "clients" : "Array" {
+     *         "date_added" : "2016-12-08 10:07:19"
+     *         "date_added" : "2016-12-15 12:19:17"
+     *       }
+     *       "orders" : "Array" {
+     *         "date_added" : "2016-12-03 11:01:15"
+     *         "date_added" : "2016-11-15 12:00:17"
+     *       }
+     * }
+     *
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "Unknown filter set"
+     *     }
+     *
+     */
+
+    public function statistic()
+    {
+        header("Access-Control-Allow-Origin: *");
+
+        $error = $this->valid();
+        if ($error != null) {
+            echo json_encode($error);
+            return;
+        }
+        $this->load->model('module/apimodule/apimodule');
+
+        if (isset($_REQUEST['filter']) && $_REQUEST['filter'] != '') {
+            $clients = $this->model_module_apimodule_apimodule->getTotalCustomers(array('filter' => $_REQUEST['filter']));
+            $orders = $this->model_module_apimodule_apimodule->getTotalOrders(array('filter' => $_REQUEST['filter']));
+            if ($clients === false) {
+                $data['clients'] = 'Unknown filter set';
+            } elseif (count($clients) > 0) {
+                $data['clients'] = $clients;
+            } else {
+                $data['clients'] = false;
+            }
+            if ($orders === false) {
+                $data['orders'] = 'Unknown filter set';
+            } elseif (count($orders) > 0) {
+                $data['orders'] = $orders;
+            } else {
+                $data['orders'] = false;
+            }
+            echo json_encode($data);
+           //print_r($data);
+        } else {
+            echo json_encode('Missing some params');
+        }
     }
 
 
