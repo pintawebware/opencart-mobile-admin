@@ -824,6 +824,24 @@ class ControllerModuleApimodule extends Controller
             return;
         }
 
+        if(isset($_REQUEST['update_device_token'])){
+            $this->model_module_apimodule->updateUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
+        }elseif(isset($_REQUEST['delete_device_token'])){
+            $this->model_module_apimodule->deleteUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
+        }elseif(isset($_REQUEST['device_token'])){
+            $devices =  $this->model_module_apimodule->getUserDevices($user['user_id']);
+            $matches = 0;
+            foreach ($devices as $device){
+                if($_REQUEST['device_token'] == $device['device_token']){
+                    $matches++;
+                }
+            }
+            if($matches == 0){
+                $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
+            }
+        }
+
+
         $token = $this->model_module_apimodule->getUserToken($user['user_id']);
         if (!isset($token['token'])) {
             $token = md5(mt_rand());
@@ -834,6 +852,35 @@ class ControllerModuleApimodule extends Controller
         $this->response->setOutput(json_encode(['response' => ['token' => $token['token']], 'status' => true]));
 
 
+    }
+    public function sendNotifications(){
+        header("Access-Control-Allow-Origin: *");
+        $mail = new Mail();
+        $mail->protocol = $this->config->get('config_mail_protocol');
+        $mail->parameter = $this->config->get('config_mail_parameter');
+        $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+        $mail->smtp_username = $this->config->get('config_mail_smtp_username');
+        $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+        $mail->smtp_port = $this->config->get('config_mail_smtp_port');
+        $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+        $mail->setTo('t0wa@mail.ru');
+        $mail->setFrom($this->config->get('config_email'));
+        $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+        $mail->setSubject('test');
+        $mail->setText('test');
+        $mail->send();
+
+        /*curl_setopt_array($ch = curl_init(), array(
+            CURLOPT_URL => "https://fcm.googleapis.com/fcm/send",
+            CURLOPT_POSTFIELDS => array(
+                "to" => "<YOUR_DEVICE_ID_TOKEN>",
+                "method" => "POST",
+                "d" => "{\"to\":\"<YOUR_DEVICE_ID_TOKEN>\",\"notification\":{\"body\":\"Yellow\"},\"priority\":10}",
+                "header" => "Authorization: key=<API_ACCESS_KEY>; Content-Type: application/json",
+            )));
+        curl_exec($ch);
+        curl_close($ch);*/
     }
 
 

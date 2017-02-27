@@ -412,8 +412,29 @@ class ModelModuleApimodule extends Model
         $sql = "SELECT c.code FROM " . DB_PREFIX . "currency c WHERE  c.value = 1";
         $query = $this->db->query($sql);
         return $query->row['code'];
-
     }
+
+    public function setUserDeviceToken($user_id, $token){
+        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token)  VALUES (" . $user_id . ",\"" . $token . "\") ";
+        $this->db->query($sql);
+        return;
+    }
+    public function getUserDevices($user_id){
+        $sql = "SELECT device_token FROM " . DB_PREFIX . "user_device_mob_api  WHERE  user_id = ".$user_id;
+        $query = $this->db->query($sql);
+        return $query->rows;
+    }
+    public function deleteUserDeviceToken($user_id, $token){
+        $sql = "DELETE * FROM " . DB_PREFIX . "user_device_mob_api  WHERE  user_id = ".$user_id." AND device_token = ". $token;
+        $this->db->query($sql);
+        return;
+    }
+    public function updateUserDeviceToken($user_id, $token){
+        $sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = ". $token ." WHERE  user_id = ".$user_id." AND device_token = ". $token;
+        $this->db->query($sql);
+        return;
+    }
+
 
 
 }
