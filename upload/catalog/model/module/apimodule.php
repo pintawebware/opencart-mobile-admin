@@ -419,20 +419,22 @@ class ModelModuleApimodule extends Model
         $this->db->query($sql);
         return;
     }
-    public function getUserDevices($user_id){
-        $sql = "SELECT device_token FROM " . DB_PREFIX . "user_device_mob_api  WHERE  user_id = ".$user_id;
+    public function getUserDevices(){
+        $sql = "SELECT device_token FROM " . DB_PREFIX . "user_device_mob_api  ";
         $query = $this->db->query($sql);
         return $query->rows;
     }
-    public function deleteUserDeviceToken($user_id, $token){
-        $sql = "DELETE * FROM " . DB_PREFIX . "user_device_mob_api  WHERE  user_id = ".$user_id." AND device_token = ". $token;
-        $this->db->query($sql);
-        return;
+    public function deleteUserDeviceToken($token){
+        $sql = "DELETE * FROM " . DB_PREFIX . "user_device_mob_api  WHERE  device_token = \"". $token."\";
+        SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = \"". $token ."\";";
+        $query = $this->db->query($sql);
+        return $query->rows;
     }
-    public function updateUserDeviceToken($user_id, $token){
-        $sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = ". $token ." WHERE  user_id = ".$user_id." AND device_token = ". $token;
-        $this->db->query($sql);
-        return;
+    public function updateUserDeviceToken($old, $new){
+        $sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = \"". $new ."\" WHERE  device_token = \"". $old ."\";
+        SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = \"". $new ."\";";
+        $query = $this->db->query($sql);
+        return $query->rows;
     }
 
 

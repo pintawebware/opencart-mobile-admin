@@ -105,7 +105,7 @@ class ControllerModuleApimodule extends Controller
             return;
         }
 
-        if (isset($_REQUEST['page']) && (int)$_REQUEST['page'] != 0  && isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] != 0) {
+        if (isset($_REQUEST['page']) && (int)$_REQUEST['page'] != 0 && isset($_REQUEST['limit']) && (int)$_REQUEST['limit'] != 0) {
             $page = ($_REQUEST['page'] - 1) * $_REQUEST['limit'];
             $limit = $_REQUEST['limit'];
         } else {
@@ -118,22 +118,22 @@ class ControllerModuleApimodule extends Controller
         if (isset($_REQUEST['filter'])) {
 
             $orders = $this->model_module_apimodule->getOrders(array('filter' => $_REQUEST['filter'], 'page' => $page, 'limit' => $limit));
-        }elseif(isset($_REQUEST['platform']) && $_REQUEST['platform'] == 'android'){
+        } elseif (isset($_REQUEST['platform']) && $_REQUEST['platform'] == 'android') {
             $filter = [];
-            if(isset($_REQUEST['order_status_id'])){
+            if (isset($_REQUEST['order_status_id'])) {
                 $filter['order_status_id'] = $_REQUEST['order_status_id'];
             }
-            if(isset($_REQUEST['fio'])){
+            if (isset($_REQUEST['fio'])) {
                 $filter['fio'] = $_REQUEST['fio'];
             }
-            if(isset($_REQUEST['min_price']) && $_REQUEST['min_price'] !=0 ){
+            if (isset($_REQUEST['min_price']) && $_REQUEST['min_price'] != 0) {
                 $filter['min_price'] = $_REQUEST['min_price'];
-            }else{
+            } else {
                 $filter['min_price'] = 1;
             }
-            if(isset($_REQUEST['max_price']) ){
+            if (isset($_REQUEST['max_price'])) {
                 $filter['max_price'] = $_REQUEST['max_price'];
-            }else{
+            } else {
                 $filter['max_price'] = $this->model_module_apimodule->getMaxOrderPrice();
             }
 
@@ -143,39 +143,39 @@ class ControllerModuleApimodule extends Controller
 
             $orders = $this->model_module_apimodule->getOrders(array('filter' => $filter, 'page' => $page, 'limit' => $limit));
 
-        }else {
+        } else {
             $orders = $this->model_module_apimodule->getOrders(array('page' => $page, 'limit' => $limit));
         }
         $response = [];
         $orders_to_response = [];
 
-            foreach ($orders->rows as $order) {
+        foreach ($orders->rows as $order) {
 
-                $data['order_number'] = $order['order_id'];
-                $data['order_id'] = $order['order_id'];
-                if (isset($order['firstname']) && isset($order['lastname'])) {
-                    $data['fio'] = $order['firstname'] . ' ' . $order['lastname'];
-                } else {
-                    $data['fio'] = $order['payment_firstname'] . ' ' . $order['payment_lastname'];
-                }
-                $data['status'] = $order['name'];
-
-                $data['total'] = number_format($order['total'], 2, '.', '');
-                $data['date_added'] = $order['date_added'];
-                $data['currency_code'] = $order['currency_code'];
-                $orders_to_response[] = $data;
-
+            $data['order_number'] = $order['order_id'];
+            $data['order_id'] = $order['order_id'];
+            if (isset($order['firstname']) && isset($order['lastname'])) {
+                $data['fio'] = $order['firstname'] . ' ' . $order['lastname'];
+            } else {
+                $data['fio'] = $order['payment_firstname'] . ' ' . $order['payment_lastname'];
             }
+            $data['status'] = $order['name'];
 
-            $response['total_quantity'] =  $orders->quantity;
-            $response['currency_code'] =  $this->model_module_apimodule->getDefaultCurrency();
-            $response['total_sum'] = number_format($orders->totalsumm, 2, '.', '');
-            $response['orders'] = $orders_to_response;
-            $response['max_price'] = $this->model_module_apimodule->getMaxOrderPrice();
-            $statuses = $this->model_module_apimodule->OrderStatusList();
-            $response['statuses'] = $statuses;
+            $data['total'] = number_format($order['total'], 2, '.', '');
+            $data['date_added'] = $order['date_added'];
+            $data['currency_code'] = $order['currency_code'];
+            $orders_to_response[] = $data;
 
-            $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+        }
+
+        $response['total_quantity'] = $orders->quantity;
+        $response['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
+        $response['total_sum'] = number_format($orders->totalsumm, 2, '.', '');
+        $response['orders'] = $orders_to_response;
+        $response['max_price'] = $this->model_module_apimodule->getMaxOrderPrice();
+        $statuses = $this->model_module_apimodule->OrderStatusList();
+        $response['statuses'] = $statuses;
+
+        $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
         return;
     }
 
@@ -246,7 +246,7 @@ class ControllerModuleApimodule extends Controller
 
             $error = $this->valid();
             if ($error != null) {
-                
+
                 $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
                 return;
             }
@@ -264,12 +264,12 @@ class ControllerModuleApimodule extends Controller
                 }
                 if (isset($order[0]['email'])) {
                     $data['email'] = $order[0]['email'];
-                }else{
+                } else {
                     $data['email'] = '';
                 }
                 if (isset($order[0]['telephone'])) {
                     $data['telephone'] = $order[0]['telephone'];
-                }else{
+                } else {
                     $data['telephone'] = '';
                 }
 
@@ -280,20 +280,20 @@ class ControllerModuleApimodule extends Controller
                 }
                 if (isset($order[0]['name'])) {
                     $data['status'] = $order[0]['name'];
-                }else{
+                } else {
                     $data['status'] = '';
                 }
                 $statuses = $this->model_module_apimodule->OrderStatusList();
                 $data['statuses'] = $statuses;
-                
+
                 $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Can not found order with id = ' . $id, 'status' => false]));
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
         }
     }
@@ -340,7 +340,7 @@ class ControllerModuleApimodule extends Controller
 
             $error = $this->valid();
             if ($error != null) {
-                
+
                 $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
                 return;
             }
@@ -374,16 +374,16 @@ class ControllerModuleApimodule extends Controller
                 if (isset($order[0]['shipping_zone']) && $order[0]['shipping_zone'] != '') {
                     $data['shipping_address'] .= ', ' . $order[0]['shipping_zone'];
                 }
-                
+
                 $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
 
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Can not found order with id = ' . $id, 'status' => false]));
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
         }
     }
@@ -467,7 +467,7 @@ class ControllerModuleApimodule extends Controller
 
             $error = $this->valid();
             if ($error != null) {
-                
+
                 $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
                 return;
             }
@@ -490,15 +490,15 @@ class ControllerModuleApimodule extends Controller
 
                 $statuses = $this->model_module_apimodule->OrderStatusList();
                 $response['statuses'] = $statuses;
-                
+
                 $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Can not found any statuses for order with id = ' . $id, 'status' => false]));
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
         }
     }
@@ -574,7 +574,7 @@ class ControllerModuleApimodule extends Controller
 
             $error = $this->valid();
             if ($error != null) {
-                
+
                 $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
                 return;
             }
@@ -641,21 +641,21 @@ class ControllerModuleApimodule extends Controller
                 );
 
 
-                $this->response->addHeader('Content-Type: application/json; charset=utf-8' );
+                $this->response->addHeader('Content-Type: application/json; charset=utf-8');
                 $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Can not found any products in order with id = ' . $id, 'status' => false]));
 
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
 
         }
     }
-    
+
 
     /**
      * @api {get} index.php?route=module/apimodule/delivery  ChangeOrderDelivery
@@ -689,7 +689,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-            
+
             $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
             return;
         }
@@ -706,16 +706,16 @@ class ControllerModuleApimodule extends Controller
             $this->load->model('module/apimodule');
             $data = $this->model_module_apimodule->ChangeOrderDelivery($address, $city, $order_id);
             if ($data) {
-                
+
                 $this->response->setOutput(json_encode(['status' => true]));
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Can not change address', 'status' => false]));
 
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
 
         }
@@ -761,7 +761,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-            
+
             $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
             return;
         }
@@ -773,9 +773,9 @@ class ControllerModuleApimodule extends Controller
             $this->load->model('module/apimodule');
             $data = $this->model_module_apimodule->AddComment($orderID, $statusID, $comment);
 
-            $this->response->setOutput(json_encode(['response' => $data,'status' => true]));
+            $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
 
         }
@@ -790,6 +790,7 @@ class ControllerModuleApimodule extends Controller
      *
      * @apiParam {String} username User unique username.
      * @apiParam {Number} password User's  password.
+     * @apiParam {String} device_token User's device's token for firebase notifications.
      *
      * @apiSuccess {String} token  Token.
      *
@@ -819,24 +820,20 @@ class ControllerModuleApimodule extends Controller
 
         if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
 
-            
+
             $this->response->setOutput(json_encode(['error' => 'Incorrect username or password', 'status' => false]));
             return;
         }
 
-        if(isset($_REQUEST['update_device_token'])){
-            $this->model_module_apimodule->updateUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
-        }elseif(isset($_REQUEST['delete_device_token'])){
-            $this->model_module_apimodule->deleteUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
-        }elseif(isset($_REQUEST['device_token'])){
-            $devices =  $this->model_module_apimodule->getUserDevices($user['user_id']);
+        if (isset($_REQUEST['device_token']) && $_REQUEST['device_token'] != '') {
+            $devices = $this->model_module_apimodule->getUserDevices($user['user_id']);
             $matches = 0;
-            foreach ($devices as $device){
-                if($_REQUEST['device_token'] == $device['device_token']){
+            foreach ($devices as $device) {
+                if ($_REQUEST['device_token'] == $device['device_token']) {
                     $matches++;
                 }
             }
-            if($matches == 0){
+            if ($matches == 0) {
                 $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
             }
         }
@@ -848,39 +845,136 @@ class ControllerModuleApimodule extends Controller
             $this->model_module_apimodule->setUserToken($user['user_id'], $token);
         }
         $token = $this->model_module_apimodule->getUserToken($user['user_id']);
-        
+
         $this->response->setOutput(json_encode(['response' => ['token' => $token['token']], 'status' => true]));
 
 
     }
-    public function sendNotifications(){
+    /**
+     * @api {post} index.php?route=module/apimodule/deletedevicetoken  deleteUserDeviceToken
+     * @apiName deleteUserDeviceToken
+     * @apiGroup All
+     *
+     * @apiParam {String} old_token User's device's token for firebase notifications.
+     *
+     * @apiSuccess {Boolean} status  true.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *       "response":
+     *       {
+     *          "status": true
+     *       }
+     *   }
+     *
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "error": "Missing some params",
+     *       "status": false
+     *     }
+     *
+     */
+    public function deletedevicetoken(){
         header("Access-Control-Allow-Origin: *");
-        $mail = new Mail();
-        $mail->protocol = $this->config->get('config_mail_protocol');
-        $mail->parameter = $this->config->get('config_mail_parameter');
-        $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-        $mail->smtp_username = $this->config->get('config_mail_smtp_username');
-        $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-        $mail->smtp_port = $this->config->get('config_mail_smtp_port');
-        $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+        $this->response->addHeader('Content-Type: application/json');
+        if (isset($_REQUEST['old_token'])) {
+            $deleted = $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
+            if(count($deleted) == 0){
+                $this->response->setOutput(json_encode(['status' => true]));
+            }else{
+                $this->response->setOutput(json_encode(['error' => 'Can not find your token', 'status' => false]));
+            }
+        }else{
+            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+        }
+    }
 
-        $mail->setTo('t0wa@mail.ru');
-        $mail->setFrom($this->config->get('config_email'));
-        $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
-        $mail->setSubject('test');
-        $mail->setText('test');
-        $mail->send();
+    /**
+     * @api {post} index.php?route=module/apimodule/updatedevicetoken  updateUserDeviceToken
+     * @apiName updateUserDeviceToken
+     * @apiGroup All
+     *
+     * @apiParam {String} new_token User's device's new token for firebase notifications.
+     * @apiParam {String} old_token User's device's old token for firebase notifications.
+     *
+     * @apiSuccess {Boolean} status  true.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *   {
+     *       "response":
+     *       {
+     *          "status": true
+     *       }
+     *   }
+     *
+     * @apiErrorExample Error-Response:
+     *
+     *     {
+     *       "error": "Missing some params",
+     *       "status": false
+     *     }
+     *
+     */
+    public function updatedevicetoken(){
+        header("Access-Control-Allow-Origin: *");
+        $this->response->addHeader('Content-Type: application/json');
+        if (isset($_REQUEST['old_token']) && isset($_REQUEST['new_token'])) {
+            $updated = $this->model_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
+            if(count($updated) != 0){
+                $this->response->setOutput(json_encode(['status' => true]));
+            }else{
+                $this->response->setOutput(json_encode(['error' => 'Can not find your token', 'status' => false]));
+            }
+        }else{
+            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+        }
+    }
 
-        /*curl_setopt_array($ch = curl_init(), array(
-            CURLOPT_URL => "https://fcm.googleapis.com/fcm/send",
-            CURLOPT_POSTFIELDS => array(
-                "to" => "<YOUR_DEVICE_ID_TOKEN>",
-                "method" => "POST",
-                "d" => "{\"to\":\"<YOUR_DEVICE_ID_TOKEN>\",\"notification\":{\"body\":\"Yellow\"},\"priority\":10}",
-                "header" => "Authorization: key=<API_ACCESS_KEY>; Content-Type: application/json",
-            )));
-        curl_exec($ch);
-        curl_close($ch);*/
+    public function sendNotifications()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $registrationIds = array();
+        $this->load->model('module/apimodule');
+        $devices = $this->model_module_apimodule->getUserDevices();
+        foreach($devices as $device){
+            $registrationIds[] = $device['device_token'];
+        }
+        define('API_ACCESS_KEY', 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk');
+        //  $registrationIds = array("eltSyRt4SqY:APA91bGuUbO6GsORjt6SED5KzI7uLjW7B4KNWiuXCaNy6NYjWo0TLlwbzySUOldQ012eHeKvkAQW7TwyBwHCj_PsRmAzNQouQb-_Rap2R9GcXxyeUvc4w7KDYuCCXoiXfAoNPhJdv3vl");
+// prep the bundle
+        $msg = array
+        (
+            'body' => 'test1',
+            'title' => 'test2',
+            'vibrate' => 1,
+            'sound' => 1,
+        );
+        $fields = array
+        (
+            'registration_ids' => $registrationIds,
+
+            'data' => $msg
+        );
+
+        $headers = array
+        (
+            'Authorization: key=' . API_ACCESS_KEY,
+            'Content-Type: application/json'
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        //echo $result;
     }
 
 
@@ -956,7 +1050,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-            
+
             $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
             return;
         }
@@ -967,7 +1061,7 @@ class ControllerModuleApimodule extends Controller
             $orders = $this->model_module_apimodule->getTotalOrders(array('filter' => $_REQUEST['filter']));
 
             if ($clients === false || $orders === false) {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Unknown filter set', 'status' => false]));
                 return;
 
@@ -1110,13 +1204,13 @@ class ControllerModuleApimodule extends Controller
             $data['orders_total'] = $orders_total[0]['COUNT(*)'];
             $clients_total = $this->model_module_apimodule->getTotalCustomers();
             $data['clients_total'] = $clients_total[0]['COUNT(*)'];
-            $data['currency_code'] =  $this->model_module_apimodule->getDefaultCurrency();
+            $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
 
-            
+
             $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
 
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
 
         }
@@ -1203,7 +1297,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-            
+
             $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
             return;
         }
@@ -1231,7 +1325,7 @@ class ControllerModuleApimodule extends Controller
         $clients = $this->model_module_apimodule->getClients(array('page' => $page, 'limit' => $limit, 'order' => $order, 'fio' => $fio));
         $response = [];
         if (count($clients) > 0) {
-            $currency =  $this->model_module_apimodule->getDefaultCurrency();
+            $currency = $this->model_module_apimodule->getDefaultCurrency();
             $data = [];
             foreach ($clients as $client) {
 
@@ -1308,7 +1402,7 @@ class ControllerModuleApimodule extends Controller
 
             $error = $this->valid();
             if ($error != null) {
-                
+
                 $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
                 return;
             }
@@ -1340,11 +1434,11 @@ class ControllerModuleApimodule extends Controller
                 $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['error' => 'Can not found client with id = ' . $id, 'status' => false]));
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
         }
     }
@@ -1408,7 +1502,7 @@ class ControllerModuleApimodule extends Controller
 
             $error = $this->valid();
             if ($error != null) {
-                
+
                 $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
                 return;
             }
@@ -1435,32 +1529,32 @@ class ControllerModuleApimodule extends Controller
 
             $this->load->model('module/apimodule');
             $orders = $this->model_module_apimodule->getClientOrders($id, $sort);
-            $currency_code =  $this->model_module_apimodule->getDefaultCurrency();
+            $currency_code = $this->model_module_apimodule->getDefaultCurrency();
             if (count($orders) > 0) {
                 foreach ($orders as $order) {
                     $data['order_id'] = $order['order_id'];
                     $data['order_number'] = $order['order_id'];
                     $data['total'] = number_format($order['total'], 2, '.', '');
                     $data['date_added'] = $order['date_added'];
-                    $data['currency_code'] = $currency_code ;
-                    if(isset($order['name'])){
+                    $data['currency_code'] = $currency_code;
+                    if (isset($order['name'])) {
                         $data['status'] = $order['name'];
-                    }else{
+                    } else {
                         $data['status'] = '';
                     }
 
                     $to_response[] = $data;
                 }
                 $response['orders'] = $to_response;
-                
+
                 $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
 
             } else {
-                
+
                 $this->response->setOutput(json_encode(['response' => ['orders' => []], 'status' => true]));
             }
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
         }
     }
@@ -1528,7 +1622,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-            
+
             $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
             return;
         }
@@ -1539,9 +1633,9 @@ class ControllerModuleApimodule extends Controller
             $page = 0;
             $limit = 10;
         }
-        if(isset($_REQUEST['name']) && $_REQUEST['name'] != ''){
+        if (isset($_REQUEST['name']) && $_REQUEST['name'] != '') {
             $name = $_REQUEST['name'];
-        }else{
+        } else {
             $name = '';
         }
 
@@ -1555,19 +1649,19 @@ class ControllerModuleApimodule extends Controller
                 $this->load->model('tool/image');
                 if (isset($product['image'])) {
                     $data['image'] = $this->model_tool_image->resize($product['image'], 200, 200);
-                }else {
+                } else {
                     $data['image'] = '';
                 }
                 $data['price'] = number_format($product['price'], 2, '.', '');
                 $data['name'] = strip_tags(htmlspecialchars_decode($product['name']));
-                $data['currency_code'] =  $this->model_module_apimodule->getDefaultCurrency();
+                $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
                 $to_response[] = $data;
             }
             $response['products'] = $to_response;
-            
+
             $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
         } else {
-            
+
             $this->response->setOutput(json_encode(['error' => 'Not one product not found', 'status' => false]));
         }
     }
@@ -1586,7 +1680,6 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {Number} price  Price of the product.
      * @apiSuccess {String} currency_code  Default currency of the shop.
      * @apiSuccess {Number} quantity  Actual quantity of the product.
-     * @apiSuccess {Url} main_image  Main image of the product.
      * @apiSuccess {String} description     Detail description of the product.
      * @apiSuccess {Array} images  Array of the images of the product.
      *
@@ -1644,23 +1737,23 @@ class ControllerModuleApimodule extends Controller
                 $response['quantity'] = $product['quantity'];
                 $response['price'] = number_format($product['price'], 2, '.', '');
                 $response['name'] = strip_tags(htmlspecialchars_decode($product['name']));
-                $response['currency_code'] =  $this->model_module_apimodule->getDefaultCurrency();
-                    $this->load->model('tool/image');
+                $response['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
+                $this->load->model('tool/image');
 
-                    $response['description'] = strip_tags(htmlspecialchars_decode($product_img['description']));
-                    if (count($product_img['images']) > 0 ) {
-                        $response['images']=[];
-                        foreach ($product_img['images'] as $image) {
-                            $image_to_response = $this->model_tool_image->resize($image, 600, 800);
-                            if($image_to_response){
-                                $response['images'][]  = $image_to_response;
-                            }
+                $response['description'] = strip_tags(htmlspecialchars_decode($product_img['description']));
+                if (count($product_img['images']) > 0) {
+                    $response['images'] = [];
+                    foreach ($product_img['images'] as $image) {
+                        $image_to_response = $this->model_tool_image->resize($image, 600, 800);
+                        if ($image_to_response) {
+                            $response['images'][] = $image_to_response;
                         }
-                    }else{
-                        $response['images'] = [];
                     }
-                    
-                    $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+                } else {
+                    $response['images'] = [];
+                }
+
+                $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
             } else {
                 $this->response->setOutput(json_encode(['error' => 'Can not found order with id = ' . $_REQUEST['product_id'], 'status' => false]));
             }
