@@ -1,4 +1,4 @@
-# OPENCART-MOBILE-ADMIN #
+OPENCART-MOBILE-ADMIN 
 =====================
 Модуль Opencart содержащий API для управления интернет-магазином с мобильного устройста.  
 ***
