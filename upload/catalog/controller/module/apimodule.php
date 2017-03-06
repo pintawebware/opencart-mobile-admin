@@ -943,8 +943,6 @@ class ControllerModuleApimodule extends Controller
             $registrationIds[] = $device['device_token'];
         }
         define('API_ACCESS_KEY', 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk');
-        //  $registrationIds = array("eltSyRt4SqY:APA91bGuUbO6GsORjt6SED5KzI7uLjW7B4KNWiuXCaNy6NYjWo0TLlwbzySUOldQ012eHeKvkAQW7TwyBwHCj_PsRmAzNQouQb-_Rap2R9GcXxyeUvc4w7KDYuCCXoiXfAoNPhJdv3vl");
-// prep the bundle
         $msg = array
         (
             'body' => 'test1',
@@ -972,9 +970,8 @@ class ControllerModuleApimodule extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        $result = curl_exec($ch);
+        curl_exec($ch);
         curl_close($ch);
-        //echo $result;
     }
 
 
@@ -1638,10 +1635,10 @@ class ControllerModuleApimodule extends Controller
         } else {
             $name = '';
         }
-
+        $to_response = [];
         $this->load->model('module/apimodule');
         $products = $this->model_module_apimodule->getProductsList($page, $limit, $name);
-        if (count($products) > 0) {
+
             foreach ($products as $product) {
                 $data['product_id'] = $product['product_id'];
                 $data['model'] = $product['model'];
@@ -1660,10 +1657,6 @@ class ControllerModuleApimodule extends Controller
             $response['products'] = $to_response;
 
             $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
-        } else {
-
-            $this->response->setOutput(json_encode(['error' => 'Not one product not found', 'status' => false]));
-        }
     }
 
     /**
