@@ -2,7 +2,11 @@
 
 class ControllerModuleApimodule extends Controller
 {
-    /**
+
+    private $API_VERSION = 1.7;
+
+
+        /**
      * @api {get} index.php?route=module/apimodule/orders  getOrders
      * @apiName GetOrders
      * @apiGroup All
@@ -18,13 +22,15 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Date} filter[date_min] min date adding of the order.
      * @apiParam {Date} filter[date_max] max date adding of the order.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Array} orders  Array of the orders.
      * @apiSuccess {Array} statuses  Array of the order statuses.
      * @apiSuccess {Number} order_id  ID of the order.
      * @apiSuccess {Number} order_number  Number of the order.
      * @apiSuccess {String} fio     Client's FIO.
      * @apiSuccess {String} status  Status of the order.
-     * @apiSuccess {currency_code} status  Default currency of the shop.
+     * @apiSuccess {String} currency_code  Default currency of the shop.
+     * @apiSuccess {String} order[currency_code] currency of the order.
      * @apiSuccess {Number} total  Total sum of the order.
      * @apiSuccess {Date} date_added  Date added of the order.
      * @apiSuccess {Date} total_quantity  Total quantity of the orders.
@@ -81,12 +87,15 @@ class ControllerModuleApimodule extends Controller
      *       "total_sum": "2026.00",
      *       "max_price": "1405.00"
      *   },
-     *   "Status" : true
+     *   "Status" : true,
+     *   "version": 1.0
      * }
      * @apiErrorExample Error-Response:
+     *
      * {
-     *      "Error" : "Not one order",
+     *      "version": 1.0,
      *      "Status" : false
+     *
      * }
      *
      *
@@ -101,7 +110,7 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
 
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
 
@@ -174,8 +183,9 @@ class ControllerModuleApimodule extends Controller
         $response['max_price'] = $this->model_module_apimodule->getMaxOrderPrice();
         $statuses = $this->model_module_apimodule->OrderStatusList();
         $response['statuses'] = $statuses;
+        $response['api_version'] = $this->API_VERSION;
 
-        $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+        $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
         return;
     }
 
@@ -187,12 +197,14 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Number} order_id unique order ID.
      * @apiParam {Token} token your unique token.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} order_number  Number of the order.
      * @apiSuccess {String} fio     Client's FIO.
      * @apiSuccess {String} status  Status of the order.
      * @apiSuccess {String} email  Client's email.
      * @apiSuccess {Number} phone  Client's phone.
      * @apiSuccess {Number} total  Total sum of the order.
+     * @apiSuccess {currency_code} status  Default currency of the shop.
      * @apiSuccess {Date} date_added  Date added of the order.
      * @apiSuccess {Array} statuses  Statuses list for order.
      *
@@ -202,6 +214,7 @@ class ControllerModuleApimodule extends Controller
      *      "response" :
      *          {
      *              "order_number" : "6",
+     *              "currency_code": "RUB",
      *              "fio" : "Anton Kiselev",
      *              "email" : "client@mail.ru",
      *              "telephone" : "056 000-11-22",
@@ -227,13 +240,15 @@ class ControllerModuleApimodule extends Controller
      *                           }
      *                    }
      *          },
-     *      "status" : true
+     *      "status" : true,
+     *      "version": 1.0
      * }
      *
      * @apiErrorExample Error-Response:
      *
      *     {
      *       "error" : "Can not found order with id = 5",
+     *       "version": 1.0,
      *       "Status" : false
      *     }
      */
@@ -247,7 +262,7 @@ class ControllerModuleApimodule extends Controller
             $error = $this->valid();
             if ($error != null) {
 
-                $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
                 return;
             }
 
@@ -285,16 +300,16 @@ class ControllerModuleApimodule extends Controller
                 }
                 $statuses = $this->model_module_apimodule->OrderStatusList();
                 $data['statuses'] = $statuses;
-
-                $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
+                $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
 
             } else {
 
-                $this->response->setOutput(json_encode(['error' => 'Can not found order with id = ' . $id, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found order with id = ' . $id, 'status' => false]));
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
 
@@ -306,6 +321,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Number} order_id unique order ID.
      * @apiParam {Token} token your unique token.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {String} payment_method     Payment method.
      * @apiSuccess {String} shipping_method  Shipping method.
      * @apiSuccess {String} shipping_address  Shipping address.
@@ -320,13 +336,15 @@ class ControllerModuleApimodule extends Controller
      *                  "shipping_method" : "Доставка с фиксированной стоимостью доставки",
      *                  "shipping_address" : "проспект Карла Маркса 1, Днепропетровск, Днепропетровская область, Украина."
      *              },
-     *          "status": true
+     *          "status": true,
+     *          "version": 1.0
      *      }
      * @apiErrorExample Error-Response:
      *
      *    {
      *      "error": "Can not found order with id = 90",
-     *      "status": false
+     *      "version": 1.0,
+     *      "Status" : false
      *   }
      *
      */
@@ -341,7 +359,7 @@ class ControllerModuleApimodule extends Controller
             $error = $this->valid();
             if ($error != null) {
 
-                $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
                 return;
             }
 
@@ -375,16 +393,16 @@ class ControllerModuleApimodule extends Controller
                     $data['shipping_address'] .= ', ' . $order[0]['shipping_zone'];
                 }
 
-                $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
 
 
             } else {
 
-                $this->response->setOutput(json_encode(['error' => 'Can not found order with id = ' . $id, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found order with id = ' . $id, 'status' => false]));
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
 
@@ -396,6 +414,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Number} order_id unique order ID.
      * @apiParam {Token} token your unique token.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {String} name     Status of the order.
      * @apiSuccess {Number} order_status_id  ID of the status of the order.
      * @apiSuccess {Date} date_added  Date of adding status of the order.
@@ -447,13 +466,15 @@ class ControllerModuleApimodule extends Controller
      *                              }
      *                         }
      *               },
-     *           "status": true
+     *           "status": true,
+     *           "version": 1.0
      *       }
      * @apiErrorExample Error-Response:
      *
      *     {
-     *          "status": false,
-     *          "error": "Can not found any statuses for order with id = 5"
+     *          "error": "Can not found any statuses for order with id = 5",
+     *          "version": 1.0,
+     *          "Status" : false
      *     }
      */
 
@@ -468,7 +489,7 @@ class ControllerModuleApimodule extends Controller
             $error = $this->valid();
             if ($error != null) {
 
-                $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
                 return;
             }
 
@@ -491,15 +512,15 @@ class ControllerModuleApimodule extends Controller
                 $statuses = $this->model_module_apimodule->OrderStatusList();
                 $response['statuses'] = $statuses;
 
-                $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
 
             } else {
 
-                $this->response->setOutput(json_encode(['error' => 'Can not found any statuses for order with id = ' . $id, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found any statuses for order with id = ' . $id, 'status' => false]));
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
 
@@ -512,6 +533,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Token} token your unique token.
      * @apiParam {ID} order_id unique order id.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Url} image  Picture of the product.
      * @apiSuccess {Number} quantity  Quantity of the product.
      * @apiSuccess {String} name     Name of the product.
@@ -521,6 +543,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {Number} total_price  Sum of product's prices.
      * @apiSuccess {Number} shipping_price  Cost of the shipping.
      * @apiSuccess {Number} total  Total order sum.
+     * @apiSuccess {Number} product_id  unique product id.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -533,14 +556,16 @@ class ControllerModuleApimodule extends Controller
      *                  "name" : "HTC Touch HD",
      *                  "model" : "Product 1",
      *                  "quantity" : 3,
-     *                  "price" : 100.00
+     *                  "price" : 100.00,
+     *                  "product_id" : 90
      *              },
      *              {
      *                  "image" : "http://opencart/image/catalog/demo/iphone_1.jpg",
      *                  "name" : "iPhone",
      *                  "model" : "Product 11",
      *                  "quantity" : 1,
-     *                  "price" : 500.00
+     *                  "price" : 500.00,
+     *                  "product_id" : 97
      *               }
      *            ],
      *            "total_order_price":
@@ -552,15 +577,17 @@ class ControllerModuleApimodule extends Controller
      *               }
      *
      *         },
-     *      "status": true
+     *      "status": true,
+     *      "version": 1.0
      * }
      *
      *
      * @apiErrorExample Error-Response:
      *
      *     {
-     *          "status": false,
-     *          "error": "Can not found any products in order with id = 10"
+     *          "error": "Can not found any products in order with id = 10",
+     *          "version": 1.0,
+     *          "Status" : false
      *     }
      *
      */
@@ -575,7 +602,7 @@ class ControllerModuleApimodule extends Controller
             $error = $this->valid();
             if ($error != null) {
 
-                $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
                 return;
             }
 
@@ -642,16 +669,16 @@ class ControllerModuleApimodule extends Controller
 
 
                 $this->response->addHeader('Content-Type: application/json; charset=utf-8');
-                $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
 
             } else {
 
-                $this->response->setOutput(json_encode(['error' => 'Can not found any products in order with id = ' . $id, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found any products in order with id = ' . $id, 'status' => false]));
 
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
 
         }
     }
@@ -667,18 +694,21 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Number} order_id unique order ID.
      * @apiParam {Token} token your unique token.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Boolean} response Status of change address.
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *   {
-     *         "status": true
+     *         "status": true,
+     *         "version": 1.0
      *    }
      * @apiErrorExample Error-Response:
      *
      *     {
      *       "error": "Can not change address",
-     *       "status": false
+     *       "version": 1.0,
+     *       "Status" : false
      *     }
      *
      */
@@ -690,7 +720,7 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
 
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
 
@@ -707,16 +737,16 @@ class ControllerModuleApimodule extends Controller
             $data = $this->model_module_apimodule->ChangeOrderDelivery($address, $city, $order_id);
             if ($data) {
 
-                $this->response->setOutput(json_encode(['status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
 
             } else {
 
-                $this->response->setOutput(json_encode(['error' => 'Can not change address', 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not change address', 'status' => false]));
 
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
 
         }
     }
@@ -732,6 +762,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Token} token your unique token.
      * @apiParam {Boolean} inform status of the informing client.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {String} name Name of the new status.
      * @apiSuccess {String} date_added Date of adding status.
      *
@@ -743,14 +774,16 @@ class ControllerModuleApimodule extends Controller
      *                  "name" : "Сделка завершена",
      *                  "date_added" : "2016-12-27 12:01:51"
      *              },
-     *          "status": true
+     *          "status": true,
+     *          "version": 1.0
      *   }
      *
      * @apiErrorExample Error-Response:
      *
      *     {
      *       "error" : "Missing some params",
-     *       "status" : false
+     *       "version": 1.0,
+     *       "Status" : false
      *     }
      *
      */
@@ -762,7 +795,7 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
 
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
 
@@ -773,10 +806,10 @@ class ControllerModuleApimodule extends Controller
             $this->load->model('module/apimodule');
             $data = $this->model_module_apimodule->AddComment($orderID, $statusID, $comment);
 
-            $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
 
         }
         return;
@@ -792,6 +825,8 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Number} password User's  password.
      * @apiParam {String} device_token User's device's token for firebase notifications.
      *
+     * @apiSuccess {Number} version  Current API version.
+     * @apiSuccess {String} token  Token.
      * @apiSuccess {String} token  Token.
      *
      * @apiSuccessExample Success-Response:
@@ -799,14 +834,18 @@ class ControllerModuleApimodule extends Controller
      *   {
      *       "response":
      *       {
-     *          "token": "e9cf23a55429aa79c3c1651fe698ed7b"
+     *          "token": "e9cf23a55429aa79c3c1651fe698ed7b",
+     *          "version": 1.0,
+     *          "status": true
      *       }
      *   }
      *
      * @apiErrorExample Error-Response:
      *
      *     {
-     *       "error": "Incorrect username or password"
+     *       "error": "Incorrect username or password",
+     *       "version": 1.0,
+     *       "Status" : false
      *     }
      *
      */
@@ -821,7 +860,7 @@ class ControllerModuleApimodule extends Controller
         if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
 
 
-            $this->response->setOutput(json_encode(['error' => 'Incorrect username or password', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
             return;
         }
 
@@ -846,7 +885,7 @@ class ControllerModuleApimodule extends Controller
         }
         $token = $this->model_module_apimodule->getUserToken($user['user_id']);
 
-        $this->response->setOutput(json_encode(['response' => ['token' => $token['token']], 'status' => true]));
+        $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['token' => $token['token']], 'status' => true]));
 
 
     }
@@ -857,6 +896,7 @@ class ControllerModuleApimodule extends Controller
      *
      * @apiParam {String} old_token User's device's token for firebase notifications.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Boolean} status  true.
      *
      * @apiSuccessExample Success-Response:
@@ -864,7 +904,8 @@ class ControllerModuleApimodule extends Controller
      *   {
      *       "response":
      *       {
-     *          "status": true
+     *          "status": true,
+     *          "version": 1.0
      *       }
      *   }
      *
@@ -872,7 +913,8 @@ class ControllerModuleApimodule extends Controller
      *
      *     {
      *       "error": "Missing some params",
-     *       "status": false
+     *       "version": 1.0,
+     *       "Status" : false
      *     }
      *
      */
@@ -882,12 +924,12 @@ class ControllerModuleApimodule extends Controller
         if (isset($_REQUEST['old_token'])) {
             $deleted = $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
             if(count($deleted) == 0){
-                $this->response->setOutput(json_encode(['status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
             }else{
-                $this->response->setOutput(json_encode(['error' => 'Can not find your token', 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
             }
         }else{
-            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
         }
     }
 
@@ -899,6 +941,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {String} new_token User's device's new token for firebase notifications.
      * @apiParam {String} old_token User's device's old token for firebase notifications.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Boolean} status  true.
      *
      * @apiSuccessExample Success-Response:
@@ -906,7 +949,8 @@ class ControllerModuleApimodule extends Controller
      *   {
      *       "response":
      *       {
-     *          "status": true
+     *          "status": true,
+     *          "version": 1.0
      *       }
      *   }
      *
@@ -914,7 +958,8 @@ class ControllerModuleApimodule extends Controller
      *
      *     {
      *       "error": "Missing some params",
-     *       "status": false
+     *       "version": 1.0,
+     *       "Status" : false
      *     }
      *
      */
@@ -924,12 +969,12 @@ class ControllerModuleApimodule extends Controller
         if (isset($_REQUEST['old_token']) && isset($_REQUEST['new_token'])) {
             $updated = $this->model_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
             if(count($updated) != 0){
-                $this->response->setOutput(json_encode(['status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
             }else{
-                $this->response->setOutput(json_encode(['error' => 'Can not find your token', 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
             }
         }else{
-            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
         }
     }
 
@@ -983,6 +1028,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {String} filter Period for filter(day/week/month/year).
      * @apiParam {Token} token your unique token.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Array} xAxis Period of the selected filter.
      * @apiSuccess {Array} Clients Clients for the selected period.
      * @apiSuccess {Array} Orders Orders for the selected period.
@@ -1029,14 +1075,16 @@ class ControllerModuleApimodule extends Controller
      *              "orders_total": "4",
      *              "clients_total": "3"
      *           },
-     *           "status": true
+     *           "status": true,
+     *           "version": 1.0
      *  }
      *
      * @apiErrorExample Error-Response:
      *
      *     {
-     *       "status": false,
-     *       "error": "Unknown filter set"
+     *       "error": "Unknown filter set",
+     *       "version": 1.0,
+     *       "Status" : false
      *     }
      *
      */
@@ -1048,7 +1096,7 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
 
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
         $this->load->model('module/apimodule');
@@ -1204,11 +1252,11 @@ class ControllerModuleApimodule extends Controller
             $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
 
 
-            $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
 
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'Missing some params', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
 
         }
     }
@@ -1249,6 +1297,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {String} fio full name of the client.
      * @apiParam {String} sort param for sorting clients(sum/quantity/date_added).
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} client_id  ID of the client.
      * @apiSuccess {String} fio     Client's FIO.
      * @apiSuccess {Number} total  Total sum of client's orders.
@@ -1278,11 +1327,13 @@ class ControllerModuleApimodule extends Controller
      *          }
      *      }
      *    },
-     *    "Status" : true
+     *    "Status" : true,
+     *    "version": 1.0
      * }
      * @apiErrorExample Error-Response:
      * {
      *      "Error" : "Not one client found",
+     *      "version": 1.0,
      *      "Status" : false
      * }
      *
@@ -1295,7 +1346,7 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
 
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
 
@@ -1345,7 +1396,7 @@ class ControllerModuleApimodule extends Controller
         } else {
             $response['clients'] = [];
         }
-        $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+        $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
         return;
     }
 
@@ -1357,6 +1408,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} client_id unique client ID.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} client_id  ID of the client.
      * @apiSuccess {String} fio     Client's FIO.
      * @apiSuccess {Number} total  Total sum of client's orders.
@@ -1380,11 +1432,13 @@ class ControllerModuleApimodule extends Controller
      *         "email" : "client@mail.ru",
      *         "telephone" : "13456789"
      *   },
-     *   "Status" : true
+     *   "Status" : true,
+     *   "version": 1.0
      * }
      * @apiErrorExample Error-Response:
      * {
      *      "Error" : "Not one client found",
+     *      "version": 1.0,
      *      "Status" : false
      * }
      *
@@ -1400,7 +1454,7 @@ class ControllerModuleApimodule extends Controller
             $error = $this->valid();
             if ($error != null) {
 
-                $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
                 return;
             }
 
@@ -1428,15 +1482,15 @@ class ControllerModuleApimodule extends Controller
                 $data['completed'] = $client['completed'];
                 $data['cancelled'] = $client['cancelled'];
 
-                $this->response->setOutput(json_encode(['response' => $data, 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
 
             } else {
 
-                $this->response->setOutput(json_encode(['error' => 'Can not found client with id = ' . $id, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found client with id = ' . $id, 'status' => false]));
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
 
@@ -1449,6 +1503,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Number} client_id unique client ID.
      * @apiParam {String} sort param for sorting orders(total/date_added/completed/cancelled).
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} order_id  ID of the order.
      * @apiSuccess {Number} order_number  Number of the order.
      * @apiSuccess {String} status  Status of the order.
@@ -1479,11 +1534,13 @@ class ControllerModuleApimodule extends Controller
      *             "date_added" : "2016-10-19 16:00:00"
      *          }
      *    },
-     *    "Status" : true
+     *    "Status" : true,
+     *    "version": 1.0
      * }
      * @apiErrorExample Error-Response:
      * {
      *      "Error" : "You have not specified ID",
+     *      "version": 1.0,
      *      "Status" : false
      * }
      *
@@ -1500,7 +1557,7 @@ class ControllerModuleApimodule extends Controller
             $error = $this->valid();
             if ($error != null) {
 
-                $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
                 return;
             }
             if (isset($_REQUEST['sort']) && $_REQUEST['sort'] != '') {
@@ -1544,15 +1601,15 @@ class ControllerModuleApimodule extends Controller
                 }
                 $response['orders'] = $to_response;
 
-                $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
 
             } else {
 
-                $this->response->setOutput(json_encode(['response' => ['orders' => []], 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['orders' => []], 'status' => true]));
             }
         } else {
 
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
 
@@ -1565,7 +1622,9 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} page number of the page.
      * @apiParam {Number} limit limit of the orders for the page.
+     * @apiParam {String} name name of the product for search.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
      * @apiSuccess {String} model     Model of the product.
      * @apiSuccess {String} name  Name of the product.
@@ -1602,11 +1661,13 @@ class ControllerModuleApimodule extends Controller
      *           }
      *      }
      *   },
-     *   "Status" : true
+     *   "Status" : true,
+     *   "version": 1.0
      * }
      * @apiErrorExample Error-Response:
      * {
      *      "Error" : "Not one product not found",
+     *      "version": 1.0,
      *      "Status" : false
      * }
      *
@@ -1620,7 +1681,7 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
 
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
         if (isset($_REQUEST['page']) && (int)$_REQUEST['page'] != 0 && (int)$_REQUEST['limit'] != 0 && isset($_REQUEST['limit'])) {
@@ -1656,7 +1717,7 @@ class ControllerModuleApimodule extends Controller
             }
             $response['products'] = $to_response;
 
-            $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
     }
 
     /**
@@ -1667,6 +1728,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} product_id unique product ID.
      *
+     * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {Number} product_id  ID of the product.
      * @apiSuccess {String} model     Model of the product.
      * @apiSuccess {String} name  Name of the product.
@@ -1696,11 +1758,13 @@ class ControllerModuleApimodule extends Controller
      *           "http://site-url/image/catalog/demo/htc_iPhone_3.jpg"
      *       ]
      *   },
-     *   "Status" : true
+     *   "Status" : true,
+     *   "version": 1.0
      * }
      * @apiErrorExample Error-Response:
      * {
      *      "Error" : "Can not found product with id = 10",
+     *      "version": 1.0,
      *      "Status" : false
      * }
      *
@@ -1713,7 +1777,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-            $this->response->setOutput(json_encode(['error' => $error, 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
         if (isset($_REQUEST['product_id']) && (int)$_REQUEST['product_id'] != 0) {
@@ -1746,12 +1810,12 @@ class ControllerModuleApimodule extends Controller
                     $response['images'] = [];
                 }
 
-                $this->response->setOutput(json_encode(['response' => $response, 'status' => true]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
             } else {
-                $this->response->setOutput(json_encode(['error' => 'Can not found order with id = ' . $_REQUEST['product_id'], 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found order with id = ' . $_REQUEST['product_id'], 'status' => false]));
             }
         } else {
-            $this->response->setOutput(json_encode(['error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
 
