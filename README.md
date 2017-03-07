@@ -13,3 +13,8 @@ OPENCART-MOBILE-ADMIN
 1. Для установки перейдите в админ панель;
 2. Перейдите "Модули->установка расширений";
 3. Нажмите "загрузить файл" и выберите **apimobile.ocmod.zip**".
+
+***
+
+##### Используйте эту ссылку для скачивания аппликации:
+https://play.google.com/store/apps/details?id=com.pinta.opencart.opencartmobileadmin
