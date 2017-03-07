@@ -16,5 +16,5 @@ OPENCART-MOBILE-ADMIN
 
 ***
 
-##### Используйте эту ссылку для скачивания аппликации:
-https://play.google.com/store/apps/details?id=com.pinta.opencart.opencartmobileadmin
+#### Используйте эту ссылку для скачивания аппликации:
+[https://play.google.com/](https://play.google.com/store/apps/details?id=com.pinta.opencart.opencartmobileadmin)
