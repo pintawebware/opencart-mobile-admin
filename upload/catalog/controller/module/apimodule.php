@@ -855,7 +855,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
 
         $this->load->model('module/apimodule');
-        $user = $this->model_module_apimodule->checkLogin($_REQUEST['username'], $_REQUEST['password']);
+        $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
 
         if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
 
@@ -864,11 +864,11 @@ class ControllerModuleApimodule extends Controller
             return;
         }
 
-        if (isset($_REQUEST['device_token']) && $_REQUEST['device_token'] != '') {
+        if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '') {
             $devices = $this->model_module_apimodule->getUserDevices($user['user_id']);
             $matches = 0;
             foreach ($devices as $device) {
-                if ($_REQUEST['device_token'] == $device['device_token']) {
+                if ($this->request->post['device_token'] == $device['device_token']) {
                     $matches++;
                 }
             }

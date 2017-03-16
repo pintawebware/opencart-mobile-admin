@@ -5,7 +5,7 @@ OPENCART-MOBILE-ADMIN
 
 Перед установкой убедитесь, что OpenCart Extension Installer настроен правильно,
 особенно FTP настройки.
-Больше подробностей смотрите [https://www.opencart.com](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=18892)
+Если при установке появляется ошибка - установите дополнение: [https://www.opencart.com](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=18892) и попробуйте снова.
 
 ***
 ###  Установка производится через OCMOD:
@@ -14,6 +14,10 @@ OPENCART-MOBILE-ADMIN
 2. Перейдите "Модули->установка расширений";
 3. Нажмите "загрузить файл" и выберите **apimobile.ocmod.zip**.
 
+***
+### ВАЖНО!!!
+
+Модуль не работает если включён режим обслуживания.
 ***
 
 #### Используйте эту ссылку для скачивания аппликации:
