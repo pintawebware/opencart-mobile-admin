@@ -5,8 +5,7 @@ class ControllerModuleApimodule extends Controller
 
     private $API_VERSION = 1.7;
 
-
-        /**
+/**
      * @api {get} index.php?route=module/apimodule/orders  getOrders
      * @apiName GetOrders
      * @apiGroup All
@@ -618,7 +617,7 @@ class ControllerModuleApimodule extends Controller
                 for ($i = 0; $i < count($products); $i++) {
 
                     if ($products[$i]['image'] && $products[$i]['image'] != '') {
-                        $product['image'] = $this->model_tool_image->resize($products[$i]['image'], 200, 200);;
+                        $product['image'] = $this->model_tool_image->resize($products[$i]['image'], 200, 200);
                     }
                     if (isset($products[$i]['name']) && $products[$i]['name'] != '') {
                         $product['name'] = strip_tags(htmlspecialchars_decode($products[$i]['name']));
@@ -803,8 +802,9 @@ class ControllerModuleApimodule extends Controller
             $statusID = $_REQUEST['status_id'];
             $orderID = $_REQUEST['order_id'];
             $comment = $_REQUEST['comment'];
+            $inform = $_REQUEST['inform'];
             $this->load->model('module/apimodule');
-            $data = $this->model_module_apimodule->AddComment($orderID, $statusID, $comment);
+            $data = $this->model_module_apimodule->AddComment($orderID, $statusID, $comment, $inform);
 
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
         } else {
@@ -1706,7 +1706,8 @@ class ControllerModuleApimodule extends Controller
                 $data['quantity'] = $product['quantity'];
                 $this->load->model('tool/image');
                 if (isset($product['image'])) {
-                    $data['image'] = $this->model_tool_image->resize($product['image'], 200, 200);
+                    $resized_omage = $this->model_tool_image->resize($product['image'], 200, 200);
+                    $data['image'] =  $resized_omage;
                 } else {
                     $data['image'] = '';
                 }

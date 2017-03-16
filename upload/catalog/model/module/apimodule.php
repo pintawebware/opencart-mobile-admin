@@ -82,7 +82,7 @@ class ModelModuleApimodule extends Model
     }
 
 
-    public function AddComment($orderID, $statusID, $comment = '')
+    public function AddComment($orderID, $statusID, $comment = '', $inform = false)
     {
         $setStatus = $this->db->query("UPDATE " . DB_PREFIX . "order SET order_status_id = " . $statusID . " WHERE order_id = " . $orderID);
         if ($setStatus === true) {
@@ -90,23 +90,24 @@ class ModelModuleApimodule extends Model
             $this->db->query("INSERT INTO " . DB_PREFIX . "order_history (order_id, order_status_id, comment, date_added)  VALUES (" . $orderID . ", " . $statusID . ",\"" . $comment . "\", NOW() ) ");
 
             $email = $this->db->query("SELECT o.email, o.store_name, o.firstname  FROM " . DB_PREFIX . "order AS o WHERE o.order_id = " . $orderID);
+            if($inform == true){
+                $mail = new Mail();
+                $mail->protocol = $this->config->get('config_mail_protocol');
+                $mail->parameter = $this->config->get('config_mail_parameter');
+                $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+                $mail->smtp_username = $this->config->get('config_mail_smtp_username');
+                $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+                $mail->smtp_port = $this->config->get('config_mail_smtp_port');
+                $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
 
-            $mail = new Mail();
-            $mail->protocol = $this->config->get('config_mail_protocol');
-            $mail->parameter = $this->config->get('config_mail_parameter');
-            $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-            $mail->smtp_username = $this->config->get('config_mail_smtp_username');
-            $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-            $mail->smtp_port = $this->config->get('config_mail_smtp_port');
-            $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
-
-            $mail->setTo($email->row['email']);
-            $mail->setFrom($this->config->get('config_email'));
-            $mail->setSender(html_entity_decode($email->row['store_name'], ENT_QUOTES, 'UTF-8'));
-            $mail->setSubject(html_entity_decode($email->row['firstname'], ENT_QUOTES, 'UTF-8'));
-            //$mail->setHtml($this->load->view('mail/order', $data));
-            $mail->setText('Status of your order changed to ' . $getStatus->row['name'] );
-            $mail->send();
+                $mail->setTo($email->row['email']);
+                $mail->setFrom($this->config->get('config_email'));
+                $mail->setSender(html_entity_decode($email->row['store_name'], ENT_QUOTES, 'UTF-8'));
+                $mail->setSubject(html_entity_decode($email->row['firstname'], ENT_QUOTES, 'UTF-8'));
+                //$mail->setHtml($this->load->view('mail/order', $data));
+                $mail->setText('Status of your order changed to ' . $getStatus->row['name'] );
+                $mail->send();
+            }
         }
         return $getStatus->row;
 
