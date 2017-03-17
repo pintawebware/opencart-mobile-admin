@@ -858,8 +858,6 @@ class ControllerModuleApimodule extends Controller
         $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
 
         if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
-
-
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
             return;
         }
@@ -872,6 +870,7 @@ class ControllerModuleApimodule extends Controller
                     $matches++;
                 }
             }
+
             if ($matches == 0) {
                 $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
             }
@@ -922,6 +921,7 @@ class ControllerModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token'])) {
+	        $this->load->model('module/apimodule');
             $deleted = $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
             if(count($deleted) == 0){
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
@@ -967,6 +967,7 @@ class ControllerModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token']) && isset($_REQUEST['new_token'])) {
+	        $this->load->model('module/apimodule');
             $updated = $this->model_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
             if(count($updated) != 0){
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
@@ -978,8 +979,9 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
-    public function sendNotifications()
+    public function sendNotifications($id)
     {
+
         header("Access-Control-Allow-Origin: *");
         $registrationIds = array();
         $this->load->model('module/apimodule');
@@ -988,13 +990,20 @@ class ControllerModuleApimodule extends Controller
             $registrationIds[] = $device['device_token'];
         }
         define('API_ACCESS_KEY', 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk');
-        $msg = array
-        (
-            'body' => 'test1',
-            'title' => 'test2',
-            'vibrate' => 1,
-            'sound' => 1,
-        );
+
+	    $this->load->model('module/apimodule');
+	    $order = $this->model_module_apimodule->getOrderById($id);
+
+	    $msg = array(
+		    'new_order' => [
+			    'order_id'=>$id,
+			    'total'=>number_format($order['total'], 2, '.', ''),
+			    'currency_code'=>$order['currency_code'],
+			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
+		    ],
+		    'event_type' => 'new_order',
+
+	    );
         $fields = array
         (
             'registration_ids' => $registrationIds,

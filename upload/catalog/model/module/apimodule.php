@@ -431,13 +431,14 @@ class ModelModuleApimodule extends Model
         $query = $this->db->query($sql);
         return $query->rows;
     }
-    public function updateUserDeviceToken($old, $new){
-        $sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = \"". $new ."\" WHERE  device_token = \"". $old ."\";
-        SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = \"". $new ."\";";
-        $query = $this->db->query($sql);
-        return $query->rows;
-    }
 
+	public function updateUserDeviceToken($old, $new){
+		$sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = '". $new ."' WHERE  device_token = '". $old ."';";
 
+		$query = $this->db->query($sql);
 
+		$sql = "SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = '". $new ."';";
+		$query = $this->db->query($sql);
+		return $query->rows;
+	}
 }
