@@ -81,6 +81,13 @@ class ModelModuleApimodule extends Model
         return $query->rows;
     }
 
+	public function getOrderFindById($id)
+	{
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o 
+				LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id 
+				WHERE order_id = " . $id . " and order_status_id != 0 GROUP BY o.order_id ORDER BY o.order_id");
+		return $query->row;
+	}
 
     public function AddComment($orderID, $statusID, $comment = '', $inform = false)
     {
@@ -426,8 +433,9 @@ class ModelModuleApimodule extends Model
         return $query->rows;
     }
     public function deleteUserDeviceToken($token){
-        $sql = "DELETE * FROM " . DB_PREFIX . "user_device_mob_api  WHERE  device_token = \"". $token."\";
-        SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = \"". $token ."\";";
+        $sql = "DELETE FROM " . DB_PREFIX . "user_device_mob_api  WHERE  device_token = '". $token."'";
+	    $query = $this->db->query($sql);
+	    $sql = "SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = '". $token ."';";
         $query = $this->db->query($sql);
         return $query->rows;
     }

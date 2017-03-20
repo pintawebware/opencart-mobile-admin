@@ -989,10 +989,10 @@ class ControllerModuleApimodule extends Controller
         foreach($devices as $device){
             $registrationIds[] = $device['device_token'];
         }
-        define('API_ACCESS_KEY', 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk');
+        $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
 
 	    $this->load->model('module/apimodule');
-	    $order = $this->model_module_apimodule->getOrderById($id);
+	    $order = $this->model_module_apimodule->getOrderFindById($id);
 
 	    $msg = array(
 		    'new_order' => [
@@ -1013,7 +1013,7 @@ class ControllerModuleApimodule extends Controller
 
         $headers = array
         (
-            'Authorization: key=' . API_ACCESS_KEY,
+            'Authorization: key=' . $API_ACCESS_KEY,
             'Content-Type: application/json'
         );
 
