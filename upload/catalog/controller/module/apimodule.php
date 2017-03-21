@@ -1010,14 +1010,21 @@ class ControllerModuleApimodule extends Controller
 	    $order = $this->model_module_apimodule->getOrderFindById($id);
 
 	    $msg = array(
-		    'new_order' => [
+		    'aps' => [
+		    	"alert" => [
+		    		"body" => "http://".$_SERVER['HTTP_HOST'],
+		            "title" => number_format($order['total'], 2, '.', ''),
+	                "badge" => 1,
+	            ],
+            ],
+		    'priority'=>'high',
+	        'new_order' => [
 			    'order_id'=>$id,
 			    'total'=>number_format($order['total'], 2, '.', ''),
 			    'currency_code'=>$order['currency_code'],
 			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
 		    ],
-		    'event_type' => 'new_order',
-
+		    'event_type' => 'new_order'
 	    );
         $fields = array
         (
