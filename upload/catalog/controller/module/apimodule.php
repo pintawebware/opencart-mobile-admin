@@ -3,6 +3,21 @@
 class ControllerModuleApimodule extends Controller
 {
 
+	public function __construct( $registry ) {
+		parent::__construct( $registry );
+		$this->load->model('setting/setting');
+
+
+		$setting = $this->model_setting_setting->getSetting('apimodule');
+
+		if(!isset($setting['apimodule_status']) || (isset($setting['apimodule_status']) && $setting['apimodule_status']==0)){
+
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You do not activated module', 'status' => false]));
+			return;
+		}
+
+	}
+
     private $API_VERSION = 1.7;
 
 /**
