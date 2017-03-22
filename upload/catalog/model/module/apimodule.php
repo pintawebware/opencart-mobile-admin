@@ -56,7 +56,7 @@ class ModelModuleApimodule extends Model
         } else {
             $sql .= " WHERE o.order_status_id != 0 ";
         }
-        $sql .= " GROUP BY o.order_id ORDER BY o.order_id";
+        $sql .= " GROUP BY o.order_id ORDER BY o.order_id DESC";
 
         $total_sum = $this->db->query($sql);
         $sum = 0;
@@ -81,6 +81,13 @@ class ModelModuleApimodule extends Model
         return $query->rows;
     }
 
+	public function getOrderFindById($id)
+	{
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o 
+				LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id 
+				WHERE order_id = " . $id . " and order_status_id != 0 GROUP BY o.order_id ORDER BY o.order_id");
+		return $query->row;
+	}
 
     public function AddComment($orderID, $statusID, $comment = '', $inform = false)
     {
@@ -415,29 +422,32 @@ class ModelModuleApimodule extends Model
         return $query->row['code'];
     }
 
-    public function setUserDeviceToken($user_id, $token){
-        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token)  VALUES (" . $user_id . ",\"" . $token . "\") ";
+    public function setUserDeviceToken($user_id, $token,$os_type){
+        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token) 
+                VALUES (" . $user_id . ",'" . $token . "','" . $os_type . "') ";
         $this->db->query($sql);
         return;
     }
     public function getUserDevices(){
-        $sql = "SELECT device_token FROM " . DB_PREFIX . "user_device_mob_api  ";
+        $sql = "SELECT device_token,os_type FROM " . DB_PREFIX . "user_device_mob_api  ";
         $query = $this->db->query($sql);
         return $query->rows;
     }
     public function deleteUserDeviceToken($token){
-        $sql = "DELETE * FROM " . DB_PREFIX . "user_device_mob_api  WHERE  device_token = \"". $token."\";
-        SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = \"". $token ."\";";
-        $query = $this->db->query($sql);
-        return $query->rows;
-    }
-    public function updateUserDeviceToken($old, $new){
-        $sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = \"". $new ."\" WHERE  device_token = \"". $old ."\";
-        SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = \"". $new ."\";";
+        $sql = "DELETE FROM " . DB_PREFIX . "user_device_mob_api  WHERE  device_token = '". $token."'";
+	    $query = $this->db->query($sql);
+	    $sql = "SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = '". $token ."';";
         $query = $this->db->query($sql);
         return $query->rows;
     }
 
+	public function updateUserDeviceToken($old, $new){
+		$sql = "UPDATE " . DB_PREFIX . "user_device_mob_api SET device_token = '". $new ."' WHERE  device_token = '". $old ."';";
 
+		$query = $this->db->query($sql);
 
+		$sql = "SELECT * FROM " . DB_PREFIX . "user_device_mob_api WHERE device_token = '". $new ."';";
+		$query = $this->db->query($sql);
+		return $query->rows;
+	}
 }

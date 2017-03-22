@@ -3,7 +3,22 @@
 class ControllerModuleApimodule extends Controller
 {
 
-    private $API_VERSION = 1.7;
+	public function __construct( $registry ) {
+		parent::__construct( $registry );
+		$this->load->model('setting/setting');
+
+
+		$setting = $this->model_setting_setting->getSetting('apimodule');
+
+		if(!isset($setting['apimodule_status']) || (isset($setting['apimodule_status']) && $setting['apimodule_status']==0)){
+
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You do not activated module', 'status' => false]));
+			return;
+		}
+
+	}
+
+    private $API_VERSION = 1.8;
 
 /**
      * @api {get} index.php?route=module/apimodule/orders  getOrders
@@ -864,13 +879,12 @@ class ControllerModuleApimodule extends Controller
         $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
 
         if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
-
-
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
             return;
         }
 
-        if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '') {
+	    if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '' &&
+	        isset($this->request->post['os_type']) && $this->request->post['os_type'] != '') {
             $devices = $this->model_module_apimodule->getUserDevices($user['user_id']);
             $matches = 0;
             foreach ($devices as $device) {
@@ -878,8 +892,9 @@ class ControllerModuleApimodule extends Controller
                     $matches++;
                 }
             }
+
             if ($matches == 0) {
-                $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
+                $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token'],$_REQUEST['os_type']);
             }
         }
 
@@ -928,6 +943,7 @@ class ControllerModuleApimodule extends Controller
         
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token'])) {
+	        $this->load->model('module/apimodule');
             $deleted = $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
             if(count($deleted) == 0){
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
@@ -973,6 +989,7 @@ class ControllerModuleApimodule extends Controller
         
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token']) && isset($_REQUEST['new_token'])) {
+	        $this->load->model('module/apimodule');
             $updated = $this->model_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
             if(count($updated) != 0){
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
@@ -984,45 +1001,92 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
-    public function sendNotifications()
+    public function sendNotifications($id)
     {
+<<<<<<< HEAD
         
+=======
+
+        header("Access-Control-Allow-Origin: *");
+>>>>>>> c1aada31b6fc4aaf0240142e79cafcea25342392
         $registrationIds = array();
         $this->load->model('module/apimodule');
         $devices = $this->model_module_apimodule->getUserDevices();
+        $ids = [];
+
         foreach($devices as $device){
-            $registrationIds[] = $device['device_token'];
+			if(strtolower($device['os_type']) == 'ios'){
+				$ids['ios'][] = $device['device_token'];
+			}else{
+				$ids['android'][] = $device['device_token'];
+			}
         }
-        define('API_ACCESS_KEY', 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk');
-        $msg = array
-        (
-            'body' => 'test1',
-            'title' => 'test2',
-            'vibrate' => 1,
-            'sound' => 1,
-        );
-        $fields = array
-        (
-            'registration_ids' => $registrationIds,
 
-            'data' => $msg
-        );
+	    $this->load->model('module/apimodule');
+	    $order = $this->model_module_apimodule->getOrderFindById($id);
 
-        $headers = array
-        (
-            'Authorization: key=' . API_ACCESS_KEY,
-            'Content-Type: application/json'
-        );
+	    $msg = array(
+		    'body'  => number_format($order['total'], 2, '.', ''),
+		    'title'         => "http://".$_SERVER['HTTP_HOST'],
+		    'vibrate'       => 1,
+		    'sound'         => 1,
+		    'priority'=>'high',
+	        'new_order' => [
+			    'order_id'=>$id,
+			    'total'=>number_format($order['total'], 2, '.', ''),
+			    'currency_code'=>$order['currency_code'],
+			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
+		    ],
+		    'event_type' => 'new_order'
+	    );
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        curl_exec($ch);
-        curl_close($ch);
+	    $msg_android = array(
+
+		    'new_order' => [
+			    'order_id'=>$id,
+			    'total'=>number_format($order['total'], 2, '.', ''),
+			    'currency_code'=>$order['currency_code'],
+			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
+		    ],
+		    'event_type' => 'new_order'
+	    );
+
+	    foreach ($ids as $k=>$mas):
+		    if($k=='ios'){
+			    $fields = array
+			    (
+				    'registration_ids' => $registrationIds,
+				    'notification' => $msg,
+			    );
+		    }else{
+			    $fields = array
+			    (
+				    'registration_ids' => $registrationIds,
+				    'data' => $msg_android
+			    );
+		    }
+	        $this->sendCurl($fields);
+
+		endforeach;
+    }
+
+    private function sendCurl($fields){
+	    $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
+	    $headers = array
+	    (
+		    'Authorization: key=' . $API_ACCESS_KEY,
+		    'Content-Type: application/json'
+	    );
+
+	    $ch = curl_init();
+	    curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+	    curl_setopt($ch, CURLOPT_POST, true);
+	    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+	    curl_exec($ch);
+	    curl_close($ch);
     }
 
 
