@@ -877,7 +877,8 @@ class ControllerModuleApimodule extends Controller
             return;
         }
 
-        if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '') {
+	    if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '' &&
+	        isset($this->request->post['os_type']) && $this->request->post['os_type'] != '') {
             $devices = $this->model_module_apimodule->getUserDevices($user['user_id']);
             $matches = 0;
             foreach ($devices as $device) {
@@ -887,7 +888,7 @@ class ControllerModuleApimodule extends Controller
             }
 
             if ($matches == 0) {
-                $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token']);
+                $this->model_module_apimodule->setUserDeviceToken($user['user_id'], $_REQUEST['device_token'],$_REQUEST['os_type']);
             }
         }
 
@@ -1001,22 +1002,24 @@ class ControllerModuleApimodule extends Controller
         $registrationIds = array();
         $this->load->model('module/apimodule');
         $devices = $this->model_module_apimodule->getUserDevices();
+        $ids = [];
+
         foreach($devices as $device){
-            $registrationIds[] = $device['device_token'];
+			if(strtolower($device['os_type']) == 'ios'){
+				$ids['ios'][] = $device['device_token'];
+			}else{
+				$ids['android'][] = $device['device_token'];
+			}
         }
-        $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
 
 	    $this->load->model('module/apimodule');
 	    $order = $this->model_module_apimodule->getOrderFindById($id);
 
 	    $msg = array(
-		    'aps' => [
-		    	"alert" => [
-		    		"body" => "http://".$_SERVER['HTTP_HOST'],
-		            "title" => number_format($order['total'], 2, '.', ''),
-	                "badge" => 1,
-	            ],
-            ],
+		    'body'  => number_format($order['total'], 2, '.', ''),
+		    'title'         => "http://".$_SERVER['HTTP_HOST'],
+		    'vibrate'       => 1,
+		    'sound'         => 1,
 		    'priority'=>'high',
 	        'new_order' => [
 			    'order_id'=>$id,
@@ -1026,28 +1029,54 @@ class ControllerModuleApimodule extends Controller
 		    ],
 		    'event_type' => 'new_order'
 	    );
-        $fields = array
-        (
-            'registration_ids' => $registrationIds,
 
-            'data' => $msg
-        );
+	    $msg_android = array(
 
-        $headers = array
-        (
-            'Authorization: key=' . $API_ACCESS_KEY,
-            'Content-Type: application/json'
-        );
+		    'new_order' => [
+			    'order_id'=>$id,
+			    'total'=>number_format($order['total'], 2, '.', ''),
+			    'currency_code'=>$order['currency_code'],
+			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
+		    ],
+		    'event_type' => 'new_order'
+	    );
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        curl_exec($ch);
-        curl_close($ch);
+	    foreach ($ids as $k=>$mas):
+		    if($k=='ios'){
+			    $fields = array
+			    (
+				    'registration_ids' => $registrationIds,
+				    'notification' => $msg,
+			    );
+		    }else{
+			    $fields = array
+			    (
+				    'registration_ids' => $registrationIds,
+				    'data' => $msg_android
+			    );
+		    }
+	        $this->sendCurl($fields);
+
+		endforeach;
+    }
+
+    private function sendCurl($fields){
+	    $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
+	    $headers = array
+	    (
+		    'Authorization: key=' . $API_ACCESS_KEY,
+		    'Content-Type: application/json'
+	    );
+
+	    $ch = curl_init();
+	    curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+	    curl_setopt($ch, CURLOPT_POST, true);
+	    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+	    curl_exec($ch);
+	    curl_close($ch);
     }
 
 
