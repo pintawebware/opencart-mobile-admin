@@ -1,7 +1,7 @@
 <?php
 class ControllerModuleApimodule extends Controller {
 	private $error = array();
-	private $API_VERSION = 1.7;
+	private $API_VERSION = 1.8;
 
 	public function checkVersion(){
 		$return = false;

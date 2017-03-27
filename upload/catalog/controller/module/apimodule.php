@@ -18,7 +18,7 @@ class ControllerModuleApimodule extends Controller
 
 	}
 
-    private $API_VERSION = 1.7;
+    private $API_VERSION = 1.8;
 
 /**
      * @api {get} index.php?route=module/apimodule/orders  getOrders
@@ -117,7 +117,7 @@ class ControllerModuleApimodule extends Controller
     public function orders()
     {
 
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
 
 
@@ -268,7 +268,7 @@ class ControllerModuleApimodule extends Controller
      */
     public function getorderinfo()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['order_id']) && $_REQUEST['order_id'] != '') {
             $id = $_REQUEST['order_id'];
@@ -365,7 +365,7 @@ class ControllerModuleApimodule extends Controller
 
     public function paymentanddelivery()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['order_id']) && $_REQUEST['order_id'] != '') {
             $id = $_REQUEST['order_id'];
@@ -495,7 +495,7 @@ class ControllerModuleApimodule extends Controller
     public function orderhistory()
     {
 
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['order_id']) && $_REQUEST['order_id'] != '') {
             $id = $_REQUEST['order_id'];
@@ -608,7 +608,7 @@ class ControllerModuleApimodule extends Controller
 
     public function orderproducts()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['order_id']) && $_REQUEST['order_id'] != '') {
             $id = $_REQUEST['order_id'];
@@ -729,7 +729,7 @@ class ControllerModuleApimodule extends Controller
 
     public function delivery()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
@@ -804,7 +804,7 @@ class ControllerModuleApimodule extends Controller
 
     public function changestatus()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
@@ -866,8 +866,14 @@ class ControllerModuleApimodule extends Controller
      */
     public function login()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
+        if(!isset($this->request->post['username']) || !isset($this->request->post['password'])){
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing username or password in the request!', 'status' => false]));
+            return;
+        }
+
+
 
         $this->load->model('module/apimodule');
         $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
@@ -934,7 +940,7 @@ class ControllerModuleApimodule extends Controller
      *
      */
     public function deletedevicetoken(){
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token'])) {
 	        $this->load->model('module/apimodule');
@@ -980,7 +986,7 @@ class ControllerModuleApimodule extends Controller
      *
      */
     public function updatedevicetoken(){
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token']) && isset($_REQUEST['new_token'])) {
 	        $this->load->model('module/apimodule');
@@ -997,8 +1003,12 @@ class ControllerModuleApimodule extends Controller
 
     public function sendNotifications($id)
     {
+<<<<<<< HEAD
+        
+=======
 
         header("Access-Control-Allow-Origin: *");
+>>>>>>> c1aada31b6fc4aaf0240142e79cafcea25342392
         $registrationIds = array();
         $this->load->model('module/apimodule');
         $devices = $this->model_module_apimodule->getUserDevices();
@@ -1151,7 +1161,7 @@ class ControllerModuleApimodule extends Controller
 
     public function statistic()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
@@ -1401,7 +1411,7 @@ class ControllerModuleApimodule extends Controller
      */
     public function clients()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
@@ -1506,7 +1516,7 @@ class ControllerModuleApimodule extends Controller
      */
     public function clientinfo()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['client_id']) && $_REQUEST['client_id'] != '') {
             $id = $_REQUEST['client_id'];
@@ -1609,7 +1619,7 @@ class ControllerModuleApimodule extends Controller
 
     public function clientorders()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['client_id']) && $_REQUEST['client_id'] != '') {
             $id = $_REQUEST['client_id'];
@@ -1736,7 +1746,7 @@ class ControllerModuleApimodule extends Controller
 
     public function products()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
@@ -1834,7 +1844,7 @@ class ControllerModuleApimodule extends Controller
 
     public function productinfo()
     {
-        header("Access-Control-Allow-Origin: *");
+        
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
@@ -1879,6 +1889,7 @@ class ControllerModuleApimodule extends Controller
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
+
 
 }
 
