@@ -7,8 +7,11 @@ class ControllerModuleApimodule extends Controller
 		parent::__construct( $registry );
 		$this->load->model('setting/setting');
 
-
 		$setting = $this->model_setting_setting->getSetting('apimodule');
+
+		$this->load->model('module/apimodule');
+
+		$this->API_VERSION = $this->model_module_apimodule->getVersion();
 
 		if(!isset($setting['apimodule_status']) || (isset($setting['apimodule_status']) && $setting['apimodule_status']==0)){
 

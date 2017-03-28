@@ -12,12 +12,12 @@ class ControllerExtensionModuleApimodule extends Controller {
 		$api = new ModelModuleApimodule($this->registry);
 
 		$this->API_VERSION = $api->getVersion();
-
+		$this->OPENCART_VERSION = substr(VERSION,0,3);
 	}
 
 	public function checkVersion(){
 		$return = false;
-		$this->OPENCART_VERSION = substr(VERSION,0,3);
+
 		$json = file_get_contents('https://opencartapp.pro/app/index.php?opencart_version='.$this->OPENCART_VERSION);
 		$version = json_decode($json,1);
 
@@ -160,7 +160,7 @@ class ControllerExtensionModuleApimodule extends Controller {
 
 		$this->clear();
 		$this->session->data['success'] = "Модуль успешно обновлен";
-		$this->response->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
+		$this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'], 'SSL'));
 
 	}
 

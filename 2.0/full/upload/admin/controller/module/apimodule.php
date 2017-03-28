@@ -12,12 +12,12 @@ class ControllerModuleApimodule extends Controller {
 		$api = new ModelModuleApimodule($this->registry);
 
 		$this->API_VERSION = $api->getVersion();
-
+		$this->OPENCART_VERSION = substr(VERSION,0,3);
 	}
 
 	public function checkVersion(){
 		$return = false;
-		$this->OPENCART_VERSION = substr(VERSION,0,3);
+
 		$json = file_get_contents('https://opencartapp.pro/app/index.php?opencart_version='.$this->OPENCART_VERSION);
 		$version = json_decode($json,1);
 
@@ -115,7 +115,7 @@ class ControllerModuleApimodule extends Controller {
 		if(isset($_GET['v'])) {
 			//apimobile1.8.ocmod.zip
 			$this->fileName = "apimobile" . $_GET['v'] .".ocmod.zip";
-			$file = file_get_contents("https://opencartapp.pro/app/".$this->fileName);
+			$file = file_get_contents("https://opencartapp.pro/app/".$this->OPENCART_VERSION."/".$this->fileName);
 			// If no temp directory exists create it
 
 			if (!is_dir(DIR_UPLOAD . $this->path)) {
@@ -138,7 +138,7 @@ class ControllerModuleApimodule extends Controller {
 	private function install($file) {
 
 		$this->unzip();
-		$this->ftp();
+		$this->localcopy();
 		$this->php();
 		$this->sql();
 
@@ -177,6 +177,82 @@ class ControllerModuleApimodule extends Controller {
 			unlink($file);
 		}
 
+	}
+
+	public function localcopy() {
+		$this->load->language('extension/installer');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'extension/installer')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (VERSION == '2.0.0.0') {
+			$directory = DIR_DOWNLOAD  . str_replace(array('../', '..\\', '..'), '', $this->path) . '/upload/';
+		} else {
+			$directory = DIR_UPLOAD  . str_replace(array('../', '..\\', '..'), '', $this->path) . '/upload/';
+		}
+
+		if (!is_dir($directory)) {
+			$json['error'] = $this->language->get('error_directory');
+		}
+
+		if (!$json) {
+			// Get a list of files ready to upload
+			$files = array();
+
+			$path = array($directory . '*');
+
+			while (count($path) != 0) {
+				$next = array_shift($path);
+
+				foreach (glob($next) as $file) {
+					if (is_dir($file)) {
+						$path[] = $file . '/*';
+					}
+
+					$files[] = $file;
+				}
+			}
+
+			$root = dirname(DIR_APPLICATION).'/';
+
+			foreach ($files as $file) {
+				// Upload everything in the upload directory
+				$destination = substr($file, strlen($directory));
+
+				// Update from newer OpenCart versions:
+				if (substr($destination, 0, 5) == 'admin') {
+					$destination = DIR_APPLICATION . substr($destination, 5);
+				} else if (substr($destination, 0, 7) == 'catalog') {
+					$destination = DIR_CATALOG . substr($destination, 0,7);
+				} else if (substr($destination, 0, 5) == 'image') {
+					$destination = DIR_IMAGE . substr($destination, 5);
+				} else if (substr($destination, 0, 6) == 'system') {
+					$destination = DIR_SYSTEM . substr($destination, 6);
+				} else {
+					$destination = $root.$destination;
+				}
+
+				if (is_dir($file)) {
+					if (!file_exists($destination)) {
+						if (!mkdir($destination)) {
+							$json['error'] = sprintf($this->language->get('error_ftp_directory'), $destination);
+						}
+					}
+				}
+
+				if (is_file($file)) {
+					if (!copy($file, $destination)) {
+						$json['error'] = sprintf($this->language->get('error_ftp_file'), $file);
+					}
+				}
+			}
+		}
+
+		/*$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));*/
 	}
 
 	public function ftp() {

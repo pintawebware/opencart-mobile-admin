@@ -2,7 +2,8 @@
 
 class ModelModuleApimodule extends Model
 {
-	private $API_VERSION = 1.7;
+	private $API_VERSION = 1.8;
+	private $API_VERSION_TEST = 1.8;
 
 	public function getVersion(){
 		return $this->API_VERSION;
@@ -17,7 +18,6 @@ class ModelModuleApimodule extends Model
 
     public function getOrders($data = array())
     {
-
         $sql = "SELECT  * FROM " . DB_PREFIX . "order AS o LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id  ";
         if (isset($data['filter'])) {
             if (isset($data['filter']['order_status_id']) && (int)($data['filter']['order_status_id']) != 0 && $data['filter']['order_status_id'] != '') {
@@ -429,7 +429,7 @@ class ModelModuleApimodule extends Model
     }
 
     public function setUserDeviceToken($user_id, $token,$os_type){
-        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token) 
+        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token,os_type) 
                 VALUES (" . $user_id . ",'" . $token . "','" . $os_type . "') ";
         $this->db->query($sql);
         return;

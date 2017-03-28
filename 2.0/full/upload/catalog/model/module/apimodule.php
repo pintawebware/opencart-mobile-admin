@@ -429,7 +429,7 @@ class ModelModuleApimodule extends Model
     }
 
     public function setUserDeviceToken($user_id, $token,$os_type){
-        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token) 
+        $sql = "INSERT INTO " . DB_PREFIX . "user_device_mob_api (user_id, device_token,os_type) 
                 VALUES (" . $user_id . ",'" . $token . "','" . $os_type . "') ";
         $this->db->query($sql);
         return;

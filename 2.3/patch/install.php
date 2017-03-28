@@ -1,7 +1,7 @@
 <?php 
 
-$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL PRIMARY KEY, user_id INT NOT NULL, token VARCHAR(32) NOT NULL )");
-$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api (id INT NOT NULL PRIMARY KEY, user_id INT NOT NULL, device_token VARCHAR(500) , os_type VARCHAR(50))");
+$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, token VARCHAR(32) NOT NULL )");
+$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, device_token VARCHAR(500) , os_type VARCHAR(50))");
 
 $this->load->model('setting/setting');
 
