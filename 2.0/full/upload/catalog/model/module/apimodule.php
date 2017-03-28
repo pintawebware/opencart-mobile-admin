@@ -2,7 +2,7 @@
 
 class ModelModuleApimodule extends Model
 {
-	private $API_VERSION = 1.7;
+	private $API_VERSION = 1.8;
 
 	public function getVersion(){
 		return $this->API_VERSION;
@@ -91,7 +91,7 @@ class ModelModuleApimodule extends Model
 	{
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order AS o 
 				LEFT JOIN " . DB_PREFIX . "order_status AS s ON o.order_status_id = s.order_status_id 
-				WHERE order_id = " . $id . " and order_status_id != 0 GROUP BY o.order_id ORDER BY o.order_id");
+				WHERE order_id = " . $id . " and o.order_status_id != 0 GROUP BY o.order_id ORDER BY o.order_id");
 		return $query->row;
 	}
 

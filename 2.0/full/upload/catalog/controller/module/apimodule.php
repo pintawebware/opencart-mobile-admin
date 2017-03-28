@@ -1001,8 +1001,6 @@ class ControllerModuleApimodule extends Controller
 
     public function sendNotifications($id)
     {
-
-        header("Access-Control-Allow-Origin: *");
         $registrationIds = array();
         $this->load->model('module/apimodule');
         $devices = $this->model_module_apimodule->getUserDevices();
@@ -1018,50 +1016,51 @@ class ControllerModuleApimodule extends Controller
 
 	    $this->load->model('module/apimodule');
 	    $order = $this->model_module_apimodule->getOrderFindById($id);
+		if($order) {
+			$msg = array(
+				'body'       => number_format( $order['total'], 2, '.', '' ),
+				'title'      => "http://" . $_SERVER['HTTP_HOST'],
+				'vibrate'    => 1,
+				'sound'      => 1,
+				'priority'   => 'high',
+				'new_order'  => [
+					'order_id'      => $id,
+					'total'         => number_format( $order['total'], 2, '.', '' ),
+					'currency_code' => $order['currency_code'],
+					'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
+				],
+				'event_type' => 'new_order'
+			);
 
-	    $msg = array(
-		    'body'  => number_format($order['total'], 2, '.', ''),
-		    'title'         => "http://".$_SERVER['HTTP_HOST'],
-		    'vibrate'       => 1,
-		    'sound'         => 1,
-		    'priority'=>'high',
-	        'new_order' => [
-			    'order_id'=>$id,
-			    'total'=>number_format($order['total'], 2, '.', ''),
-			    'currency_code'=>$order['currency_code'],
-			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
-		    ],
-		    'event_type' => 'new_order'
-	    );
+			$msg_android = array(
 
-	    $msg_android = array(
+				'new_order'  => [
+					'order_id'      => $id,
+					'total'         => number_format( $order['total'], 2, '.', '' ),
+					'currency_code' => $order['currency_code'],
+					'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
+				],
+				'event_type' => 'new_order'
+			);
 
-		    'new_order' => [
-			    'order_id'=>$id,
-			    'total'=>number_format($order['total'], 2, '.', ''),
-			    'currency_code'=>$order['currency_code'],
-			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
-		    ],
-		    'event_type' => 'new_order'
-	    );
+			foreach ( $ids as $k => $mas ):
+				if ( $k == 'ios' ) {
+					$fields = array
+					(
+						'registration_ids' => $registrationIds,
+						'notification'     => $msg,
+					);
+				} else {
+					$fields = array
+					(
+						'registration_ids' => $registrationIds,
+						'data'             => $msg_android
+					);
+				}
+				$this->sendCurl( $fields );
 
-	    foreach ($ids as $k=>$mas):
-		    if($k=='ios'){
-			    $fields = array
-			    (
-				    'registration_ids' => $registrationIds,
-				    'notification' => $msg,
-			    );
-		    }else{
-			    $fields = array
-			    (
-				    'registration_ids' => $registrationIds,
-				    'data' => $msg_android
-			    );
-		    }
-	        $this->sendCurl($fields);
-
-		endforeach;
+			endforeach;
+		}
     }
 
     private function sendCurl($fields){

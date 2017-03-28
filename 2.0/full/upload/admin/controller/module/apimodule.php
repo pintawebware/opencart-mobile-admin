@@ -89,6 +89,14 @@ class ControllerModuleApimodule extends Controller {
 			$data['apimodule_status'] = $this->config->get('apimodule_status');
 		}
 
+		if (isset($this->session->data['error'])) {
+			$data['error'] = $this->session->data['error'];
+
+			unset($this->session->data['error']);
+		} else {
+			$data['error'] = '';
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -135,10 +143,15 @@ class ControllerModuleApimodule extends Controller {
 	}
 
 
-	private function install($file) {
+	private function install() {
 
 		$this->unzip();
-		$this->localcopy();
+		$ftp = $this->ftp();
+		if(isset($ftp['error'])){
+			$this->session->data['error'] = $ftp['error'];
+			$this->response->redirect($this->url->link('module/apimodule', 'token=' . $this->session->data['token'], 'SSL'));
+		}
+		//$this->localcopy();
 		$this->php();
 		$this->sql();
 
@@ -360,6 +373,7 @@ class ControllerModuleApimodule extends Controller {
 				$json['error'] = sprintf($this->language->get('error_ftp_connection'), $this->config->get('config_ftp_hostname'), $this->config->get('config_ftp_port'));
 			}
 		}
+		return $json;
 	}
 
 	public function sql() {
