@@ -6,10 +6,10 @@ $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api 
 $this->load->model('setting/setting');
 
 	$this->model_setting_setting->editSetting('apimodule', ['apimodule_status'=>1,'version'=>1.7]);
-if(VERSION == '2.0.0.0' || VERSION == '2.0.0.0a1'){
+if(VERSION == '2.0.0.0'){
     $this->load->model('tool/event');
 	$this->model_tool_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
-}elseif(VERSION == '2.0.0.0a1'){
+}elseif(VERSION == '2.0.0.0a1'  || VERSION == '2.0.0.0a2'){
 	$this->load->model('tool/event');
 	$this->model_tool_event->setHandler('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
 }elseif(VERSION == '2.2.0.0'){
