@@ -1051,13 +1051,13 @@ class ControllerModuleApimodule extends Controller
 		    if($k=='ios'){
 			    $fields = array
 			    (
-				    'registration_ids' => $registrationIds,
+				    'registration_ids' => $ids[$k],
 				    'notification' => $msg,
 			    );
 		    }else{
 			    $fields = array
 			    (
-				    'registration_ids' => $registrationIds,
+				    'registration_ids' => $ids[$k],
 				    'data' => $msg_android
 			    );
 		    }
