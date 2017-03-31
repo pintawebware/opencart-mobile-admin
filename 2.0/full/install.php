@@ -13,8 +13,8 @@ if(VERSION == '2.0.0.0'){
 	$this->load->model('tool/event');
 	$this->model_tool_event->setHandler('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
 }elseif(VERSION == '2.2.0.0'){
-	$this->load->model('tool/event');
-	$this->model_tool_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'module/apimodule/sendNotifications');
+	$this->load->model('extension/event');
+	$this->model_extension_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'module/apimodule/sendNotifi_2_2_0_0');
 }else{
 	$this->load->model('extension/event');
 	$this->model_extension_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');

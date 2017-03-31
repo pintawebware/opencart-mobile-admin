@@ -999,6 +999,12 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
+	
+	
+    public function sendNotifi_2_2_0_0($route, $id, $order_status_id, $comment = '', $notify = false, $override = false){
+		$this->sendNotifications($order_status_id);
+	}
+    
     public function sendNotifications($id)
     {
         $registrationIds = array();
@@ -1047,13 +1053,13 @@ class ControllerModuleApimodule extends Controller
 				if ( $k == 'ios' ) {
 					$fields = array
 					(
-						'registration_ids' => $registrationIds,
+						'registration_ids' => $ids[$k],
 						'notification'     => $msg,
 					);
 				} else {
 					$fields = array
 					(
-						'registration_ids' => $registrationIds,
+						'registration_ids' => $ids[$k],
 						'data'             => $msg_android
 					);
 				}
