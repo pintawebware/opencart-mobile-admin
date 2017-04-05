@@ -1,0 +1,21 @@
+<modification>
+  <id>Apimodule</id>
+  <version>1.0.0</version>
+  <vqmver>1.0.9</vqmver>
+  <author>Pinta</author>
+ 
+  <file name="catalog/model/checkout/order.php">
+    <operation>
+     
+      <search position="after"><![CDATA[
+        if ($order_info && !$order_info['order_status_id']) {
+      ]]></search>
+         
+      <add><![CDATA[
+        $this->load->model('module/apimodule');
+        $this->model_module_apimodule->sendNotifications($order_id);
+      ]]></add>
+         
+    </operation>
+  </file> 
+</modification>
