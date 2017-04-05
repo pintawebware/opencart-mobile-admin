@@ -15,7 +15,7 @@ if(VERSION == '2.0.0.0'){
 }else{
 	$this->load->model('extension/event');
 	$this->model_extension_event->deleteEvent('apimodule');
-	$this->model_extension_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
+	$this->model_extension_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'module/apimodule/sendNotifications');
 }
 
 ?>
