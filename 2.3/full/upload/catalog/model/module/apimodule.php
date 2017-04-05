@@ -292,7 +292,7 @@ class ModelModuleApimodule extends Model
     public function getClients($data = array())
     {
 
-        $sql = "SELECT  SUM(o.total) sum, COUNT(o.total) quantity, c.firstname, c.lastname, c.date_added, c.customer_id FROM " . DB_PREFIX . "order AS o LEFT JOIN " . DB_PREFIX . "customer AS c ON c.customer_id = o.customer_id  WHERE c.customer_id != 0 ";
+        $sql = "SELECT  SUM(o.total) sum, COUNT(o.total) quantity, c.firstname, c.lastname, c.date_added, c.customer_id FROM " . DB_PREFIX . "customer AS c LEFT JOIN " . DB_PREFIX . "order AS o ON c.customer_id = o.customer_id  WHERE c.customer_id != 0 ";
 
         if (isset($data['fio']) && $data['fio'] != '') {
             $params = [];
@@ -332,7 +332,7 @@ class ModelModuleApimodule extends Model
     public function getClientInfo ($id)
     {
 
-        $sql = "SELECT  SUM(o.total) sum, COUNT(o.total) quantity, c.firstname, c.lastname, c.date_added, c.customer_id, c.email, c.telephone FROM " . DB_PREFIX . "order AS o LEFT JOIN " . DB_PREFIX . "customer AS c ON c.customer_id = o.customer_id ";
+        $sql = "SELECT  SUM(o.total) sum, COUNT(o.total) quantity, c.firstname, c.lastname, c.date_added, c.customer_id, c.email, c.telephone FROM " . DB_PREFIX . "customer AS c LEFT JOIN " . DB_PREFIX . "order AS o ON c.customer_id = o.customer_id ";
 
         $sql .= "  WHERE c.customer_id = ".$id ;
         $sql .= " group by c.customer_id";

@@ -1001,10 +1001,11 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
-    public function sendNotifications($id)
+    public function sendNotifications($route, $output)
     {
 
         header("Access-Control-Allow-Origin: *");
+		$id = $output[0];
         $registrationIds = array();
         $this->load->model('module/apimodule');
         $devices = $this->model_module_apimodule->getUserDevices();
