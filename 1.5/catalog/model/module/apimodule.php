@@ -243,7 +243,7 @@ class ModelModuleApimodule extends Model
 
     public function getUserToken($id)
     {
-        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, token VARCHAR(32) NOT NULL ;");
+        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, token VARCHAR(32) NOT NULL) ;");
         $query = $this->db->query(" SELECT token FROM " . DB_PREFIX . "user_token_mob_api WHERE user_id = " . $id);
 
         return $query->row;
