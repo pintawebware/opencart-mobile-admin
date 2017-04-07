@@ -1431,7 +1431,7 @@ class ControllerModuleApimodule extends Controller
 
             $this->load->model('module/apimodule');
             $client = $this->model_module_apimodule->getClientInfo($id);
-
+			$currency_code = $this->model_module_apimodule->getDefaultCurrency();
             if (count($client) > 0) {
                 $data['client_id'] = $client['customer_id'];
 
@@ -1449,7 +1449,7 @@ class ControllerModuleApimodule extends Controller
 
                 $data['total'] = number_format($client['sum'], 2, '.', '');
                 $data['quantity'] = $client['quantity'];
-
+				$data['currency_code'] = $currency_code;
                 $data['completed'] = $client['completed'];
                 $data['cancelled'] = $client['cancelled'];
 
