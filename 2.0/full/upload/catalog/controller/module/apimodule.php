@@ -559,6 +559,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {Number} Price  Price of the product.
      * @apiSuccess {Number} total_order_price  Total sum of the order.
      * @apiSuccess {Number} total_price  Sum of product's prices.
+	 * @apiSuccess {String} currency_code  currency of the order.
      * @apiSuccess {Number} shipping_price  Cost of the shipping.
      * @apiSuccess {Number} total  Total order sum.
      * @apiSuccess {Number} product_id  unique product id.
@@ -590,6 +591,7 @@ class ControllerModuleApimodule extends Controller
      *              {
      *                   "total_discount": 0,
      *                   "total_price": 2250,
+	 *					 "currency_code": "RUB",
      *                   "shipping_price": 35,
      *                   "total": 2285
      *               }
@@ -682,7 +684,8 @@ class ControllerModuleApimodule extends Controller
                     'total_discount' => $total_discount_sum,
                     'total_price' => $a,
                     'shipping_price' => +number_format($shipping_price, 2, '.', ''),
-                    'total' => $a + $shipping_price
+                    'total' => $a + $shipping_price,
+					'currency_code' => $products[0]['currency_code']
                 );
 
 
