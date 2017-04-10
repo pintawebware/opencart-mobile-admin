@@ -1,24 +1,26 @@
 OPENCART-MOBILE-ADMIN 
 =====================
-Модуль для Opencart версии 2.0.0.0 и выше, содержащий API для управления интернет-магазином с мобильного устройста.  
+Opencart extension for 1.5 and higher, contains API for managing store from smartphone.
+View and process orders, push-notification of new orders, quick access to clients of your store. 
 ***
 
-Перед установкой убедитесь, что OpenCart Extension Installer настроен правильно,
-особенно FTP настройки.
-Если при установке появляется ошибка - установите дополнение: [https://www.opencart.com](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=18892) и попробуйте снова.
+###  Installation
+***
+Installation process is different for some OpenCart versions, before installation check the manual:
+
+* [Manual for OpenCart 1.5 and higher](https://opencartapp.pro/opencart-15/)
+* [Manual for OpenCart 2.0 and higher](https://opencartapp.pro/opencart-20/)
+
+Before installation for some OpenCart version, please check that OpenCart Extension Installer is configured properly,
+especially FTP configs.
+In case of installation error - download this additional extension: [https://www.opencart.com](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=18892) and try again.
 
 ***
-###  Установка производится через OCMOD:
-***
-1. Для установки перейдите в админ панель;
-2. Перейдите "Модули->установка расширений";
-3. Нажмите "загрузить файл" и выберите **apimobile.ocmod.zip**.
-
-***
-### ВАЖНО!!!
-
-Модуль не работает если включён режим обслуживания.
+### ATTENTION!!!
+Installation extension for some OpenCart 2.0 and higher your website may switch to the Maintenance Mode, for proper work of store and application make sure that Maintenance Mode is turned off. 
+To make sure: System -> Settings -> Edit -> Server -> Maintenance Mode
 ***
 
-#### Используйте эту ссылку для скачивания аппликации:
-<https://play.google.com/store/apps/details?id=com.pinta.opencart.opencartmobileadmin>
+#### Use this link to download applications:
+* [Google Play](https://play.google.com/store/apps/details?id=com.pinta.opencart.opencartmobileadmin)
+* [AppStore](https://itunes.apple.com/ua/app/opencart-mobile-admin/id1213731316?l=ru&mt=8)
