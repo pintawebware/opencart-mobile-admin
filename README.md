@@ -7,8 +7,10 @@ View and process orders, push-notification of new orders, quick access to client
 ###  Installation
 ***
 Installation process is different for some OpenCart versions, before installation check the manual:
+
 * [Manual for OpenCart 1.5 and higher](https://opencartapp.pro/opencart-15/)
 * [Manual for OpenCart 2.0 and higher](https://opencartapp.pro/opencart-20/)
+
 Before installation for some OpenCart version, please check that OpenCart Extension Installer is configured properly,
 especially FTP configs.
 In case of installation error - download this additional extension: [https://www.opencart.com](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=18892) and try again.
