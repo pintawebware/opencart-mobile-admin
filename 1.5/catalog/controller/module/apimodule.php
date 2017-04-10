@@ -213,7 +213,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {String} email  Client's email.
      * @apiSuccess {Number} phone  Client's phone.
      * @apiSuccess {Number} total  Total sum of the order.
-     * @apiSuccess {currency_code} status  Default currency of the shop.
+     * @apiSuccess {String} currency_code  Default currency of the shop.
      * @apiSuccess {Date} date_added  Date added of the order.
      * @apiSuccess {Array} statuses  Statuses list for order.
      *
@@ -1385,6 +1385,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {Number} total  Total sum of client's orders.
      * @apiSuccess {Number} quantity  Total quantity of client's orders.
      * @apiSuccess {String} email  Client's email.
+	 * @apiSuccess {String} currency_code  Default currency of the shop.
      * @apiSuccess {String} telephone  Client's telephone.
      * @apiSuccess {Number} cancelled  Total quantity of cancelled orders.
      * @apiSuccess {Number} completed  Total quantity of completed orders.
@@ -1400,6 +1401,7 @@ class ControllerModuleApimodule extends Controller
      *         "quantity" : "5",
      *         "cancelled" : "1",
      *         "completed" : "2",
+	 *         "currency_code": "UAH",
      *         "email" : "client@mail.ru",
      *         "telephone" : "13456789"
      *   },
