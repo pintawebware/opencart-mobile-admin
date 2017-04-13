@@ -2,8 +2,14 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-        <?php if($version){ ?>
+        <?php if($version && empty($ext)){ ?>
         <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> Обновите модуль
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        <?php } ?>
+        <?php if ($ext) { ?>
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i>
+            <?php echo $ext; ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         <?php } ?>
