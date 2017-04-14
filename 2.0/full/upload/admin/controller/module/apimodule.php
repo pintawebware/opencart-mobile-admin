@@ -88,11 +88,13 @@ class ControllerModuleApimodule extends Controller {
 		} else {
 			$data['apimodule_status'] = $this->config->get('apimodule_status');
 		}
+
 		if (!extension_loaded('zip')) {
-			$data['ext'] = "not installed zip extansion";
+			$data['ext'] = "not installed zip extension for update";
 		}else{
 			$data['ext'] = "";
 		}
+
 		if (isset($this->session->data['error'])) {
 			$data['error'] = $this->session->data['error'];
 
