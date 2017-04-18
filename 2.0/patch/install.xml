@@ -12,7 +12,7 @@
         $version = $this->load->controller('module/apimodule/checkVersion');
 
         if ($this->API_VERSION <(float)$version) {
-			$data['update_module'] = "Обновите модуль OPENCART-MOBILE-ADMIN до версии ".$version." или скачайте по ссылке <a target="_blanc" href='https://github.com/pintawebware/opencart-mobile-admin'>скачать </a>";
+			$data['update_module'] = "Обновите модуль OPENCART-MOBILE-ADMIN до версии ".$version." или скачайте по ссылке <a target='_blanc' href='https://github.com/pintawebware/opencart-mobile-admin'>скачать </a>";
 		} else {
 			$data['update_module'] = '';
 		}
