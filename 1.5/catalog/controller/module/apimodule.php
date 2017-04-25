@@ -837,6 +837,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {String} username User unique username.
      * @apiParam {Number} password User's  password.
      * @apiParam {String} device_token User's device's token for firebase notifications.
+	 * @apiParam {String} os_type Type of the user's device's OS.
      *
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {String} token  Token.
@@ -868,11 +869,15 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
 
         $this->load->model('module/apimodule');
-        $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
-
-        if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
-            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
+        if(!isset($this->request->post['username']) || !isset($this->request->post['password'])){
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified a user name or password.', 'status' => false]));
             return;
+        }else{
+            $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
+            if (!isset($user['user_id'])) {
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
+                return;
+            }
         }
 
 	    if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '' &&
@@ -935,10 +940,12 @@ class ControllerModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token'])) {
-	        $this->load->model('module/apimodule');
-            $deleted = $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
-            if(count($deleted) == 0){
-                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+            $this->load->model('module/apimodule');
+
+            $deleted = $this->model_module_apimodule->findUserToken($_REQUEST['old_token']);
+            if(count($deleted) != 0){
+                $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
+                $this->response->setOutput(json_encode(['response' => ['version' => $this->API_VERSION, 'status' => true]]));
             }else{
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
             }
@@ -984,7 +991,7 @@ class ControllerModuleApimodule extends Controller
 	        $this->load->model('module/apimodule');
             $updated = $this->model_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
             if(count($updated) != 0){
-                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+                $this->response->setOutput(json_encode(['response' => ['version' => $this->API_VERSION, 'status' => true]]));
             }else{
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
             }
@@ -1726,7 +1733,6 @@ class ControllerModuleApimodule extends Controller
      *       "price" : "100.00",
      *       "currency_code": "UAH"
      *       "quantity" : "83",
-     *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
      *       "description" : "Revolutionary multi-touch interface.↵	iPod touch features the same multi-touch screen technology as iPhone.",
      *       "images" :
      *       [

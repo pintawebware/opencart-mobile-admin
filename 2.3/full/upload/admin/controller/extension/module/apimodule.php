@@ -139,7 +139,7 @@ class ControllerExtensionModuleApimodule extends Controller {
 				file_put_contents( $new_path, $file );
 			}
 
-			$this->installPatch($new_path);
+			$this->installPatch();
 		}else{
 			$this->error['warning'] = "Not version";
 		}
@@ -149,8 +149,8 @@ class ControllerExtensionModuleApimodule extends Controller {
 
 	public function install() {
 
-		$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL PRIMARY KEY, user_id INT NOT NULL, token VARCHAR(32) NOT NULL )");
-		$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api (id INT NOT NULL PRIMARY KEY, user_id INT NOT NULL, device_token VARCHAR(500) , os_type VARCHAR(20))");
+		$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, token VARCHAR(32) NOT NULL )");
+		$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, device_token VARCHAR(500) , os_type VARCHAR(20))");
 
 		$this->load->model('setting/setting');
 

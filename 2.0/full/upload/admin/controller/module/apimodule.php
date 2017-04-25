@@ -141,7 +141,7 @@ class ControllerModuleApimodule extends Controller {
 				file_put_contents( $new_path, $file );
 			}
 
-			$this->install($new_path);
+			$this->installPatch();
 		}else{
 			$this->error['warning'] = "Not version";
 		}
@@ -149,7 +149,24 @@ class ControllerModuleApimodule extends Controller {
 	}
 
 
-	private function install() {
+	public function install() {
+
+		$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_token_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, token VARCHAR(32) NOT NULL )");
+		$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, device_token VARCHAR(500) , os_type VARCHAR(20))");
+
+		$this->load->model('setting/setting');
+
+		$this->model_setting_setting->editSetting('apimodule', ['apimodule_status'=>1,'version'=>1.7]);
+		if(VERSION == '2.0.0.0'){
+			$this->load->model('tool/event');
+			$this->model_tool_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
+		}else{
+			$this->load->model('extension/event');
+			$this->model_extension_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
+		}
+
+	}
+	private function installPatch() {
 
 		$this->unzip();
 		$ftp = $this->ftp();
@@ -157,13 +174,12 @@ class ControllerModuleApimodule extends Controller {
 			$this->session->data['error'] = $ftp['error'];
 			$this->response->redirect($this->url->link('module/apimodule', 'token=' . $this->session->data['token'], 'SSL'));
 		}
-		//$this->localcopy();
 		$this->php();
 		$this->sql();
 
 		$this->clear();
 		$this->session->data['success'] = "Модуль успешно обновлен";
-		$this->response->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
+		$this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'], 'SSL'));
 
 	}
 
