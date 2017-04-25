@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']    = 'ApiModule';
+$_['heading_title']    = 'OPENCART-MOBILE-ADMIN';
 
 // Text
 $_['text_module']      = 'Модули';

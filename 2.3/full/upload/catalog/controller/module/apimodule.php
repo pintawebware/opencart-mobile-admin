@@ -909,7 +909,9 @@ class ControllerModuleApimodule extends Controller
         }
         $token = $this->model_module_apimodule->getUserToken($user['user_id']);
 
-        $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['token' => $token['token']], 'status' => true]));
+        $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+                                                'response' => ['token' => $token['token']],
+                                                'status' => true]));
 
 
     }
@@ -997,7 +999,9 @@ class ControllerModuleApimodule extends Controller
             if(count($updated) != 0){
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
             }else{
-                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+                                                        'error' => 'Can not find your token',
+                                                        'status' => false]));
             }
         }else{
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
