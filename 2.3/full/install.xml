@@ -1,0 +1,41 @@
+<modification>
+    <name>Check update apimodule</name>
+	<version>1.9</version>
+	<link>http://opencartapp.com</link>
+	<author>Pinta</author>
+	<code>apimodule_ocmod</code>
+    <file path="admin/controller/common/dashboard.php">
+        <operation error="skip">
+            <search ><![CDATA[// Check install directory exists]]></search>
+            <add position="before"><![CDATA[
+
+
+        $v = substr(VERSION,0,3);
+        if($v == '2.3'){
+            $version = $this->load->controller('extension/module/apimodule/checkVersion');
+        }else{
+            $version = $this->load->controller('module/apimodule/checkVersion');
+        }
+
+        if ($this->API_VERSION <(float)$version) {
+			$data['update_module'] = "Обновите модуль OPENCART-MOBILE-ADMIN до версии ".$version." или скачайте по ссылке <a target='_blanc' href='https://github.com/pintawebware/opencart-mobile-admin'>скачать </a>";
+		} else {
+			$data['update_module'] = '';
+		}
+        ]]></add>
+        </operation>
+    </file>
+	<file path="admin/view/template/common/dashboard.tpl">
+		<operation error="skip">
+			<search ><![CDATA[<?php if ($error_install) { ?>]]></search>
+			<add position="before"><![CDATA[
+  <?php if ($update_module) { ?>
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $update_module; ?>
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <?php } ?>
+]]></add>
+		</operation>
+    </file>
+
+</modification>

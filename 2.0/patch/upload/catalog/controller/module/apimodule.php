@@ -222,7 +222,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {String} email  Client's email.
      * @apiSuccess {Number} phone  Client's phone.
      * @apiSuccess {Number} total  Total sum of the order.
-     * @apiSuccess {currency_code} status  Default currency of the shop.
+     * @apiSuccess {String} currency_code  Default currency of the shop.
      * @apiSuccess {Date} date_added  Date added of the order.
      * @apiSuccess {Array} statuses  Statuses list for order.
      *
@@ -559,6 +559,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {Number} Price  Price of the product.
      * @apiSuccess {Number} total_order_price  Total sum of the order.
      * @apiSuccess {Number} total_price  Sum of product's prices.
+	 * @apiSuccess {String} currency_code  currency of the order.
      * @apiSuccess {Number} shipping_price  Cost of the shipping.
      * @apiSuccess {Number} total  Total order sum.
      * @apiSuccess {Number} product_id  unique product id.
@@ -590,6 +591,7 @@ class ControllerModuleApimodule extends Controller
      *              {
      *                   "total_discount": 0,
      *                   "total_price": 2250,
+	 *					 "currency_code": "RUB",
      *                   "shipping_price": 35,
      *                   "total": 2285
      *               }
@@ -682,7 +684,8 @@ class ControllerModuleApimodule extends Controller
                     'total_discount' => $total_discount_sum,
                     'total_price' => $a,
                     'shipping_price' => +number_format($shipping_price, 2, '.', ''),
-                    'total' => $a + $shipping_price
+                    'total' => $a + $shipping_price,
+					'currency_code' => $products[0]['currency_code']
                 );
 
 
@@ -843,6 +846,7 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {String} username User unique username.
      * @apiParam {Number} password User's  password.
      * @apiParam {String} device_token User's device's token for firebase notifications.
+	 * @apiParam {String} os_type Type of the user's device's OS.
      *
      * @apiSuccess {Number} version  Current API version.
      * @apiSuccess {String} token  Token.
@@ -874,11 +878,15 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
 
         $this->load->model('module/apimodule');
-        $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
-
-        if (!isset($this->request->post['username']) || !isset($this->request->post['password']) || !isset($user['user_id'])) {
-            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
+        if(!isset($this->request->post['username']) || !isset($this->request->post['password'])){
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified a user name or password.', 'status' => false]));
             return;
+        }else{
+            $user = $this->model_module_apimodule->checkLogin($this->request->post['username'], $this->request->post['password']);
+            if (!isset($user['user_id'])) {
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Incorrect username or password', 'status' => false]));
+                return;
+            }
         }
 
 	    if (isset($this->request->post['device_token']) && $this->request->post['device_token'] != '' &&
@@ -941,10 +949,12 @@ class ControllerModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token'])) {
-	        $this->load->model('module/apimodule');
-            $deleted = $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
-            if(count($deleted) == 0){
-                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+            $this->load->model('module/apimodule');
+
+            $deleted = $this->model_module_apimodule->findUserToken($_REQUEST['old_token']);
+            if(count($deleted) != 0){
+                $this->model_module_apimodule->deleteUserDeviceToken($_REQUEST['old_token']);
+                $this->response->setOutput(json_encode(['response' => ['version' => $this->API_VERSION, 'status' => true]]));
             }else{
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
             }
@@ -990,7 +1000,7 @@ class ControllerModuleApimodule extends Controller
 	        $this->load->model('module/apimodule');
             $updated = $this->model_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
             if(count($updated) != 0){
-                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+                $this->response->setOutput(json_encode(['response' => ['version' => $this->API_VERSION, 'status' => true]]));
             }else{
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not find your token', 'status' => false]));
             }
@@ -999,10 +1009,14 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
+	
+	
+    public function sendNotifi_2_2_0_0($route, $id, $order_status_id, $comment = '', $notify = false, $override = false){
+		$this->sendNotifications($order_status_id);
+	}
+    
     public function sendNotifications($id)
     {
-
-        header("Access-Control-Allow-Origin: *");
         $registrationIds = array();
         $this->load->model('module/apimodule');
         $devices = $this->model_module_apimodule->getUserDevices();
@@ -1018,50 +1032,51 @@ class ControllerModuleApimodule extends Controller
 
 	    $this->load->model('module/apimodule');
 	    $order = $this->model_module_apimodule->getOrderFindById($id);
+		if($order) {
+			$msg = array(
+				'body'       => number_format( $order['total'], 2, '.', '' ),
+				'title'      => "http://" . $_SERVER['HTTP_HOST'],
+				'vibrate'    => 1,
+				'sound'      => 1,
+				'priority'   => 'high',
+				'new_order'  => [
+					'order_id'      => $id,
+					'total'         => number_format( $order['total'], 2, '.', '' ),
+					'currency_code' => $order['currency_code'],
+					'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
+				],
+				'event_type' => 'new_order'
+			);
 
-	    $msg = array(
-		    'body'  => number_format($order['total'], 2, '.', ''),
-		    'title'         => "http://".$_SERVER['HTTP_HOST'],
-		    'vibrate'       => 1,
-		    'sound'         => 1,
-		    'priority'=>'high',
-	        'new_order' => [
-			    'order_id'=>$id,
-			    'total'=>number_format($order['total'], 2, '.', ''),
-			    'currency_code'=>$order['currency_code'],
-			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
-		    ],
-		    'event_type' => 'new_order'
-	    );
+			$msg_android = array(
 
-	    $msg_android = array(
+				'new_order'  => [
+					'order_id'      => $id,
+					'total'         => number_format( $order['total'], 2, '.', '' ),
+					'currency_code' => $order['currency_code'],
+					'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
+				],
+				'event_type' => 'new_order'
+			);
 
-		    'new_order' => [
-			    'order_id'=>$id,
-			    'total'=>number_format($order['total'], 2, '.', ''),
-			    'currency_code'=>$order['currency_code'],
-			    'site_url' => "http://".$_SERVER['HTTP_HOST'],
-		    ],
-		    'event_type' => 'new_order'
-	    );
+			foreach ( $ids as $k => $mas ):
+				if ( $k == 'ios' ) {
+					$fields = array
+					(
+						'registration_ids' => $ids[$k],
+						'notification'     => $msg,
+					);
+				} else {
+					$fields = array
+					(
+						'registration_ids' => $ids[$k],
+						'data'             => $msg_android
+					);
+				}
+				$this->sendCurl( $fields );
 
-	    foreach ($ids as $k=>$mas):
-		    if($k=='ios'){
-			    $fields = array
-			    (
-				    'registration_ids' => $registrationIds,
-				    'notification' => $msg,
-			    );
-		    }else{
-			    $fields = array
-			    (
-				    'registration_ids' => $registrationIds,
-				    'data' => $msg_android
-			    );
-		    }
-	        $this->sendCurl($fields);
-
-		endforeach;
+			endforeach;
+		}
     }
 
     private function sendCurl($fields){
@@ -1479,6 +1494,7 @@ class ControllerModuleApimodule extends Controller
      * @apiSuccess {Number} quantity  Total quantity of client's orders.
      * @apiSuccess {String} email  Client's email.
      * @apiSuccess {String} telephone  Client's telephone.
+	 * @apiSuccess {String} currency_code  Default currency of the shop.
      * @apiSuccess {Number} cancelled  Total quantity of cancelled orders.
      * @apiSuccess {Number} completed  Total quantity of completed orders.
      *
@@ -1494,6 +1510,7 @@ class ControllerModuleApimodule extends Controller
      *         "cancelled" : "1",
      *         "completed" : "2",
      *         "email" : "client@mail.ru",
+	 *		   "currency_code": "UAH",
      *         "telephone" : "13456789"
      *   },
      *   "Status" : true,
@@ -1524,7 +1541,7 @@ class ControllerModuleApimodule extends Controller
 
             $this->load->model('module/apimodule');
             $client = $this->model_module_apimodule->getClientInfo($id);
-
+			$currency_code = $this->model_module_apimodule->getDefaultCurrency();
             if (count($client) > 0) {
                 $data['client_id'] = $client['customer_id'];
 
@@ -1542,6 +1559,7 @@ class ControllerModuleApimodule extends Controller
 
                 $data['total'] = number_format($client['sum'], 2, '.', '');
                 $data['quantity'] = $client['quantity'];
+                $data['currency_code'] = $currency_code;
 
                 $data['completed'] = $client['completed'];
                 $data['cancelled'] = $client['cancelled'];
@@ -1814,7 +1832,6 @@ class ControllerModuleApimodule extends Controller
      *       "price" : "100.00",
      *       "currency_code": "UAH"
      *       "quantity" : "83",
-     *       "main_image" : "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
      *       "description" : "Revolutionary multi-touch interface.↵	iPod touch features the same multi-touch screen technology as iPhone.",
      *       "images" :
      *       [
