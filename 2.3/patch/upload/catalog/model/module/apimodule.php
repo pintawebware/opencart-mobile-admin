@@ -423,7 +423,7 @@ class ModelModuleApimodule extends Model
     }
 
     public function getDefaultCurrency(){
-        $sql = "SELECT c.code FROM `" . DB_PREFIX . "currency` c WHERE  c.value = 1";
+        $sql = "SELECT c.value code FROM `" . DB_PREFIX . "setting` c WHERE  c.key = 'config_currency'";
         $query = $this->db->query($sql);
         return $query->row['code'];
     }
