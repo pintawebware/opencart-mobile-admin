@@ -856,9 +856,16 @@ class ModelModuleApimodule extends Model
     }
 
     public function addProductImages($new_images, $product_id){
+    	$images = [];
         foreach ($new_images as $image){
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_image` (product_id, image) VALUES (" . $product_id . ",'" . $image. "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_image` (product_id, image) 
+            VALUES (" . $product_id . ",'" . $image. "')");
+            $val = [];
+            $val['product_id'] = $this->db->getLastId();
+            $val['image'] = $image;
+	        $images[] = $val;
         }
+        return $images;
     }
     public function removeProductImages($removed_image, $product_id){
 

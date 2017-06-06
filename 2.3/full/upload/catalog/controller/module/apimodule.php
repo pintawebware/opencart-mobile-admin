@@ -2133,8 +2133,9 @@ class ControllerModuleApimodule extends Controller
 		        $product_id = $this->model_module_apimodule->addProduct($data);
 	        }
 
+	        $images = [];
             if(!empty($new_images)){
-                $this->model_module_apimodule->addProductImages($new_images, $product_id);
+                $images = $this->model_module_apimodule->addProductImages($new_images, $product_id);
             }
             if(!empty($_REQUEST['removed_image'])){
                 $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
@@ -2143,7 +2144,9 @@ class ControllerModuleApimodule extends Controller
             if(isset($main_image)){
                 $this->model_module_apimodule->setMainImage($main_image, $product_id);
             }
-            $this->response->setOutput(json_encode(['version' => $this->API_VERSION,  'status' => true]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+                                                    'status' => true,
+                                                    'images' => $images]));
         } else {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
