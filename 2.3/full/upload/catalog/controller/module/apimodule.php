@@ -2074,15 +2074,18 @@ class ControllerModuleApimodule extends Controller
                 }
             }
         }
-        $error = $this->valid();
+       /* $error = $this->valid();
         if ($error != null) {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
 
-        }
-        if (isset($_REQUEST['name']) && isset($_REQUEST['description'])&& isset($_REQUEST['categories'])) {
-            $data = [];
+        }*/
+	   // var_dump($_FILES);
 
+        if (isset($_REQUEST['name']) && isset($_REQUEST['description'])&& isset($_REQUEST['categories'])) {
+
+
+	        $data = [];
 
             if (isset($_REQUEST['language_id'])) {
                 $data['language_id'] = $_REQUEST['language_id'];
@@ -2122,7 +2125,7 @@ class ControllerModuleApimodule extends Controller
 	            $data['quantity'] = 0;
             }
             if (!empty($_REQUEST['categories'])){
-                $data['categories'] = $_REQUEST['categories'];
+                $data['product_category'] = $_REQUEST['categories'];
             }
 
 	        if (isset($_REQUEST['product_id'])) {
