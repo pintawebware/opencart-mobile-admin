@@ -1904,11 +1904,11 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
 
 
-        $error = $this->valid();
+   /*     $error = $this->valid();
         if ($error != null) {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
-        }
+        }*/
         if (isset($_REQUEST['product_id']) && (int)$_REQUEST['product_id'] != 0) {
             $id = $_REQUEST['product_id'];
             $this->load->model('module/apimodule');
@@ -1930,6 +1930,7 @@ class ControllerModuleApimodule extends Controller
                 $this->load->model('tool/image');
                 $product_img = $this->model_module_apimodule->getProductImages($id);
                 $response['description'] = strip_tags(htmlspecialchars_decode($product_img['description']));
+                  $this->load->model('tool/image');
                 if (count($product_img['images']) > 0) {
                     $response['images'] = [];
                     foreach ($product_img['images'] as $key => $image) {
@@ -2056,7 +2057,7 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
 
         $new_images = array();
-        $server = !empty(HTTPS_SERVER) ? HTTPS_SERVER : HTTP_SERVER;
+        $server = HTTPS_SERVER ? HTTPS_SERVER : HTTP_SERVER;
         if(!empty($_REQUEST['main_image'])){
             $main_image = str_replace($server.'image/cache/', '', $_REQUEST['main_image']);
         }
@@ -2080,7 +2081,8 @@ class ControllerModuleApimodule extends Controller
             return;
 
         }*/
-	   // var_dump($_FILES);
+
+	    // var_dump($_REQUEST);
 
         if (isset($_REQUEST['name']) && isset($_REQUEST['description'])&& isset($_REQUEST['categories'])) {
 
@@ -2128,7 +2130,7 @@ class ControllerModuleApimodule extends Controller
                 $data['product_category'] = $_REQUEST['categories'];
             }
 
-	        if (isset($_REQUEST['product_id'])) {
+	        if (!empty($_REQUEST['product_id'])) {
 		        $product_id = $_REQUEST['product_id'];
 		        $this->model_module_apimodule->editProduct($product_id,$data);
 	        }else{
@@ -2136,9 +2138,9 @@ class ControllerModuleApimodule extends Controller
 		        $product_id = $this->model_module_apimodule->addProduct($data);
 	        }
 
-	        $images = [];
+	        
             if(!empty($new_images)){
-                $images = $this->model_module_apimodule->addProductImages($new_images, $product_id);
+                $this->model_module_apimodule->addProductImages($new_images, $product_id);
             }
             if(!empty($_REQUEST['removed_image'])){
                 $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
@@ -2147,11 +2149,33 @@ class ControllerModuleApimodule extends Controller
             if(isset($main_image)){
                 $this->model_module_apimodule->setMainImage($main_image, $product_id);
             }
+            $images = [];
+            $product_img = $this->model_module_apimodule->getProductImages($product_id);
+                $this->load->model('tool/image');
+                if (count($product_img['images']) > 0) {                   
+
+                    foreach ($product_img['images'] as $key => $image) {
+                        $img = [];
+                        $img['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                        $img['image_id'] = $product_img['images'][$key]['product_image_id'];
+                       $images[] = $img;
+                    }
+                   
+                } else {
+                    $images = [];
+                }
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
                                                     'status' => true,
-                                                    'images' => $images]));
+                                                    'response' =>[
+                                                            'product_id'=>$product_id,
+                                                            'images' => $images
+                                                            ]
+                                                        ]
+                                                        ));
         } else {
-            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+             'error' => 'You have not specified ID', 
+             'status' => false]));
         }
     }
 
@@ -2269,7 +2293,8 @@ class ControllerModuleApimodule extends Controller
 
 		$categories = $this->model_module_apimodule->getSubstatus();
 
-		$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['categories' => $categories], 'status' => true]));
+		$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 
+            'response' => ['stock_statuses' => $categories], 'status' => true]));
 	}
 
     private function calculatePrice($price, $currency){

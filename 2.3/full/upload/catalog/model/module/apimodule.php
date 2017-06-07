@@ -861,7 +861,7 @@ class ModelModuleApimodule extends Model
             $this->db->query("INSERT INTO `" . DB_PREFIX . "product_image` (product_id, image) 
             VALUES (" . $product_id . ",'" . $image. "')");
             $val = [];
-            $val['product_id'] = $this->db->getLastId();
+            $val['image_id'] = $this->db->getLastId();
             $val['image'] = $image;
 	        $images[] = $val;
         }
@@ -930,7 +930,7 @@ class ModelModuleApimodule extends Model
 
 	    $query = $this->db->query("SELECT cd.name, cd.category_id category_id,c.parent_id  FROM  `" . DB_PREFIX . "category` c  
                 LEFT JOIN `" . DB_PREFIX . "category_description` cd ON c.category_id = cd.category_id  
-                WHERE  cd.language_id = ".(int)$this->config->get('config_language_id'));
+                WHERE  cd.language_id = ".(int)$this->config->get('config_language_id'). " ORDER BY cd.category_id ASC ");
 
 	    $categories  = $query->rows;
 
@@ -942,16 +942,16 @@ class ModelModuleApimodule extends Model
 		foreach ($cats as $one):
 			$this->ar = [];
 			$category = [];
-				$category['id'] = $one['category_id'];
+				$category['category_id'] = $one['category_id'];
 				$category['name'] = $this->categoryTree($one['category_id']);
 			$return[] = $category;
 		endforeach;
 
 	    foreach ($return as $k => $one):
-			$name = implode(',',array_reverse($one['name']));
+			$name = implode(' - ',array_reverse($one['name']));
 		    $return[$k]['name'] = $name;
 	    endforeach;
-
+        sort($return);
 	    return $return;
     }
 
