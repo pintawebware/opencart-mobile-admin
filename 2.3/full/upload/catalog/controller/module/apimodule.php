@@ -1189,7 +1189,6 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
         $error = $this->valid();
         if ($error != null) {
-
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
@@ -1956,7 +1955,7 @@ class ControllerModuleApimodule extends Controller
                 $response['categories'] = $product_categories;
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
             } else {
-                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found order with id = ' . $_REQUEST['product_id'], 'status' => false]));
+                $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found product with id = ' . $_REQUEST['product_id'], 'status' => false]));
             }
         } else {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
@@ -2056,36 +2055,31 @@ class ControllerModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
 
+	    $error = $this->valid();
+	    if ($error != null) {
+		    $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+		                                            'error' => $error,
+		                                            'status' => false]));
+		    return;
+	    }
+
         $new_images = array();
         $server = HTTPS_SERVER ? HTTPS_SERVER : HTTP_SERVER;
-        if(!empty($_REQUEST['main_image'])){
-            $main_image = str_replace($server.'image/cache/', '', $_REQUEST['main_image']);
-        }
 
+	    $images = [];
+
+	   // file_put_contents('logimg.php', json_encode($_FILES));
         if(!empty($_FILES)){
-            foreach ($_FILES as $key => $file) {
-                $tmp_name = $file["tmp_name"];
-                $name = $file["name"];
+            foreach ($_FILES['image']['name'] as $key => $name) {
+                $tmp_name = $_FILES['image']["tmp_name"][$key];
+
                 if (move_uploaded_file($tmp_name, DIR_IMAGE."catalog/$name")){
-                    if($key == 'default_jpg'){
-                        $main_image = "catalog/$name";
-                    }else{
-                        $new_images[] = "catalog/$name";
-                    }
+                     $images[] = "catalog/$name";
                 }
             }
         }
-       /* $error = $this->valid();
-        if ($error != null) {
-            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
-            return;
-
-        }*/
-
-	    // var_dump($_REQUEST);
 
         if (isset($_REQUEST['name']) && isset($_REQUEST['description'])&& isset($_REQUEST['categories'])) {
-
 
 	        $data = [];
 
@@ -2096,7 +2090,7 @@ class ControllerModuleApimodule extends Controller
             }
             if (isset($_REQUEST['name']) && isset($_REQUEST['description'])) {
                 $data['product_description'][$data['language_id']]['name'] = $_REQUEST['name'];
-                $data['product_description'][$data['language_id']]['description'] = $_REQUEST['name'];
+                $data['product_description'][$data['language_id']]['description'] = $_REQUEST['description'];
             }
             if (isset($_REQUEST['price'])) {
                 $currency = $this->model_module_apimodule->getUserCurrency();
@@ -2111,44 +2105,41 @@ class ControllerModuleApimodule extends Controller
 	            $data['price'] = 0;
             }
 
-            if (isset($_REQUEST['model'])) {
-                $data['model'] = $_REQUEST['model'];
-            }else{
-	            $data['model'] = "";
-            }
-            if (isset($_REQUEST['SKU'])) {
-                $data['sku'] = $_REQUEST['SKU'];
-            }else{
-	            $data['sku'] = '';
-            }
-            if (isset($_REQUEST['quantity'])) {
-                $data['quantity'] = $_REQUEST['quantity'];
-            }else{
-	            $data['quantity'] = 0;
-            }
-            if (!empty($_REQUEST['categories'])){
-                $data['product_category'] = $_REQUEST['categories'];
-            }
+            if (isset($_REQUEST['model'])) {  $data['model'] = $_REQUEST['model'];  }else{    $data['model'] = "";  }
+            if (isset($_REQUEST['sku'])) {  $data['sku'] = $_REQUEST['sku'];  }else{   $data['sku'] = '';  }
+            if (isset($_REQUEST['quantity'])) {  $data['quantity'] = $_REQUEST['quantity'];  }else{  $data['quantity'] = 0;  }
+	        if (isset($_REQUEST['status'])) { $data['status'] = $_REQUEST['status'];  }else{    $data['status'] = 0;   }
+	        if (isset($_REQUEST['substatus'])) {   $data['stock_status_id'] = $_REQUEST['substatus'];  }else{   $data['stock_status_id'] = 7; }
+            if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
 
-	        if (!empty($_REQUEST['product_id'])) {
-		        $product_id = $_REQUEST['product_id'];
-		        $this->model_module_apimodule->editProduct($product_id,$data);
-	        }else{
+
+            if (!empty($_REQUEST['product_id'])) {
+            	$product_id = $_REQUEST['product_id'];
+
+	            $data['product_image'] = $images;
+            	$this->model_module_apimodule->editProduct($product_id,$data);
+
+            }else{
 		        $data['product_id'] = 0;
+		        if(!empty($images[0])){
+			        $data['image'] = $images[0];
+		        }
+	            $data['product_image'] = $images;
 		        $product_id = $this->model_module_apimodule->addProduct($data);
 	        }
 
 	        
-            if(!empty($new_images)){
+   /*         if(!empty($new_images)){
                 $this->model_module_apimodule->addProductImages($new_images, $product_id);
             }
+	         if(isset($main_image)){
+			   $this->model_module_apimodule->setMainImage($main_image, $product_id);
+		    }
             if(!empty($_REQUEST['removed_image'])){
                 $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
                 $this->model_module_apimodule->removeProductImages($removed_image, $product_id);
-            }
-            if(isset($main_image)){
-                $this->model_module_apimodule->setMainImage($main_image, $product_id);
-            }
+            }*/
+
             $images = [];
             $product_img = $this->model_module_apimodule->getProductImages($product_id);
                 $this->load->model('tool/image');

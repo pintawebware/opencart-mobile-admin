@@ -130,7 +130,11 @@ class ModelModuleApimodule extends Model
     {
         $sql = "SELECT p.product_id";
         $sql .= " FROM `" . DB_PREFIX . "product` p";
-        $sql .= " LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id) LEFT JOIN `" . DB_PREFIX . "product_to_store` p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
+        $sql .= " LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id) 
+                  LEFT JOIN `" . DB_PREFIX . "product_to_store` p2s ON (p.product_id = p2s.product_id) 
+                  WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' 
+                    AND p.status = '1' AND p.date_available <= NOW() 
+                    AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
         $sql .= " GROUP BY p.product_id";
         $sql .= " ORDER BY p.product_id ASC";
         $sql .= " LIMIT 5 OFFSET " . $page;
@@ -401,7 +405,13 @@ class ModelModuleApimodule extends Model
 
     public function getProductsByID ($id)
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, p.sku, p.status, ss.name stock_status_name FROM `" . DB_PREFIX . "product` AS p LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id LEFT JOIN `" . DB_PREFIX . "stock_status` ss ON p.stock_status_id = ss.stock_status_id WHERE ss.language_id = '" . (int)$this->config->get('config_language_id') . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.product_id = ". $id ;
+        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, p.sku, p.status, ss.name stock_status_name 
+					  FROM `" . DB_PREFIX . "product` AS p 
+					  LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
+					  LEFT JOIN `" . DB_PREFIX . "stock_status` ss ON p.stock_status_id = ss.stock_status_id 
+					  WHERE ss.language_id = '" . (int)$this->config->get('config_language_id') . "'
+					   AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' 
+					   AND p.product_id = ". $id ;
 
         $query = $this->db->query($sql);
 
@@ -482,8 +492,9 @@ class ModelModuleApimodule extends Model
 		$this->db->query("INSERT INTO " . DB_PREFIX . "product SET 
 		model = '" . $this->db->escape($data['model']) . "', 
 		sku = '" . $this->db->escape($data['sku']) . "', 
-	
+	    stock_status_id = '". (int)$data['stock_status_id']."',  
 		quantity = '" . (int)$data['quantity'] . "', 
+		status = '" . (int)$data['status'] . "', 
 	
 		price = '" . (float)$data['price'] . "',
 	
@@ -562,8 +573,8 @@ class ModelModuleApimodule extends Model
 			foreach ($data['product_image'] as $product_image) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_image SET 
 				product_id = '" . (int)$product_id . "', 
-				image = '" . $this->db->escape($product_image['image']) . "', 
-				sort_order = '" . (int)$product_image['sort_order'] . "'");
+				image = '" . $this->db->escape($product_image) . "', 
+				sort_order = '" . 0 . "'");
 			}
 		}
 
@@ -631,6 +642,8 @@ class ModelModuleApimodule extends Model
 		sku = '" . $this->db->escape($data['sku']) . "', 
 		quantity = '" . (int)$data['quantity'] . "', 
 		price = '" . (float)$data['price'] . "', 
+		status = '" . (int)$data['status'] . "', 
+		stock_status_id = '" . (int)$data['stock_status_id'] . "', 
 	    date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
 
 		if (isset($data['image'])) {
@@ -716,7 +729,10 @@ class ModelModuleApimodule extends Model
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");
 
 			foreach ($data['product_image'] as $product_image) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "product_image SET product_id = '" . (int)$product_id . "', image = '" . $this->db->escape($product_image['image']) . "', sort_order = '" . (int)$product_image['sort_order'] . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "product_image SET 
+				product_id = '" . (int)$product_id . "', 
+				image = '" . $this->db->escape($product_image) . "', 
+				sort_order = '" . 0 . "'");
 			}
 		}
 
@@ -867,11 +883,13 @@ class ModelModuleApimodule extends Model
         }
         return $images;
     }
+
     public function removeProductImages($removed_image, $product_id){
 
         $this->db->query("DELETE FROM `" . DB_PREFIX . "product_image` WHERE product_id = " . $product_id . " AND image = '" . $removed_image . "'");
 
     }
+
     public function removeProductImageById($image_id, $product_id){
 
         $this->db->query("DELETE FROM `" . DB_PREFIX . "product_image` WHERE product_id = " . $product_id . " AND product_image_id = '" . $image_id . "'");
