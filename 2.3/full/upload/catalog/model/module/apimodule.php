@@ -405,7 +405,8 @@ class ModelModuleApimodule extends Model
 
     public function getProductsByID ($id)
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, p.sku, p.status, ss.name stock_status_name 
+        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name,pd.description, p.sku, p.status,
+ 						ss.name stock_status_name 
 					  FROM `" . DB_PREFIX . "product` AS p 
 					  LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
 					  LEFT JOIN `" . DB_PREFIX . "stock_status` ss ON p.stock_status_id = ss.stock_status_id 
@@ -420,7 +421,9 @@ class ModelModuleApimodule extends Model
 
     public function getProductImages($product_id) {
 
-        $main_image = $this->db->query("SELECT p.image, pd.description FROM `" . DB_PREFIX . "product` p LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id WHERE p.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+        $main_image = $this->db->query("SELECT p.image, pd.description FROM `" . DB_PREFIX . "product` p 
+                                        LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
+                                        WHERE p.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
         $all_images = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_image` WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
 
         $response['description'] = $main_image->row['description'];

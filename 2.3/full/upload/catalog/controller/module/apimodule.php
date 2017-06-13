@@ -716,8 +716,8 @@ class ControllerModuleApimodule extends Controller
 
 
     /**
-     * @api {get} index.php?route=module/apimodule/delivery  ChangeOrderDelivery
-     * @apiName ChangeOrderDelivery
+     * @api {get} index.php?route=module/apimodule/delivery  changeOrderDelivery
+     * @apiName changeOrderDelivery
      * @apiGroup All
      *
      * @apiParam {String} address New shipping address.
@@ -783,8 +783,8 @@ class ControllerModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/changestatus  ChangeStatus
-     * @apiName ChangeStatus
+     * @api {get} index.php?route=module/apimodule/changestatus  changeStatus
+     * @apiName changeStatus
      * @apiGroup All
      *
      * @apiParam {String} comment New comment for order status.
@@ -849,8 +849,8 @@ class ControllerModuleApimodule extends Controller
 
 
     /**
-     * @api {post} index.php?route=module/apimodule/login  Login
-     * @apiName Login
+     * @api {post} index.php?route=module/apimodule/login  login
+     * @apiName login
      * @apiGroup All
      *
      * @apiParam {String} username User unique username.
@@ -1920,6 +1920,7 @@ class ControllerModuleApimodule extends Controller
                 $response['SKU'] = $product['sku'];
                 $response['stock_status_name'] = $product['stock_status_name'];
                 $response['name'] = strip_tags(htmlspecialchars_decode($product['name']));
+	            $response['description'] = $product['description'];
                 $currency = $this->model_module_apimodule->getUserCurrency();
                 if(empty($currency)){
                     $currency = $this->model_module_apimodule->getDefaultCurrency();
@@ -1928,8 +1929,8 @@ class ControllerModuleApimodule extends Controller
                 $response['price'] = $this->calculatePrice($product['price'], $currency);
                 $this->load->model('tool/image');
                 $product_img = $this->model_module_apimodule->getProductImages($id);
-                $response['description'] = strip_tags(htmlspecialchars_decode($product_img['description']));
-                  $this->load->model('tool/image');
+
+                $this->load->model('tool/image');
                 if (count($product_img['images']) > 0) {
                     $response['images'] = [];
                     foreach ($product_img['images'] as $key => $image) {
@@ -1963,12 +1964,13 @@ class ControllerModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/productinfo  getProductInfo
-     * @apiName getProductInfo
+     * @api {post} index.php?route=module/apimodule/setQuantity  setQuantity
+     * @apiName setQuantity
      * @apiGroup All
      *
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} product_id unique product ID.
+     * @apiParam {Number} quantity unique product ID.
      *
      * @apiSuccess {Number} quantity  Updated quantity of the product.
      * @apiSuccess {Number} version  Current API version.
@@ -2027,7 +2029,9 @@ class ControllerModuleApimodule extends Controller
      * @apiParam {String} name name of the product.
      * @apiParam {String} description description of the product.
      * @apiParam {Number} model model of the product.
-     * @apiParam {SKU} SKU SKU of the product.
+     * @apiParam {Sku} sku SKU of the product.
+     * @apiParam {Status} 1:0 Status of the product.
+     * @apiParam {substatus} substatus stock status id of the product.
      *
      *
      * @apiSuccess {Number} version  Current API version.
@@ -2123,6 +2127,7 @@ class ControllerModuleApimodule extends Controller
 		        $data['product_id'] = 0;
 		        if(!empty($images[0])){
 			        $data['image'] = $images[0];
+			        unset($images[0]);
 		        }
 	            $data['product_image'] = $images;
 		        $product_id = $this->model_module_apimodule->addProduct($data);
@@ -2170,6 +2175,35 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
+	/**
+	 * @api {post} index.php?route=module/apimodule/deleteImage  deleteImage
+	 * @apiName deleteImage
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} product_id unique product ID.
+	 * @apiParam {Number} image_id unique image ID.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
 
     public function deleteImage(){
         header("Access-Control-Allow-Origin: *");
@@ -2196,6 +2230,36 @@ class ControllerModuleApimodule extends Controller
         }
     }
 
+	/**
+	 * @api {post} index.php?route=module/apimodule/mainImage  mainImage
+	 * @apiName mainImage
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} product_id unique product ID.
+	 * @apiParam {Number} image_id unique image ID.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+
     public function mainImage(){
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
@@ -2219,8 +2283,8 @@ class ControllerModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/createProduct  createProduct
-     * @apiName createProduct
+     * @api {post} index.php?route=module/apimodule/getCategories  getCategories
+     * @apiName getCategories
      * @apiGroup All
      *
      * @apiParam {Token} token your unique token.
@@ -2269,7 +2333,33 @@ class ControllerModuleApimodule extends Controller
     }
 
 
-
+	/**
+	 * @api {post} index.php?route=module/apimodule/getSubstatus  getSubstatus
+	 * @apiName getSubstatus
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
 	public function getSubstatus()
 	{
 		header("Access-Control-Allow-Origin: *");
