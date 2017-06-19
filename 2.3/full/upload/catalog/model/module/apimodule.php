@@ -2,7 +2,7 @@
 
 class ModelModuleApimodule extends Model
 {
-	private $API_VERSION = 1.8;
+	private $API_VERSION = 2.0;
 
 	public function getVersion(){
 		return $this->API_VERSION;
