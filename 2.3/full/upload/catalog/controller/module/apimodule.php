@@ -1860,7 +1860,7 @@ class ControllerModuleApimodule extends Controller
      *       "model" : "Black",
      *       "name" : "HTC Touch HD",
      *       "price" : "100.00",
-     *       "SKU": "7798-70",
+     *       "sku": "7798-70",
      *       "status": "Enabled",
      *       "stock_status_name": "In Stock",
      *       "currency_code": "UAH",
@@ -1917,7 +1917,7 @@ class ControllerModuleApimodule extends Controller
                 $response['stock_statuses'] = $this->model_module_apimodule->getStockStatuses();
                 $response['model'] = $product['model'];
                 $response['quantity'] = $product['quantity'];
-                $response['SKU'] = $product['sku'];
+                $response['sku'] = $product['sku'];
                 $response['stock_status_name'] = $product['stock_status_name'];
                 $response['name'] = strip_tags(htmlspecialchars_decode($product['name']));
 	            $response['description'] = $product['description'];
@@ -2083,7 +2083,7 @@ class ControllerModuleApimodule extends Controller
             }
         }
 
-        if (isset($_REQUEST['name']) && isset($_REQUEST['description'])&& isset($_REQUEST['categories'])) {
+        if (isset($_REQUEST['name']) && isset($_REQUEST['categories'])) {
 
 	        $data = [];
 
@@ -2092,10 +2092,14 @@ class ControllerModuleApimodule extends Controller
             } else {
                 $data['language_id'] = $this->config->get('config_language_id');
             }
-            if (isset($_REQUEST['name']) && isset($_REQUEST['description'])) {
+            if (isset($_REQUEST['name'])) {
                 $data['product_description'][$data['language_id']]['name'] = $_REQUEST['name'];
-                $data['product_description'][$data['language_id']]['description'] = $_REQUEST['description'];
             }
+
+	        if (isset($_REQUEST['description'])) {
+		        $data['product_description'][$data['language_id']]['description'] = $_REQUEST['description'];
+	        }
+
             if (isset($_REQUEST['price'])) {
                 $currency = $this->model_module_apimodule->getUserCurrency();
                 if(empty($currency)){
