@@ -909,7 +909,7 @@ class ModelModuleApimodule extends Model
 
     }
     public function getStockStatuses(){
-        $query = $this->db->query("SELECT stock_status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
+        $query = $this->db->query("SELECT stock_status_id as status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
         return $query->rows;
     }
 
