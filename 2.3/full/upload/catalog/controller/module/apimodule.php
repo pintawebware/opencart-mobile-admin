@@ -1811,7 +1811,7 @@ class ControllerModuleApimodule extends Controller
             $data['model'] = $product['model'];
             $data['quantity'] = $product['quantity'];
             $this->load->model('tool/image');
-            if (isset($product['image'])) {
+            if (!empty($product['image'])) {
                 $resized_omage = $this->model_tool_image->resize($product['image'], 200, 200);
                 $data['image'] = $resized_omage;
             } else {
@@ -1825,7 +1825,7 @@ class ControllerModuleApimodule extends Controller
             foreach ($product_categories as $pc){
                 $categories[] = $pc['name'];
             }
-            $data['categories'] = htmlspecialchars_decode(implode(', ', $categories));
+            $data['category'] = htmlspecialchars_decode(implode(', ', $categories));
             $to_response[] = $data;
         }
         $response['products'] = $to_response;
@@ -1929,13 +1929,14 @@ class ControllerModuleApimodule extends Controller
                 $response['price'] = $this->calculatePrice($product['price'], $currency);
                 $this->load->model('tool/image');
                 $product_img = $this->model_module_apimodule->getProductImages($id);
-
+                $response['images'] = [];
                 $this->load->model('tool/image');
                 if (count($product_img['images']) > 0) {
                     $response['images'] = [];
                     foreach ($product_img['images'] as $key => $image) {
                         $product_img['images'][$key]['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
                         $product_img['images'][$key]['image_id'] = $product_img['images'][$key]['product_image_id'];
+                        
                         unset($product_img['images'][$key]['product_id'], $product_img['images'][$key]['sort_order'], $product_img['images'][$key]['product_image_id']);
                     }
                     $response['images'] = $product_img['images'];
