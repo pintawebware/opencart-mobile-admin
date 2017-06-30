@@ -909,7 +909,7 @@ class ModelModuleApimodule extends Model
 
     }
     public function getStockStatuses(){
-        $query = $this->db->query("SELECT stock_status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
+        $query = $this->db->query("SELECT stock_status_id as status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
         return $query->rows;
     }
 
@@ -923,9 +923,13 @@ class ModelModuleApimodule extends Model
 
     public function setMainImageByImageId($image_id, $product_id){
         $new_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product_image` WHERE product_id = '". $product_id ."' AND product_image_id = ".$image_id)->row['image'];
-        $old_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product` WHERE product_id = ". $product_id)->row['image'];
+        
         $this->db->query("UPDATE `" . DB_PREFIX . "product` SET image = '" . $new_main_image . "' WHERE product_id = " . $product_id);
+
+        $old_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product` WHERE product_id = ". $product_id)->row['image'];
+        if(trim($old_main_image)!=""){
         $this->db->query("UPDATE `" . DB_PREFIX . "product_image` SET image = '" . $old_main_image . "' WHERE product_id = " . $product_id ." AND product_image_id = ".$image_id);
+        }
     }
 
 	public function getProductCategoriesMain($product_id){
