@@ -647,6 +647,7 @@ class ControllerModuleApimodule extends Controller
                 $this->load->model('tool/image');
                 for ($i = 0; $i < count($products); $i++) {
 
+                    $product['image'] = '';
                     if ($products[$i]['image'] && $products[$i]['image'] != '') {
                         $product['image'] = $this->model_tool_image->resize($products[$i]['image'], 200, 200);
                     }
