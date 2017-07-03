@@ -1903,11 +1903,11 @@ class ControllerModuleApimodule extends Controller
         $this->response->addHeader('Content-Type: application/json');
 
 
-   /*     $error = $this->valid();
+        $error = $this->valid();
         if ($error != null) {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
-        }*/
+        }
         if (isset($_REQUEST['product_id']) && (int)$_REQUEST['product_id'] != 0) {
             $id = $_REQUEST['product_id'];
             $this->load->model('module/apimodule');
@@ -1927,10 +1927,10 @@ class ControllerModuleApimodule extends Controller
                 }
                 $response['currency_code'] = $currency;
                 $response['price'] = $this->calculatePrice($product['price'], $currency);
+
                 $this->load->model('tool/image');
                 $product_img = $this->model_module_apimodule->getProductImages($id);
                 $response['images'] = [];
-                $this->load->model('tool/image');
                 if (count($product_img['images']) > 0) {
                     $response['images'] = [];
                     
@@ -1950,12 +1950,9 @@ class ControllerModuleApimodule extends Controller
                 } else {
                     $response['status_name'] = 'Disabled';
                 }
-                $categories = array();
+
                 $product_categories = $this->model_module_apimodule->getProductCategories($id);
-//                foreach ($product_categories as $pc){
-//                    $categories[] = $pc['name'];
-//                }
-              //  $response['categories'] = htmlspecialchars_decode(implode(', ', $categories));
+
                 $response['categories'] = $product_categories;
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
             } else {
