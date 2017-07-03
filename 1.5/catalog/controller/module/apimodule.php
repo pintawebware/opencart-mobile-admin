@@ -1938,7 +1938,7 @@ class ControllerModuleApimodule extends Controller
                     foreach ($product_img['images'] as $key => $image) {
                         $product_img['images'][$key]['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
 
-                        $product_img['images'][$key]['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
+                        $product_img['images'][$key]['image_id'] = "".$product_img['images'][$key]['product_image_id'];
 
                         unset($product_img['images'][$key]['product_id'], $product_img['images'][$key]['sort_order'], $product_img['images'][$key]['product_image_id']);
                     }
@@ -2121,7 +2121,11 @@ class ControllerModuleApimodule extends Controller
             if (isset($_REQUEST['sku'])) {  $data['sku'] = $_REQUEST['sku'];  }else{   $data['sku'] = '';  }
             if (isset($_REQUEST['quantity'])) {  $data['quantity'] = $_REQUEST['quantity'];  }else{  $data['quantity'] = 0;  }
             if (isset($_REQUEST['status'])) { $data['status'] = $_REQUEST['status'];  }else{    $data['status'] = 0;   }
-            if (isset($_REQUEST['substatus'])) {   $data['stock_status_id'] = $_REQUEST['substatus'];  }else{   $data['stock_status_id'] = 7; }
+            if ( isset($_REQUEST['substatus'])) {
+                $data['stock_status_id'] = $_REQUEST['substatus'];
+            }else{
+                $data['stock_status_id'] = 7;
+            }
             if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
 
 
