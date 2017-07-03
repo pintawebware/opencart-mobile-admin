@@ -1916,6 +1916,14 @@ class ControllerModuleApimodule extends Controller
             if (count($product) > 0) {
                 $response['product_id'] = $product['product_id'];
                 $response['stock_statuses'] = $this->model_module_apimodule->getStockStatuses();
+                if ( !empty($response['stock_statuses']) ) {
+                    $newArray = [];
+                    foreach ($response['stock_statuses'] as $key => $status ) {
+                        $newArray[$key]['status_id'] = $status['stock_status_id'];
+                        $newArray[$key]['name'] = $status['name'];
+                    }
+                    $response['stock_statuses'] = $newArray;
+                }
                 $response['model'] = $product['model'];
                 $response['quantity'] = $product['quantity'];
                 $response['sku'] = $product['sku'];
