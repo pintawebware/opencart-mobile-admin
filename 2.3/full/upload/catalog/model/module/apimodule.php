@@ -393,7 +393,10 @@ class ModelModuleApimodule extends Model
 
     public function getProductsList ($page, $limit, $name = '')
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity, p.image, p.price, pd.name FROM `" . DB_PREFIX . "product` AS p LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'" ;
+        $sql = "SELECT p.product_id, p.model, p.quantity, p.image, p.price, pd.name 
+							FROM `" . DB_PREFIX . "product` AS p 
+							LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
+							WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'" ;
         if($name != ''){
             $sql .= " AND (pd.name LIKE \"%" .$name. "%\" OR p.model LIKE \"%" .$name. "%\")";
         }
@@ -411,8 +414,7 @@ class ModelModuleApimodule extends Model
 					  FROM `" . DB_PREFIX . "product` AS p 
 					  LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
 					  LEFT JOIN `" . DB_PREFIX . "stock_status` ss ON p.stock_status_id = ss.stock_status_id 
-					  WHERE ss.language_id = '" . (int)$this->config->get('config_language_id') . "'
-					   AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' 
+					  WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' 
 					   AND p.product_id = ". $id ;
 
         $query = $this->db->query($sql);
@@ -909,7 +911,7 @@ class ModelModuleApimodule extends Model
 
     }
     public function getStockStatuses(){
-        $query = $this->db->query("SELECT stock_status_id as status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
+        $query = $this->db->query("SELECT stock_status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
         return $query->rows;
     }
 
@@ -922,15 +924,26 @@ class ModelModuleApimodule extends Model
     }
 
     public function setMainImageByImageId($image_id, $product_id){
-        $new_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product_image` WHERE product_id = '". $product_id ."' AND product_image_id = ".$image_id)->row['image'];
-        
-        $this->db->query("UPDATE `" . DB_PREFIX . "product` SET image = '" . $new_main_image . "' WHERE product_id = " . $product_id);
+	    $new_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product_image` 
+            WHERE product_id = '". $product_id ."' AND product_image_id = ".$image_id)->row['image'];
 
-        $old_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product` WHERE product_id = ". $product_id)->row['image'];
-        if(trim($old_main_image)!=""){
-        $this->db->query("UPDATE `" . DB_PREFIX . "product_image` SET image = '" . $old_main_image . "' WHERE product_id = " . $product_id ." AND product_image_id = ".$image_id);
-        }
-    }
+
+	    $old_main_image = $this->db->query("SELECT image FROM `" . DB_PREFIX . "product` 
+            WHERE product_id = ". $product_id)->row['image'];
+
+	    $this->db->query("UPDATE `" . DB_PREFIX . "product` SET image = '" . $new_main_image . "' 
+        	WHERE product_id = " . $product_id);
+
+
+	    if(trim($old_main_image)!=""){
+		    $sql = "UPDATE `" . DB_PREFIX . "product_image` SET image = '" . $old_main_image . "' WHERE product_id = " . $product_id ." AND product_image_id = ".$image_id;
+
+		    $this->db->query($sql);
+	    }else{
+		    $sql = "DELETE FROM `" . DB_PREFIX . "product_image` WHERE product_image_id = ".$image_id;
+
+		    $this->db->query($sql);
+	    }    }
 
 	public function getProductCategoriesMain($product_id){
 
