@@ -2086,10 +2086,14 @@ class ControllerModuleApimodule extends Controller
 
        // file_put_contents('logimg.php', json_encode($_FILES));
         if(!empty($_FILES)){
+             $image_catalog = DIR_IMAGE."catalog/"; 
+            if (!file_exists($image_catalog)) {
+               mkdir($image_catalog, 0777, true);
+            }
             foreach ($_FILES['image']['name'] as $key => $name) {
                 $tmp_name = $_FILES['image']["tmp_name"][$key];
-
-                if (move_uploaded_file($tmp_name, DIR_IMAGE."catalog/$name")){
+             
+                if (move_uploaded_file($tmp_name, $image_catalog."$name")){
                      $images[] = "catalog/$name";
                 }
             }
@@ -2150,6 +2154,7 @@ class ControllerModuleApimodule extends Controller
                     unset($images[0]);
                 }
                 $data['product_image'] = $images;
+                  $data['product_store'][] = 0;
                 $product_id = $this->model_module_apimodule->addProduct($data);
             }
 
