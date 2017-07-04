@@ -2066,11 +2066,10 @@ class ControllerModuleApimodule extends Controller
 			}
 
 			if (isset($_REQUEST['price'])) {
-				$currency = $this->model_module_apimodule->getUserCurrency();
-				if(empty($currency)){
-					$currency = $this->model_module_apimodule->getDefaultCurrency();
-				}
-				$this->load->model('localisation/currency');
+			
+				$currency = $this->model_module_apimodule->getDefaultCurrency();
+			
+    			$this->load->model('localisation/currency');
 				$result = $this->model_localisation_currency->getCurrencyByCode($currency);
 				$price = $_REQUEST['price']/$result['value'];
 				$data['price'] = $price;

@@ -518,11 +518,13 @@ class ModelModuleApimodule extends Model
 			product_id = '" . (int)$product_id . "', 
 			language_id = '" . (int)$language_id . "', 
 			name = '" . $this->db->escape($value['name']) . "', 
-			seo_title = '" . $this->db->escape($value['name']) . "', 
+			
 			description = '" . $this->db->escape($value['description']) . "'		
 			");
 
 		}
+
+       // seo_title = '" . $this->db->escape($value['name']) . "', 
 
 		if (isset($data['product_store'])) {
 			foreach ($data['product_store'] as $store_id) {

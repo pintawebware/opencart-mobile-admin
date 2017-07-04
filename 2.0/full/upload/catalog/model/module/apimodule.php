@@ -404,7 +404,7 @@ class ModelModuleApimodule extends Model
 
     public function getProductsByID ($id)
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name 
+        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, 
 						pd.description, p.sku, p.status,
  						ss.name stock_status_name 
 				FROM `" . DB_PREFIX . "product` AS p 
