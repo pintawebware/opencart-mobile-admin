@@ -518,7 +518,7 @@ class ModelModuleApimodule extends Model
 			product_id = '" . (int)$product_id . "', 
 			language_id = '" . (int)$language_id . "', 
 			name = '" . $this->db->escape($value['name']) . "', 
-			meta_title = '" . $this->db->escape($value['name']) . "', 
+			seo_title = '" . $this->db->escape($value['name']) . "', 
 			description = '" . $this->db->escape($value['description']) . "'		
 			");
 
