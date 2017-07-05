@@ -5,6 +5,10 @@ class ControllerModuleApimodule extends Controller
 	private $error = array();
 	private $API_VERSION = 0;
 
+	public function getVersion()
+	{
+		return $this->API_VERSION;
+	}
 	public function __construct( $registry ) {
 		parent::__construct( $registry );
 		$this->load->model('setting/setting');
@@ -1787,7 +1791,7 @@ class ControllerModuleApimodule extends Controller
                 $data['model'] = $product['model'];
                 $data['quantity'] = $product['quantity'];
                 $this->load->model('tool/image');
-                if (isset($product['image'])) {
+	            if (!empty($product['image'])) {
                     $resized_omage = $this->model_tool_image->resize($product['image'], 200, 200);
                     $data['image'] =  $resized_omage;
                 } else {
@@ -1796,6 +1800,12 @@ class ControllerModuleApimodule extends Controller
                 $data['price'] = number_format($product['price'], 2, '.', '');
                 $data['name'] = strip_tags(htmlspecialchars_decode($product['name']));
                 $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
+	            $product_categories = $this->model_module_apimodule->getProductCategoriesMain($product['product_id']);
+	            $categories = array();
+	            foreach ($product_categories as $pc){
+		            $categories[] = $pc['name'];
+	            }
+	            $data['category'] = htmlspecialchars_decode(implode(', ', $categories));
                 $to_response[] = $data;
             }
             $response['products'] = $to_response;
@@ -1867,30 +1877,46 @@ class ControllerModuleApimodule extends Controller
 
             $this->load->model('module/apimodule');
             $product = $this->model_module_apimodule->getProductsByID($id);
-
-            $product_img = $this->model_module_apimodule->getProductImages($id);
-
-            if (count($product) > 0) {
+	        if (count($product) > 0) {
                 $response['product_id'] = $product['product_id'];
+	            $response['stock_statuses'] = $this->model_module_apimodule->getStockStatuses();
                 $response['model'] = $product['model'];
                 $response['quantity'] = $product['quantity'];
+	            $response['sku'] = $product['sku'];
+	            $response['stock_status_name'] = $product['stock_status_name'];
                 $response['price'] = number_format($product['price'], 2, '.', '');
                 $response['name'] = strip_tags(htmlspecialchars_decode($product['name']));
                 $response['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
+	            $response['description'] = $product['description'];
+
                 $this->load->model('tool/image');
 
-                $response['description'] = strip_tags(htmlspecialchars_decode($product_img['description']));
-                if (count($product_img['images']) > 0) {
-                    $response['images'] = [];
-                    foreach ($product_img['images'] as $image) {
-                        $image_to_response = $this->model_tool_image->resize($image, 600, 800);
-                        if ($image_to_response) {
-                            $response['images'][] = $image_to_response;
-                        }
-                    }
-                } else {
-                    $response['images'] = [];
-                }
+		        $product_img = $this->model_module_apimodule->getProductImages($id);
+		        $response['images'] = [];
+		        if (count($product_img['images']) > 0) {
+			        $response['images'] = [];
+
+			        foreach ($product_img['images'] as $key => $image) {
+				        $product_img['images'][$key]['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+
+				        $product_img['images'][$key]['image_id'] = $product_img['images'][$key]['product_image_id'];
+
+				        unset($product_img['images'][$key]['product_id'], $product_img['images'][$key]['sort_order'], $product_img['images'][$key]['product_image_id']);
+			        }
+			        $response['images'] = $product_img['images'];
+		        } else {
+			        $response['images'] = [];
+		        }
+
+		        if ($product['status']) {
+			        $response['status_name'] = 'Enabled';
+		        } else {
+			        $response['status_name'] = 'Disabled';
+		        }
+
+		        $product_categories = $this->model_module_apimodule->getProductCategories($id);
+
+		        $response['categories'] = $product_categories;
 
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
             } else {
@@ -1900,6 +1926,432 @@ class ControllerModuleApimodule extends Controller
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
         }
     }
+
+
+	/**
+	 * @api {post} index.php?route=module/apimodule/setQuantity  setQuantity
+	 * @apiName setQuantity
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} product_id unique product ID.
+	 * @apiParam {Number} quantity unique product ID.
+	 *
+	 * @apiSuccess {Number} quantity  Updated quantity of the product.
+	 * @apiSuccess {Number} version  Current API version.
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Response":
+	 *   {
+	 *       "quantity" : "999"
+	 *   },
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Missing some params",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+
+
+	public function setQuantity()
+	{
+		header("Access-Control-Allow-Origin: *");
+		$this->response->addHeader('Content-Type: application/json');
+
+		$error = $this->valid();
+		if ($error != null) {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
+			return;
+		}
+		if (!empty($_REQUEST['quantity']) && !empty($_REQUEST['product_id'])) {
+			$this->load->model('module/apimodule');
+			$quantity = $this->model_module_apimodule->setProductQuantity($_REQUEST['quantity'], $_REQUEST['product_id']);
+			if ($quantity == $_REQUEST['quantity']) {
+				$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['quantity' => $quantity], 'status' => true]));
+			}
+		} else {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Missing some params', 'status' => false]));
+		}
+	}
+
+	/**
+	 * @api {post} index.php?route=module/apimodule/updateProduct  updateProduct
+	 * @apiName updateProduct
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} product_id unique product ID.
+	 * @apiParam {String} quantity new quantity for the product.
+	 * @apiParam {Number} language_id new language_id for the product.
+	 * @apiParam {String} name name of the product.
+	 * @apiParam {String} description description of the product.
+	 * @apiParam {Number} model model of the product.
+	 * @apiParam {Sku} sku SKU of the product.
+	 * @apiParam {Status} 1:0 Status of the product.
+	 * @apiParam {substatus} substatus stock status id of the product.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found product with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+
+	public function updateProduct()
+	{
+		header("Access-Control-Allow-Origin: *");
+		$this->response->addHeader('Content-Type: application/json');
+
+		$error = $this->valid();
+		if ($error != null) {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+			                                        'error' => $error,
+			                                        'status' => false]));
+			return;
+		}
+
+		$new_images = array();
+		$server = HTTPS_SERVER ? HTTPS_SERVER : HTTP_SERVER;
+
+		$images = [];
+
+		// file_put_contents('logimg.php', json_encode($_FILES));
+		if(!empty($_FILES)){
+			foreach ($_FILES['image']['name'] as $key => $name) {
+				$tmp_name = $_FILES['image']["tmp_name"][$key];
+
+				if (move_uploaded_file($tmp_name, DIR_IMAGE."catalog/$name")){
+					$images[] = "catalog/$name";
+				}
+			}
+		}
+
+		if (isset($_REQUEST['name']) && isset($_REQUEST['categories'])) {
+
+			$data = [];
+
+			if (isset($_REQUEST['language_id'])) {
+				$data['language_id'] = $_REQUEST['language_id'];
+			} else {
+				$data['language_id'] = $this->config->get('config_language_id');
+			}
+			if (isset($_REQUEST['name'])) {
+				$data['product_description'][$data['language_id']]['name'] = $_REQUEST['name'];
+			}
+
+			if (isset($_REQUEST['description'])) {
+				$data['product_description'][$data['language_id']]['description'] = $_REQUEST['description'];
+			}
+
+			if (isset($_REQUEST['price'])) {
+			
+				$currency = $this->model_module_apimodule->getDefaultCurrency();
+			
+    			$this->load->model('localisation/currency');
+				$result = $this->model_localisation_currency->getCurrencyByCode($currency);
+				$price = $_REQUEST['price']/$result['value'];
+				$data['price'] = $price;
+			}else{
+				$data['price'] = 0;
+			}
+
+			if (isset($_REQUEST['model'])) {  $data['model'] = $_REQUEST['model'];  }else{    $data['model'] = "";  }
+			if (isset($_REQUEST['sku'])) {  $data['sku'] = $_REQUEST['sku'];  }else{   $data['sku'] = '';  }
+			if (isset($_REQUEST['quantity'])) {  $data['quantity'] = $_REQUEST['quantity'];  }else{  $data['quantity'] = 0;  }
+			if (isset($_REQUEST['status'])) { $data['status'] = $_REQUEST['status'];  }else{    $data['status'] = 0;   }
+			if (isset($_REQUEST['substatus'])) {   $data['stock_status_id'] = $_REQUEST['substatus'];  }else{   $data['stock_status_id'] = 7; }
+			if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
+
+
+			if (!empty($_REQUEST['product_id'])) {
+				$product_id = $_REQUEST['product_id'];
+
+				$data['product_image'] = $images;
+				$this->model_module_apimodule->editProduct($product_id,$data);
+
+			}else{
+				$data['product_id'] = 0;
+				if(!empty($images[0])){
+					$data['image'] = $images[0];
+					unset($images[0]);
+				}
+				$data['product_image'] = $images;
+				$product_id = $this->model_module_apimodule->addProduct($data);
+			}
+
+
+			/*         if(!empty($new_images)){
+						 $this->model_module_apimodule->addProductImages($new_images, $product_id);
+					 }
+					  if(isset($main_image)){
+						$this->model_module_apimodule->setMainImage($main_image, $product_id);
+					 }
+					 if(!empty($_REQUEST['removed_image'])){
+						 $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
+						 $this->model_module_apimodule->removeProductImages($removed_image, $product_id);
+					 }*/
+
+			$images = [];
+			$product_img = $this->model_module_apimodule->getProductImages($product_id);
+			$this->load->model('tool/image');
+			if (count($product_img['images']) > 0) {
+
+				foreach ($product_img['images'] as $key => $image) {
+					$img = [];
+					$img['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+					$img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
+					$images[] = $img;
+				}
+
+			} else {
+				$images = [];
+			}
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+			                                        'status' => true,
+			                                        'response' =>[
+				                                        'product_id'=>$product_id,
+				                                        'images' => $images
+			                                        ]
+				]
+			));
+		} else {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+			                                        'error' => 'You have not specified ID',
+			                                        'status' => false]));
+		}
+	}
+
+	/**
+	 * @api {post} index.php?route=module/apimodule/deleteImage  deleteImage
+	 * @apiName deleteImage
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} product_id unique product ID.
+	 * @apiParam {Number} image_id unique image ID.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+
+	public function deleteImage(){
+		header("Access-Control-Allow-Origin: *");
+		$this->response->addHeader('Content-Type: application/json');
+		$error = $this->valid();
+		if ($error != null) {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
+			return;
+		}
+		if(!empty($_REQUEST['product_id'])){
+			if(!empty($_REQUEST['image_id'])){
+				if($_REQUEST['image_id'] == -1){
+					$this->model_module_apimodule->removeProductMainImage($_REQUEST['product_id']);
+					$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+				}else{
+					$this->model_module_apimodule->removeProductImageById($_REQUEST['image_id'], $_REQUEST['product_id']);
+					$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+				}
+			}else{
+				$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified image id', 'status' => false]));
+			}
+		}else{
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
+		}
+	}
+
+	/**
+	 * @api {post} index.php?route=module/apimodule/mainImage  mainImage
+	 * @apiName mainImage
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} product_id unique product ID.
+	 * @apiParam {Number} image_id unique image ID.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+
+	public function mainImage(){
+		header("Access-Control-Allow-Origin: *");
+		$this->response->addHeader('Content-Type: application/json');
+		$error = $this->valid();
+		if ($error != null) {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
+			return;
+		}
+		if(!empty($_REQUEST['product_id'])){
+			if(!empty($_REQUEST['product_id'])){
+				if(!empty($_REQUEST['image_id'])){
+					$this->model_module_apimodule->setMainImageByImageId($_REQUEST['image_id'], $_REQUEST['product_id']);
+					$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'status' => true]));
+				}else{
+					$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified image id', 'status' => false]));
+				}
+			}
+		}else{
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You have not specified ID', 'status' => false]));
+		}
+	}
+
+	/**
+	 * @api {post} index.php?route=module/apimodule/getCategories  getCategories
+	 * @apiName getCategories
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 * @apiParam {Number} category_id unique category ID.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Array} categories  array of categories.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+	public function getCategories()
+	{
+		header("Access-Control-Allow-Origin: *");
+		$this->response->addHeader('Content-Type: application/json');
+
+		$error = $this->valid();
+		if ($error != null) {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
+			return;
+		}
+		$this->load->model('module/apimodule');
+		if($_REQUEST['category_id'] == -1){
+			$categories = $this->model_module_apimodule->getCategories();
+		}else{
+			$categories = $this->model_module_apimodule->getCategoriesById($_REQUEST['category_id']);
+		}
+
+
+		$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['categories' => $categories], 'status' => true]));
+	}
+
+
+	/**
+	 * @api {post} index.php?route=module/apimodule/getSubstatus  getSubstatus
+	 * @apiName getSubstatus
+	 * @apiGroup All
+	 *
+	 * @apiParam {Token} token your unique token.
+	 *
+	 *
+	 * @apiSuccess {Number} version  Current API version.
+	 * @apiSuccess {Boolean} status Status of the product update.
+	 *
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * {
+	 *   "Status" : true,
+	 *   "version": 1.0
+	 * }
+	 * @apiErrorExample Error-Response:
+	 * {
+	 *      "Error" : "Can not found category with id = 10",
+	 *      "version": 1.0,
+	 *      "Status" : false
+	 * }
+	 *
+	 *
+	 */
+	public function getSubstatus()
+	{
+		header("Access-Control-Allow-Origin: *");
+		$this->response->addHeader('Content-Type: application/json');
+
+		$error = $this->valid();
+		if ($error != null) {
+			$this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
+			return;
+		}
+		$this->load->model('module/apimodule');
+
+		$categories = $this->model_module_apimodule->getSubstatus();
+
+		$this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+		                                        'response' => ['stock_statuses' => $categories], 'status' => true]));
+	}
+
+	private function calculatePrice($price, $currency){
+		$this->load->model('localisation/currency');
+		$result = $this->model_localisation_currency->getCurrencyByCode($currency);
+		$price = number_format($price/$result['value'], 2, '.', '');
+		return $price;
+	}
 
 }
 
