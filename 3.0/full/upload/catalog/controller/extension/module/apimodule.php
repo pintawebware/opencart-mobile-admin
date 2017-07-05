@@ -144,7 +144,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $limit = 9999;
         }
 
-        $this->load->model('module/apimodule');
+        $this->load->model('extension/module/apimodule');
 
         if (isset($_REQUEST['filter'])) {
 
@@ -293,7 +293,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 return;
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $order = $this->model_extension_module_apimodule->getOrderById($id);
 
             if (count($order) > 0) {
@@ -391,7 +391,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 return;
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $order = $this->model_extension_module_apimodule->getOrderById($id);
 
 
@@ -521,7 +521,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 return;
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $statuses = $this->model_extension_module_apimodule->getOrderHistory($id);
 
             $data = array();
@@ -636,7 +636,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 return;
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $products = $this->model_extension_module_apimodule->getOrderProducts($id);
 
 
@@ -764,7 +764,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $city = false;
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $data = $this->model_extension_module_apimodule->ChangeOrderDelivery($address, $city, $order_id);
             if ($data) {
 
@@ -835,7 +835,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $orderID = $_REQUEST['order_id'];
             $comment = $_REQUEST['comment'];
             $inform = $_REQUEST['inform'];
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $data = $this->model_extension_module_apimodule->AddComment($orderID, $statusID, $comment, $inform);
 
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
@@ -968,7 +968,7 @@ class ControllerExtensionModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token'])) {
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
 
             $deleted = $this->model_extension_module_apimodule->findUserToken($_REQUEST['old_token']);
             if (count($deleted) != 0) {
@@ -1017,7 +1017,7 @@ class ControllerExtensionModuleApimodule extends Controller
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
         if (isset($_REQUEST['old_token']) && isset($_REQUEST['new_token'])) {
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $updated = $this->model_extension_module_apimodule->updateUserDeviceToken($_REQUEST['old_token'], $_REQUEST['new_token']);
             if (count($updated) != 0) {
                 $this->response->setOutput(json_encode(['response' => ['version' => $this->API_VERSION, 'status' => true]]));
@@ -1196,7 +1196,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
-        $this->load->model('module/apimodule');
+        $this->load->model('extension/module/apimodule');
 
         if (isset($_REQUEST['filter']) && $_REQUEST['filter'] != '') {
             $clients = $this->model_extension_module_apimodule->getTotalCustomers(array('filter' => $_REQUEST['filter']));
@@ -1372,7 +1372,7 @@ class ControllerExtensionModuleApimodule extends Controller
         if (!isset($_REQUEST['token']) || $_REQUEST['token'] == '') {
             $error = 'You need to be logged!';
         } else {
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $tokens = $this->model_extension_module_apimodule->getTokens();
             if (count($tokens) > 0) {
                 foreach ($tokens as $token) {
@@ -1472,7 +1472,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $fio = '';
         }
 
-        $this->load->model('module/apimodule');
+        $this->load->model('extension/module/apimodule');
 
         $clients = $this->model_extension_module_apimodule->getClients(array('page' => $page, 'limit' => $limit, 'order' => $order, 'fio' => $fio));
         $response = [];
@@ -1568,7 +1568,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 return;
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $client = $this->model_extension_module_apimodule->getClientInfo($id);
             $currency_code = $this->model_extension_module_apimodule->getDefaultCurrency();
             if (count($client) > 0) {
@@ -1691,7 +1691,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $sort = 'date_added';
             }
 
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $orders = $this->model_extension_module_apimodule->getClientOrders($id, $sort);
             $currency_code = $this->model_extension_module_apimodule->getDefaultCurrency();
             if (count($orders) > 0) {
@@ -1807,7 +1807,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $name = '';
         }
         $to_response = [];
-        $this->load->model('module/apimodule');
+        $this->load->model('extension/module/apimodule');
         $products = $this->model_extension_module_apimodule->getProductsList($page, $limit, $name);
 
         foreach ($products as $product) {
@@ -1913,7 +1913,7 @@ class ControllerExtensionModuleApimodule extends Controller
         }
         if (isset($_REQUEST['product_id']) && (int)$_REQUEST['product_id'] != 0) {
             $id = $_REQUEST['product_id'];
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $product = $this->model_extension_module_apimodule->getProductsByID($id);
             if (count($product) > 0) {
                 $response['product_id'] = $product['product_id'];
@@ -2010,7 +2010,7 @@ class ControllerExtensionModuleApimodule extends Controller
             return;
         }
         if (!empty($_REQUEST['quantity']) && !empty($_REQUEST['product_id'])) {
-            $this->load->model('module/apimodule');
+            $this->load->model('extension/module/apimodule');
             $quantity = $this->model_extension_module_apimodule->setProductQuantity($_REQUEST['quantity'], $_REQUEST['product_id']);
             if ($quantity == $_REQUEST['quantity']) {
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['quantity' => $quantity], 'status' => true]));
@@ -2328,7 +2328,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
-        $this->load->model('module/apimodule');
+        $this->load->model('extension/module/apimodule');
         if($_REQUEST['category_id'] == -1){
             $categories = $this->model_extension_module_apimodule->getCategories();
         }else{
@@ -2377,7 +2377,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => $error, 'status' => false]));
             return;
         }
-        $this->load->model('module/apimodule');
+        $this->load->model('extension/module/apimodule');
 
         $categories = $this->model_extension_module_apimodule->getSubstatus();
 
