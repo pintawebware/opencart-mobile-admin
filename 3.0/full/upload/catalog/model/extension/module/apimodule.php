@@ -1,6 +1,6 @@
 <?php
 
-class ModelModuleApimodule extends Model
+class ModelExtensionModuleApimodule extends Model
 {
 	private $API_VERSION = 2.0;
 
@@ -409,7 +409,8 @@ class ModelModuleApimodule extends Model
 
     public function getProductsByID ($id)
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name,pd.description, p.sku, p.status,
+        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name,
+						pd.description, p.sku, p.status,
  						ss.name stock_status_name 
 					  FROM `" . DB_PREFIX . "product` AS p 
 					  LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
@@ -518,13 +519,11 @@ class ModelModuleApimodule extends Model
 			product_id = '" . (int)$product_id . "', 
 			language_id = '" . (int)$language_id . "', 
 			name = '" . $this->db->escape($value['name']) . "', 
-			
+			meta_title = '" . $this->db->escape($value['name']) . "', 
 			description = '" . $this->db->escape($value['description']) . "'		
 			");
 
 		}
-
-       // seo_title = '" . $this->db->escape($value['name']) . "', 
 
 		if (isset($data['product_store'])) {
 			foreach ($data['product_store'] as $store_id) {
@@ -913,7 +912,7 @@ class ModelModuleApimodule extends Model
 
     }
     public function getStockStatuses(){
-        $query = $this->db->query("SELECT stock_status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
+        $query = $this->db->query("SELECT stock_status_id status_id, name FROM `" . DB_PREFIX . "stock_status` WHERE language_id = ".(int)$this->config->get('config_language_id'));
         return $query->rows;
     }
 
@@ -1041,7 +1040,7 @@ class ModelModuleApimodule extends Model
 
 	public function getSubstatus(){
 
-		$query = $this->db->query("SELECT c.name, c.stock_status_id status_id FROM  `" . DB_PREFIX . "stock_status` c  
+		$query = $this->db->query("SELECT c.name, c.stock_status_id FROM  `" . DB_PREFIX . "stock_status` c  
 					WHERE c.language_id = ".(int)$this->config->get('config_language_id'));
 		return $query->rows;
 	}
