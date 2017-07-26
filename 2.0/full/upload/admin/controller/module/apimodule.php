@@ -108,6 +108,7 @@ class ControllerModuleApimodule extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$data['version'] = $version = $this->checkVersion();
+		$data['current_version'] = $this->API_VERSION;
 		$data['update'] = $this->url->link('module/apimodule/update&v='.$version, 'token=' . $this->session->data['token'], 'SSL');
 
 

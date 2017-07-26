@@ -47,7 +47,12 @@
       </div>
       <div class="panel-body">
         <form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form-slideshow" class="form-horizontal">
-
+ <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">Version</label>
+                <div class="col-sm-10 control-label">
+                    <div class="pull-left"><?php echo $current_version; ?></div>
+                </div>
+            </div>
 
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status"><?php echo $entry_status; ?></label>

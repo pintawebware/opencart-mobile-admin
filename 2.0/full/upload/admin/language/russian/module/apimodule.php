@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']    = 'OPENCART-MOBILE-ADMIN';
+$_['heading_title']    = 'OPENCART-MOBILE-ADMIN v2.0';
 
 // Text
 $_['text_module']      = 'Модули';
