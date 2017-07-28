@@ -641,10 +641,9 @@ class ControllerModuleApimodule extends Controller
                 $this->load->model('tool/image');
                 for ($i = 0; $i < count($products); $i++) {
 
-                    if ($products[$i]['image'] && $products[$i]['image'] != '') {
-                        $image = $this->model_tool_image->resize($products[$i]['image'], 200, 200);
-                        $product['image'] = !empty($image) ? $image : "";
-                    }
+                    $image = $this->model_tool_image->resize($products[$i]['image'], 200, 200);
+                    $product['image'] = !empty($image) ? $image : "";
+
                     if (isset($products[$i]['name']) && $products[$i]['name'] != '') {
                         $product['name'] = strip_tags(htmlspecialchars_decode($products[$i]['name']));
                     }
