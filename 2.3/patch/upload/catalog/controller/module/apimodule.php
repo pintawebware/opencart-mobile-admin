@@ -1935,8 +1935,8 @@ class ControllerModuleApimodule extends Controller
                     $response['images'] = [];
                     
                     foreach ($product_img['images'] as $key => $image) {
-                        $product_img['images'][$key]['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
-
+                        $image = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                        $product_img['images'][$key]['image'] = !empty($image) ? $image : '';
                         $product_img['images'][$key]['image_id'] = $product_img['images'][$key]['product_image_id'];
 
                         unset($product_img['images'][$key]['product_id'], $product_img['images'][$key]['sort_order'], $product_img['images'][$key]['product_image_id']);
