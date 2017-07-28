@@ -64,7 +64,9 @@
             </div>
           </div>
         </form>
+        <h3>Version <?php echo $version; ?></h3>
       </div>
+
     </div>
   </div>
 </div>

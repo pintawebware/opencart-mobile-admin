@@ -17,7 +17,13 @@ class ControllerModuleApimodule extends Controller {
     public function checkVersion(){
         $return = false;
 
-        $json = file_get_contents('https://opencartapp.pro/app/index.php?opencart_version='.$this->OPENCART_VERSION);
+        $curl_handle = curl_init();
+        curl_setopt($curl_handle, CURLOPT_URL,'https://opencartapp.pro/app/index.php?opencart_version='.$this->OPENCART_VERSION);
+        curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0');
+        $json = curl_exec($curl_handle);
+        curl_close($curl_handle);
         $version = json_decode($json,1);
 
         if($this->API_VERSION <(float)$version['version']){
@@ -25,6 +31,7 @@ class ControllerModuleApimodule extends Controller {
         }
         return $return;
     }
+
     public function index() {
         $this->load->language('module/apimodule');
 
