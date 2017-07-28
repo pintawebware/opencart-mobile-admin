@@ -1943,7 +1943,7 @@ class ControllerModuleApimodule extends Controller
                     }
                     $response['images'] = $product_img['images'];
                 } else {
-                    $response['images'] = [];
+                    $response['images'] = '';
                 }
                 if ($product['status']) {
                     $response['status_name'] = 'Enabled';
