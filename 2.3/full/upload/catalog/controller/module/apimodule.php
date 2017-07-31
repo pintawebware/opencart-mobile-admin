@@ -647,10 +647,9 @@ class ControllerModuleApimodule extends Controller
                 $this->load->model('tool/image');
                 for ($i = 0; $i < count($products); $i++) {
 
-                    if ($products[$i]['image'] && $products[$i]['image'] != '') {
-                        $image = $this->model_tool_image->resize($products[$i]['image'], 200, 200);
-                        $product['image'] = !empty($image) ? $image : "";
-                    }
+                    $image = $this->model_tool_image->resize($products[$i]['image'], 200, 200);
+                    $product['image'] = !empty($image) ? $image : "";
+
                     if (isset($products[$i]['name']) && $products[$i]['name'] != '') {
                         $product['name'] = strip_tags(htmlspecialchars_decode($products[$i]['name']));
                     }
@@ -1936,7 +1935,8 @@ class ControllerModuleApimodule extends Controller
                     $response['images'] = [];
                     
                     foreach ($product_img['images'] as $key => $image) {
-                        $product_img['images'][$key]['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                        $image = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                        $product_img['images'][$key]['image'] = !empty($image) ? $image : '';
 
                         $product_img['images'][$key]['image_id'] = $product_img['images'][$key]['product_image_id'];
 
@@ -1944,7 +1944,7 @@ class ControllerModuleApimodule extends Controller
                     }
                     $response['images'] = $product_img['images'];
                 } else {
-                    $response['images'] = [];
+                    $response['images'] = '';
                 }
                 if ($product['status']) {
                     $response['status_name'] = 'Enabled';
