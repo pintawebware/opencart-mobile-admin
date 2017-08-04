@@ -36,5 +36,14 @@
 ]]></add>
 		</operation>
     </file>
-
+	<file path="admin/controller/user/user.php">
+	        <operation error="skip">
+	            <search ><![CDATA[$this->model_user_user->deleteUser($user_id);]]></search>
+	            <add position="before"><![CDATA[
+	                $sql = "DELETE FROM `" . DB_PREFIX . "user_token_mob_api`  WHERE user_id = '". $user_id."'";
+	                $query = $this->db->query($sql);
+	                $sql = "DELETE FROM `" . DB_PREFIX . "user_device_mob_api` WHERE user_id = ". $user_id;
+	                $query = $this->db->query($sql); ]]></add>
+	        </operation>
+	    </file>
 </modification>
