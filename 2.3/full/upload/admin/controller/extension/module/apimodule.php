@@ -45,7 +45,8 @@ class ControllerExtensionModuleApimodule extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
+			//$this->response->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
+			$this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=module', true));
 		}
 
 
@@ -134,8 +135,18 @@ class ControllerExtensionModuleApimodule extends Controller {
 		if(isset($_GET['v'])) {
 			//apimobile1.8.ocmod.zip
 			$this->fileName = "apimobile" . $_GET['v'] .".ocmod.zip";
-			$file = file_get_contents("https://opencartapp.pro/app/".$this->OPENCART_VERSION.'/'.$this->fileName);
+			//$file = file_get_contents("https://opencartapp.pro/app/".$this->OPENCART_VERSION.'/'.$this->fileName);
 			// If no temp directory exists create it
+
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_URL, "https://opencartapp.pro/app/".$this->OPENCART_VERSION.'/'.$this->fileName);
+            $file = curl_exec($ch);
+            curl_close($ch);
 
 			if (!is_dir(DIR_UPLOAD . $this->path)) {
 				mkdir(DIR_UPLOAD . $this->path, 0777);
