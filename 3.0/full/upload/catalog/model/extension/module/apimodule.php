@@ -393,7 +393,7 @@ class ModelExtensionModuleApimodule extends Model
 
     public function getProductsList ($page, $limit, $name = '')
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity, p.image, p.price, pd.name 
+        $sql = "SELECT p.product_id, p.model, p.quantity, p.image, p.price, pd.name, p.tax_class_id  
 							FROM `" . DB_PREFIX . "product` AS p 
 							LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
 							WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'" ;
@@ -409,7 +409,7 @@ class ModelExtensionModuleApimodule extends Model
 
     public function getProductsByID ($id)
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name,
+        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, p.tax_class_id,
 						pd.description, p.sku, p.status,
  						ss.name stock_status_name 
 					  FROM `" . DB_PREFIX . "product` AS p 
