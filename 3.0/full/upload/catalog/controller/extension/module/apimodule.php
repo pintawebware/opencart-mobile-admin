@@ -1943,7 +1943,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $response['currency_code'] = $currency;
                 //$response['price'] = $this->calculatePrice($product['price'], $currency);
 
-		$response['price'] = number_format($this->calculatePrice($product['price'], $product['tax_class_id'], $currency), 2, '.', '');
+		$response['price'] = number_format($this->calculatePrice($product['price'], $product['tax_class_id']), 2, '.', '');
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_extension_module_apimodule->getProductImages($id);
@@ -2399,7 +2399,7 @@ class ControllerExtensionModuleApimodule extends Controller
             'response' => ['stock_statuses' => $categories], 'status' => true]));
     }
 
-    private function calculatePrice($price, $currency){
+    private function calculatePrice($priceOld, $tax_class_id ){
         $price = $this->tax->calculate($priceOld, $tax_class_id, $this->config->get('config_tax'));
         return $price;
     }
