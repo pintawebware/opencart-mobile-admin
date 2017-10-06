@@ -1017,7 +1017,7 @@ class ModelModuleApimodule extends Model
 	    $query = $this->db->query("SELECT c.parent_id FROM  `" . DB_PREFIX . "category` c  ");
 	    $parents = $query->rows;
 	    $array =  array_map(function($v) { return $v['parent_id']; },$parents);
-
+	    $return = [];
 	    foreach ($categories as $one):
 			$cat = [];
 	        $cat['name'] = $one['name'];
