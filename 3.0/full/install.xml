@@ -38,4 +38,20 @@
 		</operation>
     </file>
 
+
+
+    <file path="catalog/controller/startup/router.php">
+        <operation error="skip">
+            <search ><![CDATA[// Sanitize the call]]></search>
+            <add position="before"><![CDATA[
+            	$routeModule = explode('/', $route);
+			        if ( $routeModule[0] == 'module' && $routeModule[1] == 'apimodule') {
+			            array_unshift($routeModule, 'extension');
+			            $route = implode('/', $routeModule);
+			        }
+	        	]]>
+        	</add>
+        </operation>
+    </file>
+
 </modification>
