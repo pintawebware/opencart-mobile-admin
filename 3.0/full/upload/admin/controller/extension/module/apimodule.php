@@ -95,6 +95,16 @@ class ControllerExtensionModuleApimodule extends Controller {
 		} else {
 			$data['module_apimodule_status'] = $this->config->get('module_apimodule_status');
 		}
+
+		$this->load->model('setting/store');
+        $data['stores'] = $this->model_setting_store->getStores();
+        if (isset($this->request->post['apimodule_store'])) {
+            $data['module_apimodule_store'] = $this->request->post['module_apimodule_store'];
+        } else {
+            $data['module_apimodule_store'] = $this->config->get('module_apimodule_store');
+        }
+
+
 		if (!extension_loaded('zip')) {
 			$data['ext'] = "not installed zip extension for update";
 		}else{

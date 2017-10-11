@@ -2151,6 +2151,7 @@ class ControllerExtensionModuleApimodule extends Controller
                     unset($images[0]);
                 }
                 $data['product_image'] = $images;
+                $data['product_store'] = $this->config->get('module_apimodule_store');
                 $product_id = $this->model_extension_module_apimodule->addProduct($data);
             }
 
