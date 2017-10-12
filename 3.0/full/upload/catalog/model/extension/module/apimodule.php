@@ -1279,7 +1279,7 @@ class ModelExtensionModuleApimodule extends Model
             // If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history
             if (in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) && !in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
                 // Restock
-                $order_products = $this->getOrderProducts($order_id);
+                $order_products = $this->getOrderProductsNew($order_id);
 
                 foreach($order_products as $order_product) {
                     $this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (int)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
