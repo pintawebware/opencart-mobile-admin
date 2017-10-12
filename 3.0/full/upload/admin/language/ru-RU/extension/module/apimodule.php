@@ -6,6 +6,8 @@ $_['heading_title']    = 'OPENCART-MOBILE-ADMIN v2.0';
 $_['text_module']      = 'Модули';
 $_['text_success']     = 'Настройки успешно изменены!';
 $_['text_edit']        = 'Настройки модуля';
+$_['text_default']     = 'По умолчанию';
+$_['entry_store']     = 'Магазины';
 
 // Entry
 $_['entry_name'] = 'Название модуля';

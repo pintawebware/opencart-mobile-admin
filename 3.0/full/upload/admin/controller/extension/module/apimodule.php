@@ -54,6 +54,8 @@ class ControllerExtensionModuleApimodule extends Controller {
 		$data['text_edit'] = $this->language->get('text_edit');
 		$data['text_enabled'] = $this->language->get('text_enabled');
 		$data['text_disabled'] = $this->language->get('text_disabled');
+		$data['text_default'] = $this->language->get('text_disabled');
+		$data['entry_store'] = $this->language->get('text_disabled');
 
 		$data['entry_status'] = $this->language->get('entry_status');
 
