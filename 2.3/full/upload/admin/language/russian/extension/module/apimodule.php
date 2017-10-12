@@ -10,6 +10,7 @@ $_['text_default']     = 'По умолчанию';
 // Entry
 $_['entry_name'] = 'Название модуля';
 $_['entry_status']     = 'Статус';
+$_['entry_store']     = 'Магазины';
 
 // Error
 $_['error_permission'] = 'У Вас нет прав для управления данным модулем!';
