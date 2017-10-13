@@ -57,6 +57,8 @@ class ControllerModuleApimodule extends Controller {
         $this->data['text_disabled'] = $this->language->get('text_disabled');
 
         $this->data['entry_status'] = $this->language->get('entry_status');
+        $this->data['entry_store'] = $this->language->get('entry_store');
+        $this->data['text_default'] = $this->language->get('text_default');
 
         $this->data['button_save'] = $this->language->get('button_save');
         $this->data['button_cancel'] = $this->language->get('button_cancel');
@@ -104,7 +106,11 @@ class ControllerModuleApimodule extends Controller {
         if (isset($this->request->post['apimodule_store'])) {
             $data['apimodule_store'] = $this->request->post['apimodule_store'];
         } else {
-            $data['apimodule_store'] = $this->config->get('apimodule_store');
+            if ( is_null($this->config->get('apimodule_store')) ) {
+                $data['apimodule_store'] = array(0);
+            } else {
+                $data['apimodule_store'] = $this->config->get('apimodule_store');
+            }
         }
 
         if (!extension_loaded('zip')) {

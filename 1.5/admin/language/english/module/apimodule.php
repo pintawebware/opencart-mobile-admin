@@ -7,6 +7,9 @@ $_['text_module']      = 'Module';
 $_['text_success']     = 'Settings changed successfully!';
 $_['text_edit']        = 'Settings module';
 
+$_['entry_store']        = 'Stores';
+$_['text_default']        = 'Default';
+
 // Entry
 $_['entry_name'] = 'Name module';
 $_['entry_status']     = 'Status';
