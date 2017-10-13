@@ -99,10 +99,10 @@ class ControllerModuleApimodule extends Controller {
         if (isset($this->request->post['apimodule_store'])) {
             $data['apimodule_store'] = $this->request->post['apimodule_store'];
         } else {
-        	if ( is_null($this->config->get('apimodule_status')) )
-                $data['apimodule_status'] = array(0);
+        	if ( is_null($this->config->get('apimodule_store')) )
+                $data['apimodule_store'] = array(0);
 		    else
-			    $data['apimodule_status'] = $this->config->get('apimodule_status');
+			    $data['apimodule_store'] = $this->config->get('apimodule_store');
         }
 
 		if (!extension_loaded('zip')) {
