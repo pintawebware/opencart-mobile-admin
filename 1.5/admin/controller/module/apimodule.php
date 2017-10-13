@@ -102,14 +102,14 @@ class ControllerModuleApimodule extends Controller {
         }
 
         $this->load->model('setting/store');
-        $data['stores'] = $this->model_setting_store->getStores();
+        $this->data['stores'] = $this->model_setting_store->getStores();
         if (isset($this->request->post['apimodule_store'])) {
-            $data['apimodule_store'] = $this->request->post['apimodule_store'];
+            $this->data['apimodule_store'] = $this->request->post['apimodule_store'];
         } else {
             if ( is_null($this->config->get('apimodule_store')) ) {
-                $data['apimodule_store'] = array(0);
+                $this->data['apimodule_store'] = array(0);
             } else {
-                $data['apimodule_store'] = $this->config->get('apimodule_store');
+                $this->data['apimodule_store'] = $this->config->get('apimodule_store');
             }
         }
 
