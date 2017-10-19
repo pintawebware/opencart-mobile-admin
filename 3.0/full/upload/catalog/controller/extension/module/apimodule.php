@@ -661,7 +661,13 @@ class ControllerExtensionModuleApimodule extends Controller
                         $product['quantity'] = number_format($products[$i]['quantity'], 2, '.', '');
                     }
                     if (isset($products[$i]['price']) && $products[$i]['price'] != '') {
-                        $product['price'] = number_format($products[$i]['price'], 2, '.', '');
+                        //$product['price'] = number_format($products[$i]['price'], 2, '.', '');
+
+                        $currency = $this->model_extension_module_apimodule->getUserCurrency();
+                        if(empty($currency)){
+                            $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
+                        }
+                        $product['price'] = number_format($this->calculatePrice($products[$i]['price'], $products[$i]['tax_class_id'], $currency), 2, '.', '');
                     }
                     $product['product_id'] = $products[$i]['product_id'];
 
