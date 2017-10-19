@@ -179,7 +179,7 @@ class ModelModuleApimodule extends Model
     public function getOrderProducts($id)
     {
 
-        $query = $this->db->query("SELECT * FROM (SELECT image, product_id FROM `" . DB_PREFIX . "product`  ) AS p LEFT JOIN (SELECT order_id, product_id, model, quantity, price,  name FROM `" . DB_PREFIX . "order_product` WHERE order_id = " . $id . " ) AS o ON o.product_id = p.product_id LEFT JOIN (SELECT store_url, order_id, total, currency_code FROM `" . DB_PREFIX . "order` WHERE order_id = " . $id . " ) t2 ON o.order_id = t2.order_id LEFT JOIN (SELECT order_id, code, value FROM `" . DB_PREFIX . "order_total` WHERE code = 'shipping' AND order_id = " . $id . " ) t5 ON o.order_id = t5.order_id WHERE o.order_id = " . $id);
+        $query = $this->db->query("SELECT * FROM (SELECT image, product_id, tax_class_id FROM `" . DB_PREFIX . "product`  ) AS p LEFT JOIN (SELECT order_id, product_id, model, quantity, price,  name FROM `" . DB_PREFIX . "order_product` WHERE order_id = " . $id . " ) AS o ON o.product_id = p.product_id LEFT JOIN (SELECT store_url, order_id, total, currency_code FROM `" . DB_PREFIX . "order` WHERE order_id = " . $id . " ) t2 ON o.order_id = t2.order_id LEFT JOIN (SELECT order_id, code, value FROM `" . DB_PREFIX . "order_total` WHERE code = 'shipping' AND order_id = " . $id . " ) t5 ON o.order_id = t5.order_id WHERE o.order_id = " . $id);
 
         return $query->rows;
     }
@@ -388,7 +388,7 @@ class ModelModuleApimodule extends Model
 
     public function getProductsList ($page, $limit, $name = '')
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity, p.image, p.price, pd.name 
+        $sql = "SELECT p.product_id, p.model, p.quantity, p.image, p.price, pd.name, p.tax_class_id 
 					FROM `" . DB_PREFIX . "product` AS p 
 					LEFT JOIN `" . DB_PREFIX . "product_description` pd ON p.product_id = pd.product_id 
 					WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'" ;
@@ -404,7 +404,7 @@ class ModelModuleApimodule extends Model
 
     public function getProductsByID ($id)
     {
-        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, 
+        $sql = "SELECT p.product_id, p.model, p.quantity,  p.price, pd.name, p.tax_class_id,
 						pd.description, p.sku, p.status,
  						ss.name stock_status_name 
 				FROM `" . DB_PREFIX . "product` AS p 
@@ -1030,6 +1030,7 @@ class ModelModuleApimodule extends Model
 					WHERE c.language_id = ".(int)$this->config->get('config_language_id'));
 		return $query->rows;
 	}
+
 
     public function getOrder($order_id) {
         $order_query = $this->db->query("SELECT *, (SELECT os.name FROM `" . DB_PREFIX . "order_status` os WHERE os.order_status_id = o.order_status_id AND os.language_id = o.language_id) AS order_status FROM `" . DB_PREFIX . "order` o WHERE o.order_id = '" . (int)$order_id . "'");
