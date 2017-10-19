@@ -1031,7 +1031,7 @@ class ModelModuleApimodule extends Model
 		return $query->rows;
 	}
 
-        public function getOrder($order_id) {
+    public function getOrder($order_id) {
         $order_query = $this->db->query("SELECT *, (SELECT os.name FROM `" . DB_PREFIX . "order_status` os WHERE os.order_status_id = o.order_status_id AND os.language_id = o.language_id) AS order_status FROM `" . DB_PREFIX . "order` o WHERE o.order_id = '" . (int)$order_id . "'");
 
         if ($order_query->num_rows) {
@@ -1077,11 +1077,9 @@ class ModelModuleApimodule extends Model
 
             if ($language_info) {
                 $language_code = $language_info['code'];
-                $language_filename = $language_info['filename'];
                 $language_directory = $language_info['directory'];
             } else {
                 $language_code = '';
-                $language_filename = '';
                 $language_directory = '';
             }
 
@@ -1143,7 +1141,6 @@ class ModelModuleApimodule extends Model
                 'commission'              => $order_query->row['commission'],
                 'language_id'             => $order_query->row['language_id'],
                 'language_code'           => $language_code,
-                'language_filename'       => $language_filename,
                 'language_directory'      => $language_directory,
                 'currency_id'             => $order_query->row['currency_id'],
                 'currency_code'           => $order_query->row['currency_code'],
@@ -1215,7 +1212,7 @@ class ModelModuleApimodule extends Model
             $this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
 
             // If current order status is not processing or complete but new status is processing or complete then commence completing the order
-            if (!in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) || in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
+            if (!in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) && in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
                 // Stock subtraction
                 $order_product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "'");
 
@@ -1266,9 +1263,9 @@ class ModelModuleApimodule extends Model
                 // Remove coupon, vouchers and reward points history
                 $this->load->model('account/order');
 
-                $order_totals = $this->model_account_order->getOrderTotals($order_id);
+                $order_total_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' ORDER BY sort_order ASC");
 
-                foreach ($order_totals as $order_total) {
+                foreach ($order_total_query->rows as $order_total) {
                     $this->load->model('total/' . $order_total['code']);
 
                     if (method_exists($this->{'model_total_' . $order_total['code']}, 'unconfirm')) {
@@ -1304,7 +1301,7 @@ class ModelModuleApimodule extends Model
 
                 // Load the language for any mails that might be required to be sent out
                 $language = new Language($order_info['language_directory']);
-                $language->load($order_info['language_filename']);
+                $language->load('default');
                 $language->load('mail/order');
 
                 $order_status_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$order_info['language_id'] . "'");
@@ -1491,6 +1488,8 @@ class ModelModuleApimodule extends Model
                 }
 
                 // Order Totals
+                $order_total_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' ORDER BY sort_order ASC");
+
                 foreach ($order_total_query->rows as $total) {
                     $data['totals'][] = array(
                         'title' => $total['title'],
@@ -1592,6 +1591,7 @@ class ModelModuleApimodule extends Model
 
                     // HTML Mail
                     $data['text_greeting'] = $language->get('text_new_received');
+
                     if ($comment) {
                         if ($order_info['comment']) {
                             $data['comment'] = nl2br($comment) . '<br/><br/>' . $order_info['comment'];
@@ -1675,7 +1675,7 @@ class ModelModuleApimodule extends Model
                     $emails = explode(',', $this->config->get('config_mail_alert'));
 
                     foreach ($emails as $email) {
-                        if ($email && preg_match('/^[^\@]+@.*\.[a-z]{2,6}$/i', $email)) {
+                        if ($email && preg_match('/^[^\@]+@.*.[a-z]{2,15}$/i', $email)) {
                             $mail->setTo($email);
                             $mail->send();
                         }
@@ -1686,7 +1686,7 @@ class ModelModuleApimodule extends Model
             // If order status is not 0 then send update text email
             if ($order_info['order_status_id'] && $order_status_id) {
                 $language = new Language($order_info['language_directory']);
-                $language->load($order_info['language_filename']);
+                $language->load('default');
                 $language->load('mail/order');
 
                 $subject = sprintf($language->get('text_update_subject'), html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'), $order_id);
@@ -1708,7 +1708,7 @@ class ModelModuleApimodule extends Model
 
                 if ($notify && $comment) {
                     $message .= $language->get('text_update_comment') . "\n\n";
-                    $message .= $comment . "\n\n";
+                    $message .= strip_tags($comment) . "\n\n";
                 }
 
                 $message .= $language->get('text_update_footer');
