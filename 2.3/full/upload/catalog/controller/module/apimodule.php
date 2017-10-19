@@ -660,7 +660,12 @@ class ControllerModuleApimodule extends Controller
                         $product['quantity'] = number_format($products[$i]['quantity'], 2, '.', '');
                     }
                     if (isset($products[$i]['price']) && $products[$i]['price'] != '') {
-                        $product['price'] = number_format($products[$i]['price'], 2, '.', '');
+                        // $product['price'] = number_format($products[$i]['price'], 2, '.', '');
+                        $currency = $this->model_module_apimodule->getUserCurrency();
+                        if(empty($currency)){
+                            $currency = $this->model_module_apimodule->getDefaultCurrency();
+                        }
+                        $product['price'] = $this->currency->format($this->tax->calculate($products[$i]['price'], $products[$i]['tax_class_id'], $this->config->get('config_tax')), $currency);
                     }
                     $product['product_id'] = $products[$i]['product_id'];
 
@@ -1818,7 +1823,12 @@ class ControllerModuleApimodule extends Controller
             } else {
                 $data['image'] = '';
             }
-            $data['price'] = number_format($product['price'], 2, '.', '');
+            //$data['price'] = number_format($product['price'], 2, '.', '');
+            $currency = $this->model_module_apimodule->getUserCurrency();
+            if(empty($currency)){
+                $currency = $this->model_module_apimodule->getDefaultCurrency();
+            }
+            $data['price'] = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $currency);
             $data['name'] = strip_tags(htmlspecialchars_decode($product['name']));
             $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
             $product_categories = $this->model_module_apimodule->getProductCategoriesMain($product['product_id']);
@@ -1927,7 +1937,13 @@ class ControllerModuleApimodule extends Controller
                     $currency = $this->model_module_apimodule->getDefaultCurrency();
                 }
                 $response['currency_code'] = $currency;
-                $response['price'] = $this->calculatePrice($product['price'], $currency);
+                // $response['price'] = $this->calculatePrice($product['price'], $currency);
+
+                $currency = $this->model_module_apimodule->getUserCurrency();
+                if(empty($currency)){
+                    $currency = $this->model_module_apimodule->getDefaultCurrency();
+                }
+                $response['price'] = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $currency);
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_module_apimodule->getProductImages($id);
