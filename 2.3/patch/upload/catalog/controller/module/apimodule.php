@@ -665,7 +665,7 @@ class ControllerModuleApimodule extends Controller
                         if(empty($currency)){
                             $currency = $this->model_module_apimodule->getDefaultCurrency();
                         }
-                        $product['price'] = number_format($this->tax->calculate($products[$i]['price'], $products[$i]['tax_class_id'], $this->config->get('config_tax')), 2, '.', '');
+                        $product['price'] = $this->calculatePriceProduct($products[$i]['price'], $products[$i]['tax_class_id'], $currency);
                     }
                     $product['product_id'] = $products[$i]['product_id'];
 
@@ -1828,7 +1828,7 @@ class ControllerModuleApimodule extends Controller
             if(empty($currency)){
                 $currency = $this->model_module_apimodule->getDefaultCurrency();
             }
-            $data['price'] = number_format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), 2, '.', '');
+            $data['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
             $data['name'] = strip_tags(htmlspecialchars_decode($product['name']));
             $data['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
             $product_categories = $this->model_module_apimodule->getProductCategoriesMain($product['product_id']);
@@ -1943,7 +1943,7 @@ class ControllerModuleApimodule extends Controller
                 if(empty($currency)){
                     $currency = $this->model_module_apimodule->getDefaultCurrency();
                 }
-                $response['price'] = number_format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), 2, '.', '');
+                $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_module_apimodule->getProductImages($id);
@@ -2401,10 +2401,17 @@ class ControllerModuleApimodule extends Controller
             'response' => ['stock_statuses' => $categories], 'status' => true]));
     }
 
-    private function calculatePrice($price, $currency){
-        $this->load->model('localisation/currency');
-        $result = $this->model_localisation_currency->getCurrencyByCode($currency);
-        $price = number_format($price/$result['value'], 2, '.', '');
+    private function calculatePriceProduct($priceOld, $tax_class_id, $currency ){
+        $price = $this->currency->format($this->tax->calculate($priceOld, $tax_class_id, $this->config->get('config_tax')), $currency);
+        $symbol = $this->currency->getSymbolRight($currency);
+        if ( empty($symbol) || is_null($symbol) )
+            $symbol = $this->currency->getSymbolLeft($currency);
+        $price = str_replace($symbol, '', $price);
+        return $price;
+    }
+
+    private function calculatePrice($priceOld, $tax_class_id ){
+        $price = $this->tax->calculate($priceOld, $tax_class_id, $this->config->get('config_tax'));
         return $price;
     }
 }

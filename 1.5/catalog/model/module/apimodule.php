@@ -1046,4 +1046,10 @@ class ModelModuleApimodule extends Model
 		return $query->rows;
 	}
 
+    public function getUserCurrency(){
+        $sql = "SELECT c.value code FROM `" . DB_PREFIX . "setting` c WHERE  c.key = 'config_currency'";
+        $query = $this->db->query($sql);
+        return $query->row['code'];
+    }
+
 }

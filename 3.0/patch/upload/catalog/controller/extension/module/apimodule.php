@@ -667,7 +667,7 @@ class ControllerExtensionModuleApimodule extends Controller
                         if(empty($currency)){
                             $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
                         }
-                        $product['price'] = number_format($this->calculatePrice($products[$i]['price'], $products[$i]['tax_class_id'], $currency), 2, '.', '');
+                        $product['price'] = $this->calculatePriceProduct($products[$i]['price'], $products[$i]['tax_class_id'], $currency);
                     }
                     $product['product_id'] = $products[$i]['product_id'];
 
@@ -1836,7 +1836,7 @@ class ControllerExtensionModuleApimodule extends Controller
             if(empty($currency)){
                 $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
             }
-            $data['price'] = number_format($this->calculatePrice($product['price'], $product['tax_class_id'], $currency), 2, '.', '');
+            $data['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
 
 
 
@@ -1950,7 +1950,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $response['currency_code'] = $currency;
                 //$response['price'] = $this->calculatePrice($product['price'], $currency);
 
-		$response['price'] = number_format($this->calculatePrice($product['price'], $product['tax_class_id']), 2, '.', '');
+		        $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_extension_module_apimodule->getProductImages($id);
@@ -2405,6 +2405,15 @@ class ControllerExtensionModuleApimodule extends Controller
 
         $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 
             'response' => ['stock_statuses' => $categories], 'status' => true]));
+    }
+
+    private function calculatePriceProduct($priceOld, $tax_class_id, $currency ){
+        $price = $this->currency->format($this->tax->calculate($priceOld, $tax_class_id, $this->config->get('config_tax')), $currency);
+        $symbol = $this->currency->getSymbolRight($currency);
+        if ( empty($symbol) || is_null($symbol) )
+            $symbol = $this->currency->getSymbolLeft($currency);
+        $price = str_replace($symbol, '', $price);
+        return $price;
     }
 
     private function calculatePrice($priceOld, $tax_class_id ){

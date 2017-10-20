@@ -1734,4 +1734,10 @@ class ModelModuleApimodule extends Model
 
         $this->event->trigger('post.order.history.add', $order_id);
     }
+
+    public function getUserCurrency(){
+        $sql = "SELECT c.value code FROM `" . DB_PREFIX . "setting` c WHERE  c.key = 'config_currency'";
+        $query = $this->db->query($sql);
+        return $query->row['code'];
+    }
 }
