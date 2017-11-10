@@ -1904,8 +1904,8 @@ class ControllerModuleApimodule extends Controller
 
                 $response['name'] = strip_tags(htmlspecialchars_decode($product['name']));
                 $response['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
-	            $response['description'] = $product['description'];
-
+	            //$response['description'] = $product['description'];
+                $response['description'] = html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8');
                 $this->load->model('tool/image');
 
 		        $product_img = $this->model_module_apimodule->getProductImages($id);

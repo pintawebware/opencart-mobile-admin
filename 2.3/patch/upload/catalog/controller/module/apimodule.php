@@ -1931,7 +1931,8 @@ class ControllerModuleApimodule extends Controller
                 $response['sku'] = $product['sku'];
                 $response['stock_status_name'] = $product['stock_status_name'];
                 $response['name'] = strip_tags(htmlspecialchars_decode($product['name']));
-                $response['description'] = $product['description'];
+                //$response['description'] = $product['description'];
+                $response['description'] = html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8');
                 $currency = $this->model_module_apimodule->getUserCurrency();
                 if(empty($currency)){
                     $currency = $this->model_module_apimodule->getDefaultCurrency();
