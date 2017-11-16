@@ -442,11 +442,11 @@ class ModelModuleApimodule extends Model
         return $query->row['code'];
     }
 
-    public function getUserCurrency(){
-	    $sql = "SELECT c.value code FROM `" . DB_PREFIX . "setting` c WHERE  c.key = 'config_currency'";
-	    $query = $this->db->query($sql);
-	    return $query->row['code'];
-    }
+    // public function getUserCurrency(){
+	   //  $sql = "SELECT c.value code FROM `" . DB_PREFIX . "setting` c WHERE  c.key = 'config_currency'";
+	   //  $query = $this->db->query($sql);
+	   //  return $query->row['code'];
+    // }
 
     public function setUserDeviceToken($user_id, $token,$os_type){
         $sql = "INSERT INTO `" . DB_PREFIX . "user_device_mob_api` (user_id, device_token,os_type) 
