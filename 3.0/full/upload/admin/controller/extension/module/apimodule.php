@@ -188,7 +188,7 @@ class ControllerExtensionModuleApimodule extends Controller {
             $this->model_tool_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
         }else{
 			$this->load->model('setting/event');
-			$this->model_setting_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'module/apimodule/sendNotifications');
+			$this->model_setting_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'extension/module/apimodule/sendNotifications');
         }
 
 	}
