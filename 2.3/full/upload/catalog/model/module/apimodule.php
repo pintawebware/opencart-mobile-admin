@@ -64,14 +64,9 @@ class ModelModuleApimodule extends Model
         }
         $sql .= " GROUP BY o.order_id ORDER BY o.order_id DESC";
 
-        $total_sum = $this->db->query($sql);
-        $sum = 0;
-        $quantity = 0;
-        foreach ($total_sum->rows as $value){
-            $sum = $sum + $value['total'];
-            $quantity++;
-        }
-
+        $total_sum = $this->db->query('SELECT sum(`total`) as `summa`, count(*) as `quantity` FROM `oc_order` WHERE `oc_order`.order_status_id != 0');
+        $sum = $total_sum->rows[0]['summa'];
+        $quantity = $total_sum->rows[0]['quantity'];
         $sql .= " LIMIT " . (int)$data['limit'] . " OFFSET " . (int)$data['page'];
 
         $query = $this->db->query($sql);
