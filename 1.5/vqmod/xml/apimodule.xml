@@ -8,7 +8,7 @@
     <operation>
      
       <search position="after"><![CDATA[
-        if ($order_info && !$order_info['order_status_id']) {
+        $template->data['vouchers'] = array();
       ]]></search>
          
       <add><![CDATA[
