@@ -54,4 +54,17 @@
         </operation>
     </file>
 
+    <file path="catalog/controller/extension/payment/cod.php">
+        <operation error="skip">
+            <search ><![CDATA[ $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_cod_order_status_id')); ]]></search>
+            <add position="after"><![CDATA[
+                
+                $this->load->model('extension/module/apimodule');
+                $this->model_extension_module_apimodule->sendNotifications( $this->session->data['order_id'] );
+
+                ]]>
+            </add>
+        </operation>
+    </file>
+
 </modification>

@@ -1310,4 +1310,88 @@ class ModelExtensionModuleApimodule extends Model
         }
     }
 
+    public function sendNotifications( $output ) {
+
+        header("Access-Control-Allow-Origin: *");
+        $id = $output;
+        $registrationIds = array();
+        $this->load->model('extension/module/apimodule');
+        $devices = $this->model_extension_module_apimodule->getUserDevices();
+        $ids = [];
+
+        foreach ($devices as $device) {
+            if (strtolower($device['os_type']) == 'ios') {
+                $ids['ios'][] = $device['device_token'];
+            } else {
+                $ids['android'][] = $device['device_token'];
+            }
+        }
+
+        $this->load->model('extension/module/apimodule');
+        $order = $this->model_extension_module_apimodule->getOrderFindById($id);
+        file_put_contents('order_'.$id.'.txt', $id);
+        $msg = array(
+            'body' => number_format($order['total'], 2, '.', ''),
+            'title' => "http://" . $_SERVER['HTTP_HOST'],
+            'vibrate' => 1,
+            'sound' => 1,
+            'priority' => 'high',
+            'new_order' => [
+                'order_id' => $id,
+                'total' => number_format($order['total'], 2, '.', ''),
+                'currency_code' => $order['currency_code'],
+                'site_url' => "http://" . $_SERVER['HTTP_HOST'],
+            ],
+            'event_type' => 'new_order'
+        );
+
+        $msg_android = array(
+
+            'new_order' => [
+                'order_id' => $id,
+                'total' => number_format($order['total'], 2, '.', ''),
+                'currency_code' => $order['currency_code'],
+                'site_url' => "http://" . $_SERVER['HTTP_HOST'],
+            ],
+            'event_type' => 'new_order'
+        );
+
+        foreach ($ids as $k => $mas):
+            if ($k == 'ios') {
+                $fields = array
+                (
+                    'registration_ids' => $ids[$k],
+                    'notification' => $msg,
+                );
+            } else {
+                $fields = array
+                (
+                    'registration_ids' => $ids[$k],
+                    'data' => $msg_android
+                );
+            }
+            $this->sendCurl($fields);
+
+        endforeach;
+    }
+
+    private function sendCurl($fields)
+    {
+        $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
+        $headers = array
+        (
+            'Authorization: key=' . $API_ACCESS_KEY,
+            'Content-Type: application/json'
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+        curl_exec($ch);
+        curl_close($ch);
+    }
 }
