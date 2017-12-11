@@ -36,14 +36,28 @@
 ]]></add>
 		</operation>
     </file>
-	<file path="admin/controller/user/user.php">
-	        <operation error="skip">
-	            <search ><![CDATA[$this->model_user_user->deleteUser($user_id);]]></search>
-	            <add position="before"><![CDATA[
-	                $sql = "DELETE FROM `" . DB_PREFIX . "user_token_mob_api`  WHERE user_id = '". $user_id."'";
-	                $query = $this->db->query($sql);
-	                $sql = "DELETE FROM `" . DB_PREFIX . "user_device_mob_api` WHERE user_id = ". $user_id;
-	                $query = $this->db->query($sql); ]]></add>
-	        </operation>
-	    </file>
+    <file path="admin/controller/user/user.php">
+        <operation error="skip">
+            <search ><![CDATA[$this->model_user_user->deleteUser($user_id);]]></search>
+            <add position="before"><![CDATA[
+                $sql = "DELETE FROM `" . DB_PREFIX . "user_token_mob_api`  WHERE user_id = '". $user_id."'";
+                $query = $this->db->query($sql);
+                $sql = "DELETE FROM `" . DB_PREFIX . "user_device_mob_api` WHERE user_id = ". $user_id;
+                $query = $this->db->query($sql); ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/payment/cod.php">
+        <operation error="skip">
+            <search ><![CDATA[ $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('cod_order_status_id')); ]]></search>
+            <add position="after"><![CDATA[
+                
+                $this->load->model('module/apimodule');
+                $this->model_module_apimodule->sendNotifications( $this->session->data['order_id'] );
+
+                ]]>
+            </add>
+        </operation>
+    </file>
+
 </modification>
