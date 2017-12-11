@@ -1,7 +1,7 @@
 <modification>
     <name>Check update apimodule</name>
 	<version>2.0</version>
-	<link>http://opencartapp.com</link>
+	<link>https://opencartapp.pro</link>
 	<author>Pinta</author>
 	<code>apimodule_ocmod</code>
     <file path="admin/controller/common/dashboard.php">
@@ -45,6 +45,19 @@
                 $query = $this->db->query($sql);
                 $sql = "DELETE FROM `" . DB_PREFIX . "user_device_mob_api` WHERE user_id = ". $user_id;
                 $query = $this->db->query($sql); ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/extension/payment/cod.php">
+        <operation error="skip">
+            <search ><![CDATA[ $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('cod_order_status_id')); ]]></search>
+            <add position="after"><![CDATA[
+                
+                $this->load->model('module/apimodule');
+                $this->model_module_apimodule->sendNotifications( $this->session->data['order_id'] );
+
+                ]]>
+            </add>
         </operation>
     </file>
 

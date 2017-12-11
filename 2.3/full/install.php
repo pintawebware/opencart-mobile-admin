@@ -13,9 +13,9 @@ if(VERSION == '2.0.0.0'){
 	$this->model_tool_event->deleteEvent('apimodule');
 	$this->model_tool_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');
 }else{
-	$this->load->model('extension/event');
-	$this->model_extension_event->deleteEvent('apimodule');
-	$this->model_extension_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'module/apimodule/sendNotifications');
+	//$this->load->model('extension/event');
+	//$this->model_extension_event->deleteEvent('apimodule');
+	//$this->model_extension_event->addEvent('apimodule', 'catalog/model/checkout/order/addOrderHistory/after', 'module/apimodule/sendNotifications');
 }
 
 ?>
