@@ -1361,7 +1361,7 @@ class ControllerModuleApimodule extends Controller
             if (count($tokens) > 0) {
                 foreach ($tokens as $token) {
                     if ($_REQUEST['token'] == $token['token']) {
-                        $error = null;
+                        return null;
                     } else {
                         $error = 'Your token is no longer relevant!';
                     }
