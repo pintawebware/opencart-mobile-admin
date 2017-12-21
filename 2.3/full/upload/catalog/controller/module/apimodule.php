@@ -180,8 +180,12 @@ class ControllerModuleApimodule extends Controller
         $response = [];
         $orders_to_response = [];
 
+        $currency = $this->model_module_apimodule->getUserCurrency();
+        if(empty($currency)){
+            $currency = $this->model_module_apimodule->getDefaultCurrency();
+        }
+        $response['currency_code'] = $currency;
         foreach ($orders->rows as $order) {
-
             $data['order_number'] = $order['order_id'];
             $data['order_id'] = $order['order_id'];
             if (isset($order['firstname']) && isset($order['lastname'])) {
@@ -190,20 +194,14 @@ class ControllerModuleApimodule extends Controller
                 $data['fio'] = $order['payment_firstname'] . ' ' . $order['payment_lastname'];
             }
             $data['status'] = $order['name'];
-
-            $data['total'] = number_format($order['total'], 2, '.', '');
+            $data['total'] = $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']);
             $data['date_added'] = $order['date_added'];
             $data['currency_code'] = $order['currency_code'];
             $orders_to_response[] = $data;
-
         }
-
+        
+        
         $response['total_quantity'] = $orders->quantity;
-        $currency = $this->model_module_apimodule->getUserCurrency();
-        if(empty($currency)){
-            $currency = $this->model_module_apimodule->getDefaultCurrency();
-        }
-        $response['currency_code'] = $currency;
         $response['total_sum'] = $this->calculatePrice($orders->totalsumm, $currency);
         //$response['total_sum'] = number_format($orders->totalsumm, 2, '.', '');
         $response['orders'] = $orders_to_response;
@@ -318,8 +316,7 @@ class ControllerModuleApimodule extends Controller
                 $data['date_added'] = $order[0]['date_added'];
 
                 if (isset($order[0]['total'])) {
-                    $data['total'] = $order[0]['total']*$order[0]['currency_value'];
-                    $data['total'] = number_format($order[0]['total']/$order[0]['currency_value'], 2, '.', '');;
+                    $data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
                 }
                 if (isset($order[0]['name'])) {
                     $data['status'] = $order[0]['name'];
