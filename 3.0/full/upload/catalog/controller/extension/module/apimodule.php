@@ -180,6 +180,12 @@ class ControllerExtensionModuleApimodule extends Controller
         $response = [];
         $orders_to_response = [];
 
+        $currency = $this->model_extension_module_apimodule->getUserCurrency();
+        if(empty($currency)){
+            $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
+        }
+        $response['currency_code'] = $currency;
+
         foreach ($orders->rows as $order) {
 
             $data['order_number'] = $order['order_id'];
@@ -191,7 +197,7 @@ class ControllerExtensionModuleApimodule extends Controller
             }
             $data['status'] = $order['name'];
 
-            $data['total'] = number_format($order['total'], 2, '.', '');
+            $data['total'] = $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']);
             $data['date_added'] = $order['date_added'];
             $data['currency_code'] = $order['currency_code'];
             $orders_to_response[] = $data;
@@ -199,10 +205,6 @@ class ControllerExtensionModuleApimodule extends Controller
         }
 
         $response['total_quantity'] = $orders->quantity;
-        $currency = $this->model_extension_module_apimodule->getUserCurrency();
-        if(empty($currency)){
-            $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
-        }
         $response['currency_code'] = $currency;
         $response['total_sum'] = $this->calculatePrice($orders->totalsumm, $currency);
         //$response['total_sum'] = number_format($orders->totalsumm, 2, '.', '');
@@ -318,8 +320,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $data['date_added'] = $order[0]['date_added'];
 
                 if (isset($order[0]['total'])) {
-                    $data['total'] = $order[0]['total']*$order[0]['currency_value'];
-                    $data['total'] = number_format($order[0]['total']/$order[0]['currency_value'], 2, '.', '');;
+					$data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
                 }
                 if (isset($order[0]['name'])) {
                     $data['status'] = $order[0]['name'];
@@ -1061,14 +1062,14 @@ class ControllerExtensionModuleApimodule extends Controller
         $order = $this->model_extension_module_apimodule->getOrderFindById($id);
 
         $msg = array(
-            'body' => number_format($order['total'], 2, '.', ''),
+            'body' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
             'title' => "http://" . $_SERVER['HTTP_HOST'],
             'vibrate' => 1,
             'sound' => 1,
             'priority' => 'high',
             'new_order' => [
                 'order_id' => $id,
-                'total' => number_format($order['total'], 2, '.', ''),
+                'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
                 'currency_code' => $order['currency_code'],
                 'site_url' => "http://" . $_SERVER['HTTP_HOST'],
             ],
@@ -1079,7 +1080,7 @@ class ControllerExtensionModuleApimodule extends Controller
 
             'new_order' => [
                 'order_id' => $id,
-                'total' => number_format($order['total'], 2, '.', ''),
+                'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
                 'currency_code' => $order['currency_code'],
                 'site_url' => "http://" . $_SERVER['HTTP_HOST'],
             ],
