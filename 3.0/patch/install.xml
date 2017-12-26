@@ -69,12 +69,12 @@
 
     <file path="catalog/controller/extension/payment/bank_transfer.php">
         <operation error="skip">
-            <search ><![CDATA[ $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('bank_transfer_order_status_id'), $comment, true); ]]>
+            <search ><![CDATA[ $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_bank_transfer_order_status_id'), $comment, true); ]]>
             </search>
             <add position="after"><![CDATA[
                 
-                $this->load->model('module/apimodule');
-                $this->model_module_apimodule->sendNotifications( $this->session->data['order_id'] );
+		            $this->load->model('extension/module/apimodule');
+		            $this->model_extension_module_apimodule->sendNotifications($this->session->data['order_id'] );
 
                 ]]>
             </add>
