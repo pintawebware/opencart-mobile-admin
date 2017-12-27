@@ -180,6 +180,12 @@ class ControllerModuleApimodule extends Controller
         $response = [];
         $orders_to_response = [];
 
+        $currency = $this->model_module_apimodule->getUserCurrency();
+        if(empty($currency)){
+            $currency = $this->model_module_apimodule->getDefaultCurrency();
+        }
+        $response['currency_code'] = $currency;
+
         foreach ($orders->rows as $order) {
 
             $data['order_number'] = $order['order_id'];
@@ -191,7 +197,7 @@ class ControllerModuleApimodule extends Controller
             }
             $data['status'] = $order['name'];
 
-            $data['total'] = number_format($order['total'], 2, '.', '');
+            $data['total'] = $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']);
             $data['date_added'] = $order['date_added'];
             $data['currency_code'] = $order['currency_code'];
             $orders_to_response[] = $data;
@@ -199,7 +205,6 @@ class ControllerModuleApimodule extends Controller
         }
 
         $response['total_quantity'] = $orders->quantity;
-        $response['currency_code'] = $this->model_module_apimodule->getDefaultCurrency();
         $response['total_sum'] = number_format($orders->totalsumm, 2, '.', '');
         $response['orders'] = $orders_to_response;
         $response['max_price'] = $this->model_module_apimodule->getMaxOrderPrice();
@@ -313,7 +318,7 @@ class ControllerModuleApimodule extends Controller
                 $data['date_added'] = $order[0]['date_added'];
 
                 if (isset($order[0]['total'])) {
-                    $data['total'] = number_format($order[0]['total'], 2, '.', '');;
+                    $data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
                 }
                 if (isset($order[0]['name'])) {
                     $data['status'] = $order[0]['name'];
@@ -1020,92 +1025,92 @@ class ControllerModuleApimodule extends Controller
 
 	
 	
-    public function sendNotifi_2_2_0_0($route, $id, $order_status_id, $comment = '', $notify = false, $override = false){
-		$this->sendNotifications($order_status_id);
-	}
+ //    public function sendNotifi_2_2_0_0($route, $id, $order_status_id, $comment = '', $notify = false, $override = false){
+	// 	$this->sendNotifications($order_status_id);
+	// }
     
-    public function sendNotifications($id)
-    {
-        $registrationIds = array();
-        $this->load->model('module/apimodule');
-        $devices = $this->model_module_apimodule->getUserDevices();
-        $ids = [];
+ //    public function sendNotifications($id)
+ //    {
+ //        $registrationIds = array();
+ //        $this->load->model('module/apimodule');
+ //        $devices = $this->model_module_apimodule->getUserDevices();
+ //        $ids = [];
 
-        foreach($devices as $device){
-			if(strtolower($device['os_type']) == 'ios'){
-				$ids['ios'][] = $device['device_token'];
-			}else{
-				$ids['android'][] = $device['device_token'];
-			}
-        }
+ //        foreach($devices as $device){
+	// 		if(strtolower($device['os_type']) == 'ios'){
+	// 			$ids['ios'][] = $device['device_token'];
+	// 		}else{
+	// 			$ids['android'][] = $device['device_token'];
+	// 		}
+ //        }
 
-	    $this->load->model('module/apimodule');
-	    $order = $this->model_module_apimodule->getOrderFindById($id);
-		if($order) {
-			$msg = array(
-				'body'       => number_format( $order['total'], 2, '.', '' ),
-				'title'      => "http://" . $_SERVER['HTTP_HOST'],
-				'vibrate'    => 1,
-				'sound'      => 1,
-				'priority'   => 'high',
-				'new_order'  => [
-					'order_id'      => $id,
-					'total'         => number_format( $order['total'], 2, '.', '' ),
-					'currency_code' => $order['currency_code'],
-					'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
-				],
-				'event_type' => 'new_order'
-			);
+	//     $this->load->model('module/apimodule');
+	//     $order = $this->model_module_apimodule->getOrderFindById($id);
+	// 	if($order) {
+	// 		$msg = array(
+	// 			'body'       => number_format( $order['total'], 2, '.', '' ),
+	// 			'title'      => "http://" . $_SERVER['HTTP_HOST'],
+	// 			'vibrate'    => 1,
+	// 			'sound'      => 1,
+	// 			'priority'   => 'high',
+	// 			'new_order'  => [
+	// 				'order_id'      => $id,
+	// 				'total'         => number_format( $order['total'], 2, '.', '' ),
+	// 				'currency_code' => $order['currency_code'],
+	// 				'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
+	// 			],
+	// 			'event_type' => 'new_order'
+	// 		);
 
-			$msg_android = array(
+	// 		$msg_android = array(
 
-				'new_order'  => [
-					'order_id'      => $id,
-					'total'         => number_format( $order['total'], 2, '.', '' ),
-					'currency_code' => $order['currency_code'],
-					'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
-				],
-				'event_type' => 'new_order'
-			);
+	// 			'new_order'  => [
+	// 				'order_id'      => $id,
+	// 				'total'         => number_format( $order['total'], 2, '.', '' ),
+	// 				'currency_code' => $order['currency_code'],
+	// 				'site_url'      => "http://" . $_SERVER['HTTP_HOST'],
+	// 			],
+	// 			'event_type' => 'new_order'
+	// 		);
 
-			foreach ( $ids as $k => $mas ):
-				if ( $k == 'ios' ) {
-					$fields = array
-					(
-						'registration_ids' => $ids[$k],
-						'notification'     => $msg,
-					);
-				} else {
-					$fields = array
-					(
-						'registration_ids' => $ids[$k],
-						'data'             => $msg_android
-					);
-				}
-				$this->sendCurl( $fields );
+	// 		foreach ( $ids as $k => $mas ):
+	// 			if ( $k == 'ios' ) {
+	// 				$fields = array
+	// 				(
+	// 					'registration_ids' => $ids[$k],
+	// 					'notification'     => $msg,
+	// 				);
+	// 			} else {
+	// 				$fields = array
+	// 				(
+	// 					'registration_ids' => $ids[$k],
+	// 					'data'             => $msg_android
+	// 				);
+	// 			}
+	// 			$this->sendCurl( $fields );
 
-			endforeach;
-		}
-    }
+	// 		endforeach;
+	// 	}
+ //    }
 
-    private function sendCurl($fields){
-	    $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
-	    $headers = array
-	    (
-		    'Authorization: key=' . $API_ACCESS_KEY,
-		    'Content-Type: application/json'
-	    );
+ //    private function sendCurl($fields){
+	//     $API_ACCESS_KEY = 'AAAAlhKCZ7w:APA91bFe6-ynbVuP4ll3XBkdjar_qlW5uSwkT5olDc02HlcsEzCyGCIfqxS9JMPj7QeKPxHXAtgjTY89Pv1vlu7sgtNSWzAFdStA22Ph5uRKIjSLs5z98Y-Z2TCBN3gl2RLPDURtcepk';
+	//     $headers = array
+	//     (
+	// 	    'Authorization: key=' . $API_ACCESS_KEY,
+	// 	    'Content-Type: application/json'
+	//     );
 
-	    $ch = curl_init();
-	    curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-	    curl_setopt($ch, CURLOPT_POST, true);
-	    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-	    curl_exec($ch);
-	    curl_close($ch);
-    }
+	//     $ch = curl_init();
+	//     curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+	//     curl_setopt($ch, CURLOPT_POST, true);
+	//     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	//     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	//     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	//     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+	//     curl_exec($ch);
+	//     curl_close($ch);
+ //    }
 
 
     /**
