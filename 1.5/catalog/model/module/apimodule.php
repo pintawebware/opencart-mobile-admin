@@ -1064,14 +1064,14 @@ class ModelModuleApimodule extends Model
         }
         $order = $this->getOrderFindById($id);
         $msg = array(
-            'body' => number_format($order['total'], 2, '.', ''),
+            'body' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
             'title' => "http://" . $_SERVER['HTTP_HOST'],
             'vibrate' => 1,
             'sound' => 1,
             'priority' => 'high',
             'new_order' => [
                 'order_id' => $id,
-                'total' => number_format($order['total'], 2, '.', ''),
+                'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
                 'currency_code' => $order['currency_code'],
                 'site_url' => "http://" . $_SERVER['HTTP_HOST'],
             ],
@@ -1082,7 +1082,7 @@ class ModelModuleApimodule extends Model
 
             'new_order' => [
                 'order_id' => $id,
-                'total' => number_format($order['total'], 2, '.', ''),
+                'total' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
                 'currency_code' => $order['currency_code'],
                 'site_url' => "http://" . $_SERVER['HTTP_HOST'],
             ],
