@@ -1769,7 +1769,6 @@ class ModelModuleApimodule extends Model
 
         $this->load->model('module/apimodule');
         $order = $this->model_module_apimodule->getOrderFindById($id);
-        file_put_contents('order_'.$id.'.txt', $id);
         $msg = array(
             'body' => $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']),
             'title' => "http://" . $_SERVER['HTTP_HOST'],
