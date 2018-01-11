@@ -95,10 +95,11 @@ class ModelModuleApimodule extends Model
         $setStatus = $this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = " . $statusID . " WHERE order_id = " . $orderID);
         if ($setStatus === true) {
             $getStatus = $this->db->query("SELECT name, date_added FROM `" . DB_PREFIX . "order_status` AS s LEFT JOIN `" . DB_PREFIX . "order` AS o ON o.order_status_id = s.order_status_id WHERE o.order_id = " . $orderID);
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "order_history` (order_id, order_status_id, comment, date_added)  VALUES (" . $orderID . ", " . $statusID . ",\"" . $comment . "\", NOW() ) ");
+            $notify = ( $inform == 'true' ) ? 1 : 0;
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "order_history` (order_id, order_status_id, notify, comment, date_added)  VALUES (" . $orderID . ", " . $statusID . ", ".$notify.", \"" . $comment . "\", NOW() ) ");
 
             $email = $this->db->query("SELECT o.email, o.store_name, o.firstname  FROM `" . DB_PREFIX . "order` AS o WHERE o.order_id = " . $orderID);
-            if($inform == true){
+            if( $inform == 'true' ){
                 $mail = new Mail();
                 $mail->protocol = $this->config->get('config_mail_protocol');
                 $mail->parameter = $this->config->get('config_mail_parameter');
@@ -112,9 +113,13 @@ class ModelModuleApimodule extends Model
                 $mail->setFrom($this->config->get('config_email'));
                 $mail->setSender(html_entity_decode($email->row['store_name'], ENT_QUOTES, 'UTF-8'));
                 $mail->setSubject(html_entity_decode($email->row['firstname'], ENT_QUOTES, 'UTF-8'));
-                //$mail->setHtml($this->load->view('mail/order', $data));
-                $mail->setText('Status of your order changed to ' . $getStatus->row['name'] );
+                $text = 'Status of your order changed to ' . $getStatus->row['name'];
+                if ( !empty($comment) ) {
+                    $text .= PHP_EOL.' Comment ' . $comment;
+                }
+                $mail->setText( $text );
                 $mail->send();
+
             }
         }
         return $getStatus->row;
