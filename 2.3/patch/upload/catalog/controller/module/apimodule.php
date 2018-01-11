@@ -838,7 +838,7 @@ class ControllerModuleApimodule extends Controller
             $comment = $_REQUEST['comment'];
             $inform = $_REQUEST['inform'];
             $this->load->model('module/apimodule');
-            $this->model_module_apimodule->addOrderHistory($orderID, $statusID);
+            //$this->model_module_apimodule->addOrderHistory($orderID, $statusID);
             $data = $this->model_module_apimodule->AddComment($orderID, $statusID, $comment, $inform);
 
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));

@@ -2,7 +2,7 @@
 
 class ControllerExtensionModuleApimodule extends Controller
 {
-    private $API_VERSION = 0;
+    private $API_VERSION = 2;
 
     public function getVersion()
     {
@@ -844,7 +844,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $comment = $_REQUEST['comment'];
             $inform = $_REQUEST['inform'];
             $this->load->model('extension/module/apimodule');
-            $this->model_extension_module_apimodule->addOrderHistory($orderID, $statusID);
+            //$this->model_extension_module_apimodule->addOrderHistory($orderID, $statusID);
             $data = $this->model_extension_module_apimodule->AddComment($orderID, $statusID, $comment, $inform);
 
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $data, 'status' => true]));
@@ -1833,7 +1833,7 @@ class ControllerExtensionModuleApimodule extends Controller
             //$data['price'] = number_format($product['price'], 2, '.', '');
 
 
-	    $currency = $this->model_extension_module_apimodule->getUserCurrency();
+        $currency = $this->model_extension_module_apimodule->getUserCurrency();
             if(empty($currency)){
                 $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
             }
@@ -1952,7 +1952,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $response['currency_code'] = $currency;
                 //$response['price'] = $this->calculatePrice($product['price'], $currency);
 
-		        $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
+                $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_extension_module_apimodule->getProductImages($id);
