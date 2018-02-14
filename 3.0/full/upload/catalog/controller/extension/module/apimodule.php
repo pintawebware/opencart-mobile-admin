@@ -2,7 +2,7 @@
 
 class ControllerExtensionModuleApimodule extends Controller
 {
-    private $API_VERSION = 0;
+    private $API_VERSION = 2;
 
     public function getVersion()
     {
