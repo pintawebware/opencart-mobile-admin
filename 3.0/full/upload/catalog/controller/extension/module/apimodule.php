@@ -2183,7 +2183,7 @@ class ControllerExtensionModuleApimodule extends Controller
 
                     foreach ($product_img['images'] as $key => $image) {
                         $img = [];
-                        $img['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                        $img['image'] = !is_null($this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800)) ? $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800) : '';
                         $img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
                        $images[] = $img;
                     }

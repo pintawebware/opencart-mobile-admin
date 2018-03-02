@@ -320,7 +320,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $data['date_added'] = $order[0]['date_added'];
 
                 if (isset($order[0]['total'])) {
-                    $data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
+					$data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
                 }
                 if (isset($order[0]['name'])) {
                     $data['status'] = $order[0]['name'];
@@ -1833,7 +1833,7 @@ class ControllerExtensionModuleApimodule extends Controller
             //$data['price'] = number_format($product['price'], 2, '.', '');
 
 
-        $currency = $this->model_extension_module_apimodule->getUserCurrency();
+	    $currency = $this->model_extension_module_apimodule->getUserCurrency();
             if(empty($currency)){
                 $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
             }
@@ -1952,7 +1952,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $response['currency_code'] = $currency;
                 //$response['price'] = $this->calculatePrice($product['price'], $currency);
 
-                $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
+		        $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_extension_module_apimodule->getProductImages($id);
@@ -2183,7 +2183,7 @@ class ControllerExtensionModuleApimodule extends Controller
 
                     foreach ($product_img['images'] as $key => $image) {
                         $img = [];
-                        $img['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                        $img['image'] = !is_null($this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800)) ? $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800) : '';
                         $img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
                        $images[] = $img;
                     }
