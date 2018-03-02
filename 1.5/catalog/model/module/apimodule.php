@@ -178,11 +178,14 @@ class ModelModuleApimodule extends Model
                 $template->data['telephone'] = $order_info['telephone'];
                 $template->data['ip'] = $order_info['ip'];
 
+                $changeStatus = 'Your status is on ' . $order_status ."\n";
                 if ($comment && $notify) {
                     $template->data['comment'] = nl2br($comment);
                 } else {
                     $template->data['comment'] = '';
                 }
+
+                $template->data['comment'] .= '<br>' .$changeStatus;
 
                 if ($order_info['payment_address_format']) {
                     $format = $order_info['payment_address_format'];
