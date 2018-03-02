@@ -1246,7 +1246,7 @@ class ModelExtensionModuleApimodule extends Model
 
     public function getSubstatus(){
 
-        $query = $this->db->query("SELECT c.name, c.stock_status_id FROM  `" . DB_PREFIX . "stock_status` c  
+        $query = $this->db->query("SELECT c.name as name , c.stock_status_id as status_id FROM  `" . DB_PREFIX . "stock_status` c  
                     WHERE c.language_id = ".(int)$this->config->get('config_language_id'));
         return $query->rows;
     }
