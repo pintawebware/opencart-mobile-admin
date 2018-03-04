@@ -2422,6 +2422,33 @@ class ControllerExtensionModuleApimodule extends Controller
         $price = $this->tax->calculate($priceOld, $tax_class_id, $this->config->get('config_tax'));
         return $price;
     }
+
+    public function getLanguages() {
+        header("Access-Control-Allow-Origin: *");
+        $this->response->addHeader('Content-Type: application/json');
+
+        $error = $this->valid();
+        if ($error != null) {
+            $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'error' => $error,
+                'status' => false
+            ]));
+            return;
+        }
+        $this->load->model('extension/module/apimodule');
+
+        $languages = $this->model_extension_module_apimodule->getLanguages();
+
+        $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'response' => [
+                    'languages' => $languages
+                ],
+                'status' => true]
+        ));
+
+    }
 }
 
 
