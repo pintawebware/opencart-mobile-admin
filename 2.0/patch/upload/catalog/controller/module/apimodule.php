@@ -2385,6 +2385,33 @@ class ControllerModuleApimodule extends Controller
         return $price;
     }
 
+    public function getLanguages() {
+        header("Access-Control-Allow-Origin: *");
+        $this->response->addHeader('Content-Type: application/json');
+
+        $error = $this->valid();
+        if ($error != null) {
+            $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'error' => $error,
+                'status' => false
+            ]));
+            return;
+        }
+        $this->load->model('module/apimodule');
+
+        $languages = $this->model_module_apimodule->getLanguages();
+
+        $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'response' => [
+                    'languages' => $languages
+                ],
+                'status' => true]
+        ));
+
+    }
+
 }
 
 
