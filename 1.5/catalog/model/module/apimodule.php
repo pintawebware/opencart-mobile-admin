@@ -1449,4 +1449,11 @@ class ModelModuleApimodule extends Model
         curl_close($ch);
     }
 
+    public function getLanguages() {
+        $query = $this->db->query("SELECT c.language_id as id, c.code, c.name FROM  `" . DB_PREFIX . "language` c  
+                    WHERE c.status = 1");
+
+        return $query->rows;
+    }
+
 }
