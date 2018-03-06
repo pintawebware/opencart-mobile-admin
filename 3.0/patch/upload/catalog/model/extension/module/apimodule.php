@@ -637,6 +637,7 @@ class ModelExtensionModuleApimodule extends Model
              LEFT JOIN `" . DB_PREFIX . "option_value_description` AS ovd ON pov.option_value_id = ovd.option_value_id
              LEFT JOIN `" . DB_PREFIX . "option_description` AS od ON pov.option_id = od.option_id
              WHERE ovd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+              AND od.language_id = '" . (int)$this->config->get('config_language_id') . "'
               AND pov.product_id = " . $id ;
 
         $query = $this->db->query($sql);
