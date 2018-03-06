@@ -1938,6 +1938,9 @@ class ControllerModuleApimodule extends Controller
 
 		        $product_categories = $this->model_module_apimodule->getProductCategories($id);
 
+            $product_options = $this->model_module_apimodule->getProductOptionsByID($id);
+            $response['options'] = $product_options;
+
 		        $response['categories'] = $product_categories;
 
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
