@@ -630,6 +630,21 @@ class ModelModuleApimodule extends Model
         return $query->row;
     }
 
+    public function getProductOptionsByID ($id)
+    {
+      $sql = "SELECT pov.option_id option_id, pov.option_value_id option_value_id,
+                     ovd.name option_value_name, od.name option_name
+             FROM `" . DB_PREFIX . "product_option_value` AS pov
+             LEFT JOIN `" . DB_PREFIX . "option_value_description` AS ovd ON pov.option_value_id = ovd.option_value_id
+             LEFT JOIN `" . DB_PREFIX . "option_description` AS od ON pov.option_id = od.option_id
+             WHERE ovd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+              AND pov.product_id = " . $id ;
+
+        $query = $this->db->query($sql);
+
+        return $query->rows;
+    }
+
     public function getProductImages($product_id) {
 
         $main_image = $this->db->query("SELECT p.image, pd.description FROM `" . DB_PREFIX . "product` p 

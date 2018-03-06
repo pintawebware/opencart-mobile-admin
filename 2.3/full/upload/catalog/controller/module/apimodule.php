@@ -1970,6 +1970,10 @@ class ControllerModuleApimodule extends Controller
                 $product_categories = $this->model_module_apimodule->getProductCategories($id);
 
                 $response['categories'] = $product_categories;
+
+                $product_options = $this->model_module_apimodule->getProductOptionsByID($id);
+                $response['options'] = $product_options;
+
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
             } else {
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'Can not found product with id = ' . $_REQUEST['product_id'], 'status' => false]));
