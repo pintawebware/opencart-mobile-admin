@@ -1941,10 +1941,10 @@ class ControllerModuleApimodule extends Controller
 
 		        $product_categories = $this->model_module_apimodule->getProductCategories($id);
 
+		        $response['categories'] = $product_categories;
+
             $product_options = $this->model_module_apimodule->getProductOptionsByID($id);
             $response['options'] = $product_options;
-
-		        $response['categories'] = $product_categories;
 
                 $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => $response, 'status' => true]));
             } else {
@@ -2099,6 +2099,12 @@ class ControllerModuleApimodule extends Controller
 			
     			$this->load->model('localisation/currency');
 				$result = $this->model_localisation_currency->getCurrencyByCode($currency);
+
+                $product = $this->model_module_apimodule->getProductsByID($_REQUEST['product_id']);
+                if ( $_REQUEST['price'] == $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency) ) {
+                    $data['price_old'] = true;
+                }
+
 				$price = $_REQUEST['price']/$result['value'];
 				$data['price'] = $price;
 			}else{
