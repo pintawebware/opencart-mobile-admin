@@ -2140,6 +2140,12 @@ class ControllerExtensionModuleApimodule extends Controller
                 }
                 $this->load->model('localisation/currency');
                 $result = $this->model_localisation_currency->getCurrencyByCode($currency);
+
+                $product = $this->model_extension_module_apimodule->getProductsByID($_REQUEST['product_id']);
+                if ( $_REQUEST['price'] == $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency) ) {
+                    $data['price_old'] = true;
+                }
+                
                 $price = $_REQUEST['price']/$result['value'];
                 $data['price'] = $price;
             }else{
