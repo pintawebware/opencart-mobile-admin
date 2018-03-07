@@ -646,7 +646,6 @@ class ModelModuleApimodule extends Model
         return $query->rows;
     }
 
-
     public function getProductImages($product_id) {
 
         $main_image = $this->db->query("SELECT p.image, pd.description FROM `" . DB_PREFIX . "product` p 
@@ -869,14 +868,11 @@ class ModelModuleApimodule extends Model
 	}
 
 	public function editProduct($product_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "product SET 
-		model = '" . $this->db->escape($data['model']) . "', 
-		sku = '" . $this->db->escape($data['sku']) . "', 
-		quantity = '" . (int)$data['quantity'] . "', 
-		price = '" . (float)$data['price'] . "', 
-		status = '" . (int)$data['status'] . "', 
-		stock_status_id = '" . (int)$data['stock_status_id'] . "', 
-	    date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
+        if ( !isset($data['price_old']) ) {
+            $this->db->query("UPDATE " . DB_PREFIX . "product SET model = '" . $this->db->escape($data['model']) . "', sku = '" . $this->db->escape($data['sku']) . "', quantity = '" . (int)$data['quantity'] . "', price = '" . (float)$data['price'] . "',  status = '" . (int)$data['status'] . "',  stock_status_id = '" . (int)$data['stock_status_id'] . "', date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
+        } else {
+            $this->db->query("UPDATE " . DB_PREFIX . "product SET model = '" . $this->db->escape($data['model']) . "', sku = '" . $this->db->escape($data['sku']) . "', quantity = '" . (int)$data['quantity'] . "',  status = '" . (int)$data['status'] . "',  stock_status_id = '" . (int)$data['stock_status_id'] . "', date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
+        }
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "product SET image = '" . $this->db->escape($data['image']) . "' WHERE product_id = '" . (int)$product_id . "'");
