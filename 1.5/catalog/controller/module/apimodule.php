@@ -695,6 +695,9 @@ class ControllerModuleApimodule extends Controller
                     }
                     $shipping_price = $products[$i]['value'];
 
+                    $product_options = $this->model_module_apimodule->getProductOptionsByID($products[$i]['product_id']);
+                    $product['options'] = $product_options;
+
                     $data['products'][] = $product;
                 }
 
