@@ -908,62 +908,25 @@ class ModelModuleApimodule extends Model
 		}
 
     /*
-     * Old code that processes product options.
-     */
-    /*
-		if (isset($data['product_option'])) {
-			$this->db->query("DELETE FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "'");
-			$this->db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "'");
-
-			foreach ($data['product_option'] as $product_option) {
-				if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image') {
-					if (isset($product_option['product_option_value'])) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_option_id = '" . (int)$product_option['product_option_id'] . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', required = '" . (int)$product_option['required'] . "'");
-
-						$product_option_id = $this->db->getLastId();
-
-						foreach ($product_option['product_option_value'] as $product_option_value) {
-							$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_value_id = '" . (int)$product_option_value['product_option_value_id'] . "', product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', option_value_id = '" . (int)$product_option_value['option_value_id'] . "', quantity = '" . (int)$product_option_value['quantity'] . "', subtract = '" . (int)$product_option_value['subtract'] . "', price = '" . (float)$product_option_value['price'] . "', price_prefix = '" . $this->db->escape($product_option_value['price_prefix']) . "', points = '" . (int)$product_option_value['points'] . "', points_prefix = '" . $this->db->escape($product_option_value['points_prefix']) . "', weight = '" . (float)$product_option_value['weight'] . "', weight_prefix = '" . $this->db->escape($product_option_value['weight_prefix']) . "'");
-						}
-					}
-				} else {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_option_id = '" . (int)$product_option['product_option_id'] . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', value = '" . $this->db->escape($product_option['value']) . "', required = '" . (int)$product_option['required'] . "'");
-				}
-			}
-		}
-    */
-
-    /*
-     * Process updating product options.
+     * Update product options.
      */
     if (isset($data['product_option'])) {
 
       $this->db->query("DELETE FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "'");
       $this->db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "'");
-      print_r($data);
 
       foreach ($data['product_option'] as $product_option) {
         if (isset($product_option['option_id']) && isset($product_option['option_value_id'])) { 
           $option_id = $product_option['option_id'];
           $option_value_id = $product_option['option_value_id'];
 
-          print("option_id: $option_id \n"); // XXX
-          print("option_value_id:  $option_value_id \n"); // XXX
           /*
            * Verify that the option id is present in the database.
            */
           $option_id_is_correct_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "option` WHERE option_id = '" . (int)$option_id . "'");
           $option_id_is_correct =  $option_id_is_correct_query->row['total'];
 
-          print("option_id_is_present: $option_id_is_correct \n"); // XXX
-          if (!$option_id_is_correct) {
-
-            /*
-             * The given option id is not present in the database and the product option cannot be processed.
-             */
-            die("The given option id $option_id does not exsit.");
-
-          } else {
+          if ($option_id_is_correct) {
 
             /*
              * Check if the given option id is allowed to be associated with the given option value id
@@ -975,6 +938,7 @@ class ModelModuleApimodule extends Model
 
               /*
                * Check if the given option id is already associated with the product id.
+               * If not, associate the given option id with the given product id.
                */
               $product_option_id_query = $this->db->query("SELECT product_option_id FROM `" . DB_PREFIX . "product_option` WHERE option_id = '" . (int)$option_id . "' AND product_id = '" . (int)$product_id . "'");
 
@@ -988,10 +952,6 @@ class ModelModuleApimodule extends Model
                 $product_option_id = $this->db->getLastId();
 
               }
-
-              /*
-               * The given option id is associated with the given product id at this point. 
-               */
 
               /*
                * Register the option id, option value id and the product id in the database.
@@ -1013,11 +973,6 @@ class ModelModuleApimodule extends Model
         }
       }
     }
-
-    print("----------FINISHED----------");exit;
-
-
-    
 
 		if (isset($data['product_discount'])) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
