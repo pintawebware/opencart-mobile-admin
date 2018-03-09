@@ -2173,13 +2173,12 @@ class ControllerModuleApimodule extends Controller
             }
             if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
 
+            if (!empty($_REQUEST['options'])){ $data['product_option'] = $_REQUEST['options']; }
 
             if (!empty($_REQUEST['product_id'])) {
                 $product_id = $_REQUEST['product_id'];
-
                 $data['product_image'] = $images;
                 $this->model_module_apimodule->editProduct($product_id,$data);
-
             }else{
                 $data['product_id'] = 0;
                 if(!empty($images[0])){
