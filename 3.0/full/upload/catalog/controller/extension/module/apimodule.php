@@ -2133,23 +2133,25 @@ class ControllerExtensionModuleApimodule extends Controller
                 $data['product_description'][$data['language_id']]['description'] = $_REQUEST['description'];
             }
 
-            if (isset($_REQUEST['price'])) {
-                $currency = $this->model_extension_module_apimodule->getUserCurrency();
-                if(empty($currency)){
-                    $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
-                }
-                $this->load->model('localisation/currency');
-                $result = $this->model_localisation_currency->getCurrencyByCode($currency);
+            if (!empty($_REQUEST['product_id'])) {
+              if (isset($_REQUEST['price'])) {
+                  $currency = $this->model_extension_module_apimodule->getUserCurrency();
+                  if(empty($currency)){
+                      $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
+                  }
+                  $this->load->model('localisation/currency');
+                  $result = $this->model_localisation_currency->getCurrencyByCode($currency);
 
-                $product = $this->model_extension_module_apimodule->getProductsByID($_REQUEST['product_id']);
-                if ( $_REQUEST['price'] == $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency) ) {
-                    $data['price_old'] = true;
-                }
-                
-                $price = $_REQUEST['price']/$result['value'];
-                $data['price'] = $price;
-            }else{
-                $data['price'] = 0;
+                  $product = $this->model_extension_module_apimodule->getProductsByID($_REQUEST['product_id']);
+                  if ( $_REQUEST['price'] == $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency) ) {
+                      $data['price_old'] = true;
+                  }
+                  
+                  $price = $_REQUEST['price']/$result['value'];
+                  $data['price'] = $price;
+              }else{
+                  $data['price'] = 0;
+              }
             }
 
             if (isset($_REQUEST['model'])) {  $data['model'] = $_REQUEST['model'];  }else{    $data['model'] = "";  }
@@ -2159,6 +2161,7 @@ class ControllerExtensionModuleApimodule extends Controller
             if (isset($_REQUEST['substatus'])) {   $data['stock_status_id'] = $_REQUEST['substatus'];  }else{   $data['stock_status_id'] = 7; }
             if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
 
+            if (!empty($_REQUEST['options'])){ $data['product_option'] = $_REQUEST['options']; }
 
             if (!empty($_REQUEST['product_id'])) {
                 $product_id = $_REQUEST['product_id'];
