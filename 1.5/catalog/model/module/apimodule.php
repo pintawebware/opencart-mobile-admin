@@ -735,7 +735,6 @@ class ModelModuleApimodule extends Model
 			product_id = '" . (int)$product_id . "', 
 			language_id = '" . (int)$language_id . "', 
 			name = '" . $this->db->escape($value['name']) . "', 
-			meta_title = '" . $this->db->escape($value['name']) . "', 
 			description = '" . $this->db->escape($value['description']) . "'		
 			");
 
@@ -764,24 +763,53 @@ class ModelModuleApimodule extends Model
 		}
 
     /*
-		if (isset($data['product_option'])) {
-			foreach ($data['product_option'] as $product_option) {
-				if ($product_option['type'] == 'select' || $product_option['type'] == 'radio' || $product_option['type'] == 'checkbox' || $product_option['type'] == 'image') {
-					if (isset($product_option['product_option_value'])) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', required = '" . (int)$product_option['required'] . "'");
+     * Add product options.
+     */
+    if (isset($data['product_option'])) {
 
-						$product_option_id = $this->db->getLastId();
+      foreach ($data['product_option'] as $option_id => $option_value_ids) {
 
-						foreach ($product_option['product_option_value'] as $product_option_value) {
-							$this->db->query("INSERT INTO " . DB_PREFIX . "product_option_value SET product_option_id = '" . (int)$product_option_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', option_value_id = '" . (int)$product_option_value['option_value_id'] . "', quantity = '" . (int)$product_option_value['quantity'] . "', subtract = '" . (int)$product_option_value['subtract'] . "', price = '" . (float)$product_option_value['price'] . "', price_prefix = '" . $this->db->escape($product_option_value['price_prefix']) . "', points = '" . (int)$product_option_value['points'] . "', points_prefix = '" . $this->db->escape($product_option_value['points_prefix']) . "', weight = '" . (float)$product_option_value['weight'] . "', weight_prefix = '" . $this->db->escape($product_option_value['weight_prefix']) . "'");
-						}
-					}
-				} else {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_id = '" . (int)$product_id . "', option_id = '" . (int)$product_option['option_id'] . "', value = '" . $this->db->escape($product_option['value']) . "', required = '" . (int)$product_option['required'] . "'");
-				}
-			}
-		}
-   */
+        /*
+         * Verify that the option id is present in the database.
+         */
+        $option_id_is_correct_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "option` WHERE option_id = '" . (int)$option_id . "'");
+        $option_id_is_correct =  $option_id_is_correct_query->row['total'];
+
+        if ($option_id_is_correct) {
+
+          $this->db->query("INSERT INTO `" . DB_PREFIX . "product_option` (product_id, option_id) VALUES ('" . (int)$product_id . "', '" . (int)$option_id . "')");
+          $product_option_id = $this->db->getLastId();
+
+          foreach ($option_value_ids as $option_value_id) {
+
+            /*
+             * Check if the given option id is allowed to be associated with the given option value id
+             */
+            $option_value_id_is_correct_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "option_value` WHERE option_id = '" . (int)$option_id . "' AND option_value_id = '" . (int)$option_value_id . "'");
+            $option_value_id_is_correct = $option_value_id_is_correct_query->row['total'];
+
+            if ($option_value_id_is_correct) {
+
+              /*
+               * Register the option id, option value id and the product id in the database.
+               */
+
+              $this->db->query("INSERT INTO `" . DB_PREFIX . "product_option_value` (
+                product_option_id,
+                product_id,
+                option_id,
+                option_value_id
+              ) VALUES ( " .
+                "'" . (int)$product_option_id . "'," .
+                "'" . (int)$product_id . "'," .
+                "'" .  (int)$option_id . "'," . 
+                "'" .  (int)$option_value_id . "')"
+              );
+            }
+          }
+        }
+      }
+    }
 
 		if (isset($data['product_discount'])) {
 			foreach ($data['product_discount'] as $product_discount) {
@@ -915,18 +943,34 @@ class ModelModuleApimodule extends Model
       $this->db->query("DELETE FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "'");
       $this->db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "'");
 
-      foreach ($data['product_option'] as $product_option) {
-        if (isset($product_option['option_id']) && isset($product_option['option_value_id'])) { 
-          $option_id = $product_option['option_id'];
-          $option_value_id = $product_option['option_value_id'];
+      foreach ($data['product_option'] as $option_id => $option_value_ids) {
+
+        /*
+         * Verify that the option id is present in the database.
+         */
+        $option_id_is_correct_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "option` WHERE option_id = '" . (int)$option_id . "'");
+        $option_id_is_correct =  $option_id_is_correct_query->row['total'];
+
+        if ($option_id_is_correct) {
 
           /*
-           * Verify that the option id is present in the database.
+           * Check if the given option id is already associated with the product id.
+           * If not, associate the given option id with the given product id.
            */
-          $option_id_is_correct_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "option` WHERE option_id = '" . (int)$option_id . "'");
-          $option_id_is_correct =  $option_id_is_correct_query->row['total'];
+          $product_option_id_query = $this->db->query("SELECT product_option_id FROM `" . DB_PREFIX . "product_option` WHERE option_id = '" . (int)$option_id . "' AND product_id = '" . (int)$product_id . "'");
 
-          if ($option_id_is_correct) {
+          if (isset($product_option_id_query->row['product_option_id'])) {
+            
+            $product_option_id = $product_option_id_query->row['product_option_id'];
+
+          } else{
+
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_option` (product_id, option_id) VALUES ('" . (int)$product_id . "', '" . (int)$option_id . "')");
+            $product_option_id = $this->db->getLastId();
+
+          }
+
+          foreach ($option_value_ids as $option_value_id) {
 
             /*
              * Check if the given option id is allowed to be associated with the given option value id
@@ -935,23 +979,6 @@ class ModelModuleApimodule extends Model
             $option_value_id_is_correct = $option_value_id_is_correct_query->row['total'];
 
             if ($option_value_id_is_correct) {
-
-              /*
-               * Check if the given option id is already associated with the product id.
-               * If not, associate the given option id with the given product id.
-               */
-              $product_option_id_query = $this->db->query("SELECT product_option_id FROM `" . DB_PREFIX . "product_option` WHERE option_id = '" . (int)$option_id . "' AND product_id = '" . (int)$product_id . "'");
-
-              if (isset($product_option_id_query->row['product_option_id'])) {
-                
-                $product_option_id = $product_option_id_query->row['product_option_id'];
-
-              } else{
-
-                $this->db->query("INSERT INTO `" . DB_PREFIX . "product_option` (product_id, option_id) VALUES ('" . (int)$product_id . "', '" . (int)$product_option['option_id'] . "')");
-                $product_option_id = $this->db->getLastId();
-
-              }
 
               /*
                * Register the option id, option value id and the product id in the database.
@@ -1084,7 +1111,6 @@ class ModelModuleApimodule extends Model
 	}
 
 	public function updateProduct($data = array()){
-		// print_r($data);die;
 		foreach ($data as $table => $fields_data){
 			if($table != 'categories'){
 				if(!empty($fields_data) && is_array($fields_data)){
@@ -1123,7 +1149,6 @@ class ModelModuleApimodule extends Model
 
 					$sql = 'INSERT INTO `' . DB_PREFIX .$table.'` ('.$fields.') VALUES ('.$values.') 
                             ON DUPLICATE KEY UPDATE '.$update;
-					// print_r($sql);die;
 					$this->db->query($sql);
 				}
 			}

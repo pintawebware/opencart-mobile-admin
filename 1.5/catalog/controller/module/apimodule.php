@@ -2143,23 +2143,25 @@ class ControllerModuleApimodule extends Controller
                 $data['product_description'][$data['language_id']]['description'] = $_REQUEST['description'];
             }
 
-            if (isset($_REQUEST['price'])) {
-                $currency = $this->model_module_apimodule->getUserCurrency();
-                if(empty($currency)){
-                    $currency = $this->model_module_apimodule->getDefaultCurrency();
-                }
-                $this->load->model('localisation/currency');
-                $result = $this->model_localisation_currency->getCurrencyByCode($currency);
+            if (!empty($_REQUEST['product_id'])) {
+              if (isset($_REQUEST['price'])) {
+                  $currency = $this->model_module_apimodule->getUserCurrency();
+                  if(empty($currency)){
+                      $currency = $this->model_module_apimodule->getDefaultCurrency();
+                  }
+                  $this->load->model('localisation/currency');
+                  $result = $this->model_localisation_currency->getCurrencyByCode($currency);
 
-                $product = $this->model_module_apimodule->getProductsByID($_REQUEST['product_id']);
-                if ( $_REQUEST['price'] == $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency) ) {
-                    $data['price_old'] = true;
-                }
+                  $product = $this->model_module_apimodule->getProductsByID($_REQUEST['product_id']);
+                  if ( $_REQUEST['price'] == $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency) ) {
+                      $data['price_old'] = true;
+                  }
 
-                $price = $_REQUEST['price']/$result['value'];
-                $data['price'] = $price;
-            }else{
-                $data['price'] = 0;
+                  $price = $_REQUEST['price']/$result['value'];
+                  $data['price'] = $price;
+              }else{
+                  $data['price'] = 0;
+              }
             }
 
             if (isset($_REQUEST['model'])) {  $data['model'] = $_REQUEST['model'];  }else{    $data['model'] = "";  }
