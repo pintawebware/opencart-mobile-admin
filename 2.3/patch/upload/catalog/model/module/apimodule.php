@@ -908,15 +908,13 @@ class ModelModuleApimodule extends Model
 			$this->db->query("UPDATE " . DB_PREFIX . "product SET image = '" . $this->db->escape($data['image']) . "' WHERE product_id = '" . (int)$product_id . "'");
 		}
 
-		$this->db->query("DELETE FROM " . DB_PREFIX . "product_description WHERE product_id = '" . (int)$product_id . "'");
 
 		foreach ($data['product_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "product_description SET 
+			$this->db->query("UPDATE " . DB_PREFIX . "product_description SET 
 			product_id = '" . (int)$product_id . "', language_id = '" . (int)$language_id . "', 
 			name = '" . $this->db->escape($value['name']) . "', 
-			description = '" . $this->db->escape($value['description']) . "'");
+			description = '" . $this->db->escape($value['description']) . "' WHERE product_id = ". (int)$product_id . " and language_id = " . (int)$language_id );
 		}
-
 
 		if (isset($data['product_store'])) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_store WHERE product_id = '" . (int)$product_id . "'");
@@ -1047,13 +1045,40 @@ class ModelModuleApimodule extends Model
 		}
 
 
-		if (isset($data['product_category'])) {
-			$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+        if (isset($data['product_category'])) {
+            $fields = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_category WHERE 1 LIMIT 1");
 
-			foreach ($data['product_category'] as $category_id) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "product_to_category SET product_id = '" . (int)$product_id . "', category_id = '" . (int)$category_id . "'");
-			}
-		}
+            if ( isset($fields->row['main_category']) ) {
+                $mainId = null;
+                foreach ($data['product_category'] as $category_id) {
+                    $isMain = $this->db->query("SELECT top FROM " . DB_PREFIX . "category WHERE category_id = ".$category_id );
+                    if ( isset($isMain->row['top']) && $isMain->row['top'] == 1 ) {
+                        $mainId = $category_id;
+                    }
+                }
+
+                if ( is_null($mainId) ) {
+                    if ( isset($data['product_category'][0] ) )
+                        $mainId = $data['product_category'][0];
+                }
+
+                $this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+
+                foreach ($data['product_category'] as $category_id) {
+                    $isMainCat = 0;
+                    if ( $category_id == $mainId )
+                        $isMainCat = 1;
+
+                    $this->db->query("INSERT INTO " . DB_PREFIX . "product_to_category SET product_id = '" . (int)$product_id . "', category_id = '" . (int)$category_id . "' , main_category = '" . (int)$isMainCat . "'");
+                }
+            } else {
+                $this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
+
+                foreach ($data['product_category'] as $category_id) {
+                    $this->db->query("INSERT INTO " . DB_PREFIX . "product_to_category SET product_id = '" . (int)$product_id . "', category_id = '" . (int)$category_id . "'");
+                }
+            }
+        }
 
 
 		if (isset($data['product_filter'])) {
