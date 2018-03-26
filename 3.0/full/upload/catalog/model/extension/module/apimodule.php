@@ -1307,6 +1307,15 @@ class ModelExtensionModuleApimodule extends Model
 
         $categories = $query->rows;
 
+        if ( empty($categories) || is_null($categories) ) {
+            $query = $this->db->query("SELECT cd.name, cd.category_id category_id FROM  `" . DB_PREFIX . "category` c
+                LEFT JOIN `" . DB_PREFIX . "category_description` cd ON c.category_id = cd.category_id
+                WHERE cd.language_id = ".(int)$this->config->get('config_language_id'));
+
+            $categories = $query->rows;
+        }
+
+
 	    $query = $this->db->query("SELECT c.parent_id FROM  `" . DB_PREFIX . "category` c  ");
 	    $parents = $query->rows;
 	    $array =  array_map(function($v) { return $v['parent_id']; },$parents);
