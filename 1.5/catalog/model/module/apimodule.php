@@ -1291,13 +1291,15 @@ class ModelModuleApimodule extends Model
 		return $this->ar;
 	}
 
-	public function getCategories(){
 
-		$query = $this->db->query("SELECT cd.name, cd.category_id category_id FROM  `" . DB_PREFIX . "category` c  
+    public function getCategories(){
+
+        $query = $this->db->query("SELECT cd.name, cd.category_id category_id FROM  `" . DB_PREFIX . "category` c  
                 LEFT JOIN `" . DB_PREFIX . "category_description` cd ON c.category_id = cd.category_id  
                 WHERE c.top = 1 AND cd.language_id = ".(int)$this->config->get('config_language_id'));
 
-		$categories = $query->rows;
+        $categories = $query->rows;
+
 
         if ( empty($categories) || is_null($categories) ) {
             $query = $this->db->query("SELECT cd.name, cd.category_id category_id FROM  `" . DB_PREFIX . "category` c  
@@ -1308,29 +1310,41 @@ class ModelModuleApimodule extends Model
         }
 
 
-		$query = $this->db->query("SELECT c.parent_id FROM  `" . DB_PREFIX . "category` c  ");
-		$parents = $query->rows;
-		$array =  array_map(function($v) { return $v['parent_id']; },$parents);
-		$return = [];
-		foreach ($categories as $one):
-			$cat = [];
-			$cat['name'] = $one['name'];
-			$cat['category_id'] = $one['category_id'];
-			if(in_array($one['category_id'],$array)){
-				$cat['parent'] = true;
-			}else{
-				$cat['parent'] = false;
-			}
-			$return[] = $cat;
-		endforeach;
+        $query = $this->db->query("SELECT c.parent_id FROM  `" . DB_PREFIX . "category` c  ");
+        $parents = $query->rows;
+        $resposne = $this->getParentsCategories($categories, $parents);
+        return $resposne;
+    }
 
-		return $return;
-	}
-	public function getCategoriesById($id){
+    public function getParentsCategories( $categories, $parents ) {
+        $array =  array_map(function($v) { return $v['parent_id']; },$parents);
+        $return = [];
+        foreach ($categories as $one):
+            $cat = [];
+            $cat['name'] = $one['name'];
+            $cat['category_id'] = $one['category_id'];
+            if(in_array($one['category_id'],$array)){
+                $cat['parent'] = true;
+            }else{
+                $cat['parent'] = false;
+            }
+            $return[] = $cat;
+        endforeach;
+        return $return;
+    }
 
-		$query = $this->db->query("SELECT cd.name, cd.category_id category_id FROM  `" . DB_PREFIX . "category` c  LEFT JOIN `" . DB_PREFIX . "category_description` cd ON c.category_id = cd.category_id  WHERE c.parent_id = ".$id." AND cd.language_id = ".(int)$this->config->get('config_language_id'));
-		return $query->rows;
-	}
+    public function getCategoriesById($id){
+        $query = $this->db->query("SELECT  cd.name, cd.category_id category_id FROM  `" . DB_PREFIX . "category` c  
+                LEFT JOIN `" . DB_PREFIX . "category_description` cd ON c.category_id = cd.category_id  
+                WHERE c.parent_id = ".$id." AND cd.language_id = ".(int)$this->config->get('config_language_id'));
+
+        $categories = $query->rows;
+
+        $query = $this->db->query("SELECT c.parent_id FROM  `" . DB_PREFIX . "category` c  ");
+        $parents = $query->rows;
+        $resposne = $this->getParentsCategories($categories, $parents);
+        return $resposne;
+    }
 
 	public function getSubstatus(){
 
