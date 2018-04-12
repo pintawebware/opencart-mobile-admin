@@ -652,8 +652,8 @@ class ModelExtensionModuleApimodule extends Model
                                         WHERE p.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
         $all_images = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_image` WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC");
 
-        $response['description'] = $main_image->row['description'];
-        $all_images->rows[] = ['product_image_id' => -1, 'image' => $main_image->row['image']];
+        $response['description'] = isset($main_image->row['description']) ? $main_image->row['description'] : '';
+        $all_images->rows[] = ['product_image_id' => -1, 'image' => isset($main_image->row['image']) ? $main_image->row['image'] : ''];
         $response['images'] = array_reverse($all_images->rows);
 
         return $response;
