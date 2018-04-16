@@ -9,26 +9,6 @@ class ControllerExtensionModuleApimodule extends Controller
         return $this->API_VERSION;
     }
 
-//    public function __construct($registry)
-//    {
-//        parent::__construct($registry);
-//        $this->load->model('setting/setting');
-//
-//        $this->load->model('extension/module/apimodule');
-//
-//        $this->API_VERSION = $this->model_extension_module_apimodule->getVersion();
-//
-//        $setting = $this->model_setting_setting->getSetting('module_apimodule');
-//
-//        if (!isset($setting['module_apimodule_status']) || (isset($setting['module_apimodule_status']) && $setting['module_apimodule_status'] == 0)) {
-//
-//            $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'error' => 'You do not activated module', 'status' => false]));
-//            return;
-//        }
-//
-//    }
-
-
     /**
      * @api {get} index.php?route=module/apimodule/orders  getOrders
      * @apiName GetOrders
@@ -695,7 +675,7 @@ class ControllerExtensionModuleApimodule extends Controller
                     }
                     $shipping_price = $products[$i]['value'];
 
-                    $product_options = $this->model_extensions_module_apimodule->getProductOptionsByID($products[$i]['product_id']);
+                    $product_options = $this->model_extension_module_apimodule->getProductOptionsByID($products[$i]['product_id']);
                     $product['options'] = $product_options;
 
                     $data['products'][] = $product;
