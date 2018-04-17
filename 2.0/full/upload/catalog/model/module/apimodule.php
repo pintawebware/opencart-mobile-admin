@@ -51,11 +51,11 @@ class ModelModuleApimodule extends Model
             }
             if (isset($data['filter']['date_min']) && $data['filter']['date_min'] != '') {
                 $date_min = date('y-m-d', strtotime($data['filter']['date_min']));
-                $sql .= " AND DATE_FORMAT(o.date_added,'%y-%m-%d') > '" . $date_min . "'";
+                $sql .= " AND DATE_FORMAT(o.date_added,'%y-%m-%d') >= '" . $date_min . "'";
             }
             if (isset($data['filter']['date_max']) && $data['filter']['date_max'] != '') {
                 $date_max = date('y-m-d', strtotime($data['filter']['date_max']));
-                $sql .= " AND DATE_FORMAT(o.date_added,'%y-%m-%d') < '" . $date_max . "'";
+                $sql .= " AND DATE_FORMAT(o.date_added,'%y-%m-%d') <= '" . $date_max . "'";
             }
 
 
