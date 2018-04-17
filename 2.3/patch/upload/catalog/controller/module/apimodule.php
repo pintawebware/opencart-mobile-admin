@@ -1271,34 +1271,37 @@ class ControllerModuleApimodule extends Controller
                     }
 
                 } elseif ($_REQUEST['filter'] == 'week') {
-                    $hours = range(1, 7);
+                    $start = new DateTime( date('Y-m-d') );
+                    $start->modify( '-6 day' );
+                    $end = new DateTime( date('Y-m-d') );
+                    $end->modify( '+1 day' );
 
-                    for ($i = 1; $i <= 7; $i++) {
-                        $b = 0;
-                        $o = 0;
-                        foreach ($clients as $value) {
+                    $interval = new DateInterval('P1D');
+                    $daterange = new DatePeriod($start, $interval ,$end);
 
+                    foreach( $daterange as $date ){
+                        $countClients = 0;
+                        $countOrders = 0;
+                        $hours[] = (int)$date->format("d");
+                        $currentDay = $date->format("d");
+
+                        foreach ( $clients as $value ) {
                             $date = strtotime($value['date_added']);
-
-                            $f = date("N", $date);
-
-                            if ($f == $i) {
-                                $b = $b + 1;
+                            $dateOrder = date("d", $date);
+                            if ($dateOrder == $currentDay ) {
+                                $countClients++;
                             }
                         }
-                        $clients_for_time[] = $b;
+                        $clients_for_time[] = $countClients;
 
                         foreach ($orders as $val) {
-
                             $day = strtotime($val['date_added']);
-                            $day = date("N", $day);
-
-                            if ($day == $i) {
-                                $o = $o + 1;
+                            $day = date("d", $day);
+                            if ($day == $currentDay) {
+                                $countOrders++;
                             }
                         }
-                        $orders_for_time[] = $o;
-
+                        $orders_for_time[] = $countOrders;
                     }
 
                 } elseif ($_REQUEST['filter'] == 'year') {
