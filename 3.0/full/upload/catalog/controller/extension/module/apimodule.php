@@ -105,7 +105,7 @@ class ControllerExtensionModuleApimodule extends Controller
      */
     public function orders()
     {
-
+		header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
 
 
