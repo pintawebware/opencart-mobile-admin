@@ -2127,7 +2127,7 @@ class ControllerModuleApimodule extends Controller
             }
 
             if (isset($_REQUEST['price'])) {
-                $currency = $this->model_module_aptmodule->getUserCurrency();
+                $currency = $this->model_module_apimodule->getUserCurrency();
                 if(empty($currency)){
                     $currency = $this->model_module_apimodule->getDefaultCurrency();
                 }
