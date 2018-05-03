@@ -1249,7 +1249,7 @@ class ControllerModuleApimodule extends Controller
                         foreach ($clients as $value) {
 
                             $hour = strtotime($value['date_added']);
-                            $hour = date("h", $hour);
+                            $hour = date("H", $hour);
 
                             if ($hour == $i) {
                                 $b = $b + 1;
@@ -1260,7 +1260,7 @@ class ControllerModuleApimodule extends Controller
                         foreach ($orders as $value) {
 
                             $day = strtotime($value['date_added']);
-                            $day = date("h", $day);
+                            $day = date("H", $day);
 
                             if ($day == $i) {
                                 $o = $o + 1;
