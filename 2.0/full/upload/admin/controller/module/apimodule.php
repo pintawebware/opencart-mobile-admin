@@ -3,6 +3,7 @@
 require_once DIR_CATALOG . "model/module/apimodule.php";
 
 class ControllerModuleApimodule extends Controller {
+
 	private $error = array();
 	private $API_VERSION = 0;
 	private $OPENCART_VERSION = 0;
@@ -14,7 +15,7 @@ class ControllerModuleApimodule extends Controller {
 		$this->OPENCART_VERSION = substr(VERSION,0,3);
 	}
 
-	public function checkVersion(){
+	public function checkVersion() {
         $return = false;
 
         $curl_handle = curl_init();
@@ -26,7 +27,7 @@ class ControllerModuleApimodule extends Controller {
         curl_close($curl_handle);
         $version = json_decode($json,1);
 
-        if($this->API_VERSION <(float)$version['version']){
+        if ($this->API_VERSION <(float)$version['version']) {
             $return = $version['version'];
         }
         return $return;
@@ -40,7 +41,6 @@ class ControllerModuleApimodule extends Controller {
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-
 			$this->model_setting_setting->editSetting('apimodule', $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -48,20 +48,19 @@ class ControllerModuleApimodule extends Controller {
 			$this->response->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
 		}
 
+    $data['heading_title'] = $this->language->get('heading_title');
 
-		$data['heading_title'] = $this->language->get('heading_title');
+    $data['text_edit'] = $this->language->get('text_edit');
+    $data['text_enabled'] = $this->language->get('text_enabled');
+    $data['text_disabled'] = $this->language->get('text_disabled');
+    $data['text_default'] = $this->language->get('text_default');
+    $data['entry_store'] = $this->language->get('entry_store');
 
-		$data['text_edit'] = $this->language->get('text_edit');
-		$data['text_enabled'] = $this->language->get('text_enabled');
-		$data['text_disabled'] = $this->language->get('text_disabled');
-		$data['text_default'] = $this->language->get('text_default');
-        $data['entry_store'] = $this->language->get('entry_store');
+    $data['entry_status'] = $this->language->get('entry_status');
 
-		$data['entry_status'] = $this->language->get('entry_status');
-
-		$data['button_save'] = $this->language->get('button_save');
-		$data['button_cancel'] = $this->language->get('button_cancel');
-		$data['button_update'] = $this->language->get('button_update');
+    $data['button_save'] = $this->language->get('button_save');
+    $data['button_cancel'] = $this->language->get('button_cancel');
+    $data['button_update'] = $this->language->get('button_update');
 
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -97,25 +96,25 @@ class ControllerModuleApimodule extends Controller {
 		}
 
 		$this->load->model('setting/store');
-        $data['stores'] = $this->model_setting_store->getStores();
-        if (isset($this->request->post['apimodule_store'])) {
-            $data['apimodule_store'] = $this->request->post['apimodule_store'];
-        } else {
-        	if ( is_null($this->config->get('apimodule_store')) )
-                $data['apimodule_store'] = array(0);
-		    else
-			    $data['apimodule_store'] = $this->config->get('apimodule_store');
-        }
+    $data['stores'] = $this->model_setting_store->getStores();
+    if (isset($this->request->post['apimodule_store'])) {
+      $data['apimodule_store'] = $this->request->post['apimodule_store'];
+    } else {
+      if (is_null($this->config->get('apimodule_store'))) {
+        $data['apimodule_store'] = array(0);
+      } else {
+        $data['apimodule_store'] = $this->config->get('apimodule_store');
+      }
+    }
 
 		if (!extension_loaded('zip')) {
 			$data['ext'] = "not installed zip extension for update";
-		}else{
+		} else {
 			$data['ext'] = "";
 		}
 
 		if (isset($this->session->data['error'])) {
 			$data['error'] = $this->session->data['error'];
-
 			unset($this->session->data['error']);
 		} else {
 			$data['error'] = '';
@@ -129,7 +128,6 @@ class ControllerModuleApimodule extends Controller {
 		$data['current_version'] = $this->API_VERSION;
 		$data['update'] = $this->url->link('module/apimodule/update&v='.$version, 'token=' . $this->session->data['token'], 'SSL');
 
-
 		$this->response->setOutput($this->load->view('module/apimodule.tpl', $data));
 	}
 
@@ -140,25 +138,26 @@ class ControllerModuleApimodule extends Controller {
 
 		return !$this->error;
 	}
-	private $path = "update";
-	private $fileName = "";
-	public function update() {
 
-		if(isset($_GET['v'])) {
+	private $path = "update";
+
+	private $fileName = "";
+
+	public function update() {
+		if (isset($_GET['v'])) {
 			//apimobile1.8.ocmod.zip
 			$this->fileName = "apimobile" . $_GET['v'] .".ocmod.zip";
 			//$file = file_get_contents("https://opencartapp.pro/app/".$this->OPENCART_VERSION.'/'.$this->fileName);
 			// If no temp directory exists create it
 
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_FAILONERROR, 1);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_URL, "https://opencartapp.pro/app/".$this->OPENCART_VERSION.'/'.$this->fileName);
-            $file = curl_exec($ch);
-            curl_close($ch);
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+      curl_setopt($ch, CURLOPT_HEADER, 0);
+      curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($ch, CURLOPT_URL, "https://opencartapp.pro/app/".$this->OPENCART_VERSION.'/'.$this->fileName);
+      $file = curl_exec($ch);
+      curl_close($ch);
 
 			if (!is_dir(DIR_UPLOAD . $this->path)) {
 				mkdir(DIR_UPLOAD . $this->path, 0777);
@@ -195,7 +194,6 @@ class ControllerModuleApimodule extends Controller {
 
 	}
 	private function installPatch() {
-
 		$this->unzip();
 		$ftp = $this->ftp();
 		if(isset($ftp['error'])){
@@ -208,7 +206,6 @@ class ControllerModuleApimodule extends Controller {
 		$this->clear();
 		$this->session->data['success'] = "Модуль успешно обновлен";
 		$this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'], 'SSL'));
-
 	}
 
 
