@@ -182,7 +182,7 @@ class ControllerExtensionModuleApimodule extends Controller {
 
         $this->load->model('setting/setting');
 
-        $this->model_setting_setting->editSetting('apimodule', ['module_apimodule_status'=>1,'version'=>1.7]);
+        $this->model_setting_setting->editSetting('apimodule', ['module_apimodule_status'=>1,'version'=>1.7,'module_apimodule_store' => ['0']]);
         if(VERSION == '2.0.0.0'){
             $this->load->model('tool/event');
             $this->model_tool_event->addEvent('apimodule', 'post.order.history.add', 'module/apimodule/sendNotifications');

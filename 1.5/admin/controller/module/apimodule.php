@@ -201,8 +201,10 @@ class ControllerModuleApimodule extends Controller {
         $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX."user_device_mob_api (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, user_id INT NOT NULL, device_token VARCHAR(500) , os_type VARCHAR(20))");
 
         $this->load->model('setting/setting');
+        $this->model_setting_setting->editSetting('apimodule', ['apimodule_store' => ['0']]);
 
     }
+
     private function installPatch() {
 
         $this->unzip();
