@@ -2112,7 +2112,7 @@ class ControllerModuleApimodule extends Controller
             }
         }
 
-        $price = $_REQUEST['price']/$result['value'];
+        $price = (float)$_REQUEST['price']/(float)$result['value'];
         $data['price'] = $price;
       }else{
         $data['price'] = 0;
