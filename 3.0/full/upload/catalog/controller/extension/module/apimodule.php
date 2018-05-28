@@ -2088,7 +2088,6 @@ class ControllerExtensionModuleApimodule extends Controller
 
         $images = [];
 
-       // file_put_contents('logimg.php', json_encode($_FILES));
         if(!empty($_FILES)){
             foreach ($_FILES['image']['name'] as $key => $name) {
                 $tmp_name = $_FILES['image']["tmp_name"][$key];

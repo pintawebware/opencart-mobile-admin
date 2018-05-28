@@ -2114,7 +2114,6 @@ class ControllerModuleApimodule extends Controller
 
         $images = [];
 
-       // file_put_contents('logimg.php', json_encode($_FILES));
         if(!empty($_FILES)){
              $image_catalog = DIR_IMAGE."catalog/"; 
             if (!file_exists($image_catalog)) {
