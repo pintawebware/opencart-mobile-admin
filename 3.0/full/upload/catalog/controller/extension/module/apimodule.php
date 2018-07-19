@@ -1797,7 +1797,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $limit = 10;
         }
         if (isset($_REQUEST['name']) && $_REQUEST['name'] != '') {
-            $name = $_REQUEST['name'];
+            $name = str_replace('&', '&amp;', $_REQUEST['name']);
         } else {
             $name = '';
         }
