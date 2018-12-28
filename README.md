@@ -1,4 +1,4 @@
-OPENCART-MOBILE-ADMIN 
+﻿OPENCART-MOBILE-ADMIN 
 =====================
 Opencart extension for 1.5 and higher, contains API for managing store from smartphone.
 View and process orders, push-notification of new orders, quick access to clients of your store. 
@@ -10,17 +10,17 @@ Installation process is different for some OpenCart versions, before installatio
 ### Manual for OpenCart 1.5 and higher
 #### To install extension on your website, you need to:
 1. Follow the link https://github.com/pintawebware/opencart-mobile-admin/releases and download the extension according to the version of your store
-![step 1](https://opencartapp.pro/images/opencart-15/en/1.png)
+![step 1](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%201.png?raw=true)
 
 2. Install Vqmod to your website. If Vqmod is already installed - skip to next step. 
     1. Follow the link: https://github.com/vqmod/vqmod/releases
     2. Download release with the “Latest Release” mark (at the time of writing - 2.6.1) 
-      ![step 2.2](https://opencartapp.pro/images/opencart-15/en/2.png)
+      ![step 2.2](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/Step%202.2.png?raw=true)
     3. Login into your website via any FTP-client (for example, Filezilla)
     4. In the window “Remote site” open the root of your website
     5. In the window “Local site” open the folder with unpacked archiveм 
     6. Right mouse button click on folder called “vqmod”, in the opened menu hit “Upload”
-      ![step 2.6](https://opencartapp.pro/images/opencart-15/ua/650xNx3.png.pagespeed.ic.7nhifkqMgw.jpg)
+      ![step 2.6](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%202.6.png?raw=true)
      7. Open in your web-browser following link: http://your-cool-site.com/vqmod/install/
       > If you got the message “VQMOD HAS BEEN INSTALLED ON YOUR SYSTEM!” - it means that you have successfully installed vqmod, go to the next step.
       If your got the message "VQMOD ALREADY INSTALLED!" - it means that you have already installed vqmod on your site, go to the next step.
@@ -31,14 +31,14 @@ Installation process is different for some OpenCart versions, before installatio
 5. In the window “Remote site” open the root of your site
 6. In the window “Local site” open the directory that contains unpacked archive data.
 7. Pick extracted data and hit “Upload” 
-![step 7](https://opencartapp.pro/images/opencart-15/ua/4.png)
+![step 7](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%207.png?raw=true)
 8. The installation of extension is completed, for the next step you can install application using Google Play or iTunes.
 
 
 ### Manual for OpenCart 2.0 and higher
 > For the module to work, you need a version of php 5.4 and higher.
 For online stores owners on OpenCart version 2 and above. After installing the module on some intermediate versions, the website can go into development mode. Be sure, after installing the module, check the settings, the development mode should be turned off! To check, go to System - Settings - Edit (current site) - Server tab.
-![step 0](https://opencartapp.pro/images/faqEn/6.jpg)
+![step 0](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%200.jpg?raw=true)
 #### To install extension on your website, you need to:
 1. Follow the link https://github.com/pintawebware/opencart-mobile-admin/releases and download the extension according to the version of your store
 ![step 1](https://opencartapp.pro/images/faqEn/5.jpg)
