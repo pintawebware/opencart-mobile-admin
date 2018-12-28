@@ -41,17 +41,17 @@ For online stores owners on OpenCart version 2 and above. After installing the m
 ![step 0](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%200.jpg?raw=true)
 #### To install extension on your website, you need to:
 1. Follow the link https://github.com/pintawebware/opencart-mobile-admin/releases and download the extension according to the version of your store
-![step 1](https://opencartapp.pro/images/faqEn/5.jpg)
+![step 1](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/Step%201a.jpg?raw=true)
 2. Login to your store as “Administrator” and go to Extensions -> Extension installer
-![step 2](https://opencartapp.pro/images/faqEn/1.jpg)
+![step 2](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%202a.jpg?raw=true)
 3. Press Upload and choose extension-archive that you have downloaded previously
-![step 3](https://opencartapp.pro/images/faqEn/2.jpg)
+![step 3](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%203a.jpg?raw=true)
 4. Next step to install the extension, press “Continue”
-![step 4](https://opencartapp.pro/images/faqEn/3.jpg)
+![step 4](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%204a.jpg?raw=true)
 5. The installation process will begin, and when its finished you will see “Success: The extension has been installed!” message.
-![step 5](https://opencartapp.pro/images/faqEn/4.jpg)
+![step 5](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%205a.jpg?raw=true)
 6. After installation, go to the "Extensions" - "Modifications", select "Check update apimodule" and click on the update button. 
-![step 6](https://opencartapp.pro/images/faqEn/7.jpg)
+![step 6](https://github.com/pintawebware/opencart-mobile-admin/blob/master/Images/step%206a.jpg?raw=true)
 7.The installation of extension is completed, for the next step you can install application using.
 
 #### Use this link to download applications:
