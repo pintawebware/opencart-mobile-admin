@@ -10,44 +10,52 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/orders  getOrders
-     * @apiName GetOrders
-     * @apiGroup All
+     * @api {post} index.php?route=module/apimodule/orders  Orders List
+     * @apiName  GetOrders
+     * @apiDescription  List of user orders
+     * @apiGroup Order
      *
-     * @apiParam {Token} token your unique token.
-     * @apiParam {Number} page number of the page.
-     * @apiParam {Number} limit limit of the orders for the page.
-     * @apiParam {Array} filter array of the filter params.
-     * @apiParam {String} filter[fio] full name of the client.
-     * @apiParam {Number} filter[order_status_id] unique id of the order.
-     * @apiParam {Number} filter[min_price] min price of order.
-     * @apiParam {Number} filter[max_price] max price of order.
-     * @apiParam {Date} filter[date_min] min date adding of the order.
-     * @apiParam {Date} filter[date_max] max date adding of the order.
+     * @apiParam {Token}     token your unique token.
+     * @apiParam {Number}    page number of the page.
+     * @apiParam {Number}    limit limit of the orders for the page.
+     * @apiParam {Array[]}   filter Array of the filters.
+     * @apiParam {String}    filter.fio full name of the client.
+     * @apiParam {Number}    filter.order_status_id unique id of the order.
+     * @apiParam {Number}    filter.min_price min price of order.
+     * @apiParam {Number}    filter.max_price max price of order.
+     * @apiParam {Date}      filter.date_min min date adding of the order.
+     * @apiParam {Date}      filter.date_max max date adding of the order.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Array} orders  Array of the orders.
-     * @apiSuccess {Array} statuses  Array of the order statuses.
-     * @apiSuccess {Number} order_id  ID of the order.
-     * @apiSuccess {Number} order_number  Number of the order.
-     * @apiSuccess {String} fio     Client's FIO.
-     * @apiSuccess {String} status  Status of the order.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {String} order[currency_code] currency of the order.
-     * @apiSuccess {Number} total  Total sum of the order.
-     * @apiSuccess {Date} date_added  Date added of the order.
-     * @apiSuccess {Date} total_quantity  Total quantity of the orders.
+     * @apiSuccess {Number}  version                          Current API version.
+     * @apiSuccess {Bool}    status                           Response status.
+     * @apiSuccess {Array[]} response                         Array with content response.
+     * @apiSuccess {String}  response.total_quantity          Total quantity of the orders.
+     * @apiSuccess {String}  response.currency_code           Default currency of the shop.
+     * @apiSuccess {Number}  response.total_sum               Total amount of orders.
+     * @apiSuccess {String}  response.max_price               Maximum order amount.
+     * @apiSuccess {Number}  response.api_version             Current API version.
      *
+     * @apiSuccess {Array[]} response.orders                  Array of the orders.
+     * @apiSuccess {Array[]} response.statuses                Array of the order statuses.
+
+     * @apiSuccess {String} response.orders.order_id          ID of the order.
+     * @apiSuccess {String} response.orders.order_number      Number of the order.
+     * @apiSuccess {String} response.orders.fio               Client's FIO.
+     * @apiSuccess {String} response.orders.status            Status of the order.
+     * @apiSuccess {String} response.orders.total             Total sum of the order.
+     * @apiSuccess {String} response.orders.date_added        Date added of the order.
+     * @apiSuccess {String} response.orders.currency_code     Currency of the order.
+     *
+     * @apiSuccess {String} response.statuses.name            Status Name.
+     * @apiSuccess {String} response.statuses.order_status_id Status id.
+     * @apiSuccess {String} response.statuses.language_id     Language id.
      *
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response"
-     *   {
-     *      "orders":
-     *      {
+     *     HTTP/1.1 200 OK {
+     *     "Response" {
+     *        "orders": {
      *            {
      *             "order_id" : "1",
      *             "order_number" : "1",
@@ -66,9 +74,8 @@ class ControllerExtensionModuleApimodule extends Controller
      *             "date_added" : "2016-10-19 16:00:00",
      *             "currency_code": "RUB"
      *             }
-     *       },
-     *       "statuses" :
-     *       {
+     *        },
+     *        "statuses" : {
      *             {
      *              "name": "Отменено",
      *              "order_status_id": "7",
@@ -87,25 +94,22 @@ class ControllerExtensionModuleApimodule extends Controller
      *       },
      *       "currency_code": "RUB",
      *       "total_quantity": 50,
-     *       "total_sum": "2026.00",
+     *       "total_sum": 2026.00,
      *       "max_price": "1405.00"
      *   },
      *   "Status" : true,
-     *   "version": 1.0
+     *   "version": 2.0
      * }
-     * @apiErrorExample Error-Response:
-     *
-     * {
-     *      "version": 1.0,
+     * @apiErrorExample Error-Response: {
+     *      "version": 2.0,
      *      "Status" : false
-     *
      * }
      *
      *
      */
     public function orders()
     {
-		header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
 
 
@@ -199,27 +203,37 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/getorderinfo  getOrderInfo
+     * @api {post} index.php?route=module/apimodule/getorderinfo  Order Info
      * @apiName getOrderInfo
-     * @apiGroup All
+     * @apiDescription Order details
+     * @apiGroup Order
      *
-     * @apiParam {Number} order_id unique order ID.
-     * @apiParam {Token} token your unique token.
+     * @apiParam {Token}       token                              Your unique token.
+     * @apiParam {Number}      order_id                           Unique order ID.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} order_number  Number of the order.
-     * @apiSuccess {String} fio     Client's FIO.
-     * @apiSuccess {String} status  Status of the order.
-     * @apiSuccess {String} email  Client's email.
-     * @apiSuccess {Number} phone  Client's phone.
-     * @apiSuccess {Number} total  Total sum of the order.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Date} date_added  Date added of the order.
-     * @apiSuccess {Array} statuses  Statuses list for order.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     *
+     * @apiSuccess {String}    response.order_number              Number of the order.
+     * @apiSuccess {String}    response.fio                       Client's FIO.
+     * @apiSuccess {String}    response.status                    Status of the order.
+     * @apiSuccess {String}    response.email                     Client's email.
+     * @apiSuccess {String}    response.telephone                 Client's phone.
+     * @apiSuccess {String}    response.total                     Total sum of the order.
+     * @apiSuccess {String}    response.currency_code             Default currency of the shop.
+     * @apiSuccess {String}    response.date_added                Date added of the order.
+     * @apiSuccess {Array[]}   response.statuses                  Statuses list for order.
+     *
+     * @apiSuccess {String}    response.statuses.language_id      Language id
+     * @apiSuccess {String}    response.statuses.name             Status name
+     * @apiSuccess {String}    response.statuses.order_status_id  Status id
+     *
+     *
+     *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
+     *     HTTP/1.1 200 OK {
      *      "response" :
      *          {
      *              "order_number" : "6",
@@ -253,9 +267,7 @@ class ControllerExtensionModuleApimodule extends Controller
      *      "version": 1.0
      * }
      *
-     * @apiErrorExample Error-Response:
-     *
-     *     {
+     * @apiErrorExample Error-Response: {
      *       "error" : "Can not found order with id = 5",
      *       "version": 1.0,
      *       "Status" : false
@@ -300,7 +312,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $data['date_added'] = $order[0]['date_added'];
 
                 if (isset($order[0]['total'])) {
-					$data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
+                    $data['total'] = $this->currency->format($order[0]['total'], $order[0]['currency_code'], $order[0]['currency_value']);
                 }
                 if (isset($order[0]['name'])) {
                     $data['status'] = $order[0]['name'];
@@ -323,22 +335,24 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/paymentanddelivery  getOrderPaymentAndDelivery
+     * @api {post} index.php?route=module/apimodule/paymentanddelivery  Payment and delivery by order
      * @apiName getOrderPaymentAndDelivery
-     * @apiGroup All
+     * @apiDescription Receive payment and delivery by order
+     * @apiGroup Order
      *
-     * @apiParam {Number} order_id unique order ID.
-     * @apiParam {Token} token your unique token.
+     * @apiParam {Number} order_id                                Unique order ID.
+     * @apiParam {Token}  token your                              Unique token.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {String} payment_method     Payment method.
-     * @apiSuccess {String} shipping_method  Shipping method.
-     * @apiSuccess {String} shipping_address  Shipping address.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {String}    response.payment_method            Payment method.
+     * @apiSuccess {String}    response.shipping_method           Shipping method.
+     * @apiSuccess {String}    response.shipping_address          Shipping address.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *
-     *      {
+     *     HTTP/1.1 200 OK {
      *          "response":
      *              {
      *                  "payment_method" : "Оплата при доставке",
@@ -357,7 +371,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *   }
      *
      */
-
     public function paymentanddelivery()
     {
         header("Access-Control-Allow-Origin: *");
@@ -416,23 +429,32 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/orderhistory  getOrderHistory
+     * @api {post} index.php?route=module/apimodule/orderhistory  Order Change History
      * @apiName getOrderHistory
-     * @apiGroup All
+     * @apiDescription View order changes list
+     * @apiGroup Order
      *
-     * @apiParam {Number} order_id unique order ID.
-     * @apiParam {Token} token your unique token.
+     * @apiParam {Number}      order_id                           Unique order ID.
+     * @apiParam {Token}       token                              Your unique token.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {String} name     Status of the order.
-     * @apiSuccess {Number} order_status_id  ID of the status of the order.
-     * @apiSuccess {Date} date_added  Date of adding status of the order.
-     * @apiSuccess {String} comment  Some comment added from manager.
-     * @apiSuccess {Array} statuses  Statuses list for order.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Array[]}   response.orders                    An array with information about the order.
+     * @apiSuccess {String}    response.orders.name               Status of the order.
+     * @apiSuccess {String}    response.orders.order_status_id    ID of the status of the order.
+     * @apiSuccess {String}    response.orders.date_added         Date of adding status of the order.
+     * @apiSuccess {String}    response.orders.comment            Some comment added from manager.
+     * @apiSuccess {Array[]}   response.statuses                  Statuses list for order.
+     *
+     * @apiSuccess {String}    response.statuses.name             Status name.
+     * @apiSuccess {String}    response.statuses.language_id      Language id.
+     * @apiSuccess {String}    response.statuses.order_status_id  Status id.
+     *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *       {
+     *     HTTP/1.1 200 OK {
      *           "response":
      *               {
      *                   "orders":
@@ -478,15 +500,12 @@ class ControllerExtensionModuleApimodule extends Controller
      *           "status": true,
      *           "version": 1.0
      *       }
-     * @apiErrorExample Error-Response:
-     *
-     *     {
+     * @apiErrorExample Error-Response:  {
      *          "error": "Can not found any statuses for order with id = 5",
      *          "version": 1.0,
      *          "Status" : false
      *     }
      */
-
     public function orderhistory()
     {
 
@@ -533,41 +552,71 @@ class ControllerExtensionModuleApimodule extends Controller
         }
     }
 
-
     /**
-     * @api {get} index.php?route=module/apimodule/orderproducts  getOrderProducts
+     * @api {post} index.php?route=module/apimodule/orderproducts  List of products in the order
      * @apiName getOrderProducts
-     * @apiGroup All
+     * @apiDescription Get the full list of products in the order
+     * @apiGroup Order
      *
-     * @apiParam {Token} token your unique token.
-     * @apiParam {ID} order_id unique order id.
+     * @apiParam   {Token}     token                              Your unique token.
+     * @apiParam   {Number}    order_id                           Unique order id.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Url} image  Picture of the product.
-     * @apiSuccess {Number} quantity  Quantity of the product.
-     * @apiSuccess {String} name     Name of the product.
-     * @apiSuccess {String} model  Model of the product.
-     * @apiSuccess {Number} Price  Price of the product.
-     * @apiSuccess {Number} total_order_price  Total sum of the order.
-     * @apiSuccess {Number} total_price  Sum of product's prices.
-     * @apiSuccess {String} currency_code  currency of the order.
-     * @apiSuccess {Number} shipping_price  Cost of the shipping.
-     * @apiSuccess {Number} total  Total order sum.
-     * @apiSuccess {Number} product_id  unique product id.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     * @apiSuccess {Array[]}   response.products                  Array of products.
+     * @apiSuccess {String}    response.products.name             Name of the product.
+     * @apiSuccess {String}    response.products.image            Picture of the product.
+     * @apiSuccess {String}    response.products.model            Model of the product.
+     * @apiSuccess {String}    response.products.quantity         Quantity of the product.
+     * @apiSuccess {String}    response.products.price            Price of the product.
+     * @apiSuccess {String}    response.products.product_id       Unique product id.
+     *
+     * @apiSuccess {Array[]}   response.products.options                   Array of of the product options.
+     * @apiSuccess {String}    response.products.options.option_id         Option id.
+     * @apiSuccess {String}    response.products.options.option_name       Option name.
+     * @apiSuccess {String}    response.products.options.option_value_id   Option value id.
+     * @apiSuccess {String}    response.products.options.option_value_name Option value name.
+     * @apiSuccess {String}    response.products.options.language_id       Language id of options and option values.
+     *
+     * @apiSuccess {Array[]}   response.total_order_price                  The array with a list of prices.
+     * @apiSuccess {Number}    response.total_order_price.total_discount     The amount of the discount for the order.
+     * @apiSuccess {Number}    response.total_order_price.total_price        Sum of product's prices.
+     * @apiSuccess {Number}    response.total_order_price.shipping_price     Cost of the shipping.
+     * @apiSuccess {Number}    response.total_order_price.total              Total order sum.
+     * @apiSuccess {String}    response.total_order_price.currency_code      Currency of the order.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *      "response":
-     *          {
-     *              "products": [
-     *              {
+     *     HTTP/1.1 200 OK {
+     *      "response": {
+     *              "products": [ {
      *                  "image" : "http://opencart/image/catalog/demo/htc_touch_hd_1.jpg",
      *                  "name" : "HTC Touch HD",
      *                  "model" : "Product 1",
      *                  "quantity" : 3,
      *                  "price" : 100.00,
-     *                  "product_id" : 90
+     *                  "product_id" : 90,
+     *                  "options": [
+     *                      {
+     *                          "option_id": "11",
+     *                          "option_value_id": "46",
+     *                          "option_value_name": "Small",
+     *                          "option_name": "Size"
+     *                      },
+     *                      {
+     *                          "option_id": "11",
+     *                          "option_value_id": "47",
+     *                          "option_value_name": "Medium",
+     *                          "option_name": "Size"
+     *                      },
+     *                      {
+     *                          "option_id": "11",
+     *                          "option_value_id": "48",
+     *                          "option_value_name": "Large",
+     *                          "option_name": "Size"
+     *                      }
+     *                  ]
      *              },
      *              {
      *                  "image" : "http://opencart/image/catalog/demo/iphone_1.jpg",
@@ -575,7 +624,8 @@ class ControllerExtensionModuleApimodule extends Controller
      *                  "model" : "Product 11",
      *                  "quantity" : 1,
      *                  "price" : 500.00,
-     *                  "product_id" : 97
+     *                  "product_id" : 97,
+     *                  "options" : []
      *               }
      *            ],
      *            "total_order_price":
@@ -593,16 +643,13 @@ class ControllerExtensionModuleApimodule extends Controller
      * }
      *
      *
-     * @apiErrorExample Error-Response:
-     *
-     *     {
+     * @apiErrorExample Error-Response: {
      *          "error": "Can not found any products in order with id = 10",
      *          "version": 1.0,
      *          "Status" : false
      *     }
      *
      */
-
     public function orderproducts()
     {
         header("Access-Control-Allow-Origin: *");
@@ -620,6 +667,7 @@ class ControllerExtensionModuleApimodule extends Controller
             $this->load->model('extension/module/apimodule');
             $products = $this->model_extension_module_apimodule->getOrderProducts($id);
 
+            $this->load->model('catalog/product');
 
             if (count($products) > 0) {
                 $data = array();
@@ -676,7 +724,10 @@ class ControllerExtensionModuleApimodule extends Controller
                     $shipping_price = $products[$i]['value'];
 
                     $product_options = $this->model_extension_module_apimodule->getProductOptionsByID($products[$i]['product_id']);
+
+                    $attributes = $this->model_catalog_product->getProductAttributes($products[$i]['product_id']);
                     $product['options'] = $product_options;
+                    $product['attributes'] = $attributes;
 
                     $data['products'][] = $product;
                 }
@@ -705,36 +756,32 @@ class ControllerExtensionModuleApimodule extends Controller
         }
     }
 
-
     /**
-     * @api {get} index.php?route=module/apimodule/delivery  changeOrderDelivery
+     * @api {post} index.php?route=module/apimodule/delivery  Change shipping method
      * @apiName changeOrderDelivery
-     * @apiGroup All
+     * @apiDescription Changes to the delivery method
+     * @apiGroup Order
      *
-     * @apiParam {String} address New shipping address.
-     * @apiParam {String} city New shipping city.
-     * @apiParam {Number} order_id unique order ID.
-     * @apiParam {Token} token your unique token.
+     * @apiParam {Token}  token             Your unique token.
+     * @apiParam {Number} order_id          Unique order ID.
+     * @apiParam {String} address           New shipping address.
+     * @apiParam {String} city              New shipping city.
      *
-     * @apiSuccess {Number} version  Current API version.
+     * @apiSuccess {Number}  version  Current API version.
      * @apiSuccess {Boolean} response Status of change address.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
+     *     HTTP/1.1 200 OK {
      *         "status": true,
      *         "version": 1.0
      *    }
-     * @apiErrorExample Error-Response:
-     *
-     *     {
+     * @apiErrorExample Error-Response:  {
      *       "error": "Can not change address",
      *       "version": 1.0,
      *       "Status" : false
      *     }
      *
      */
-
     public function delivery()
     {
         header("Access-Control-Allow-Origin: *");
@@ -809,7 +856,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *     }
      *
      */
-
     public function changestatus()
     {
         header("Access-Control-Allow-Origin: *");
@@ -839,35 +885,33 @@ class ControllerExtensionModuleApimodule extends Controller
         return;
     }
 
-
     /**
-     * @api {post} index.php?route=module/apimodule/login  login
+     * @api {post} index.php?route=module/apimodule/login  User authorization
      * @apiName login
-     * @apiGroup All
+     * @apiDescription uthorizing a new and existing user
+     * @apiGroup Authorization
      *
-     * @apiParam {String} username User unique username.
-     * @apiParam {Number} password User's  password.
-     * @apiParam {String} device_token User's device's token for firebase notifications.
-     * @apiParam {String} os_type Type of the user's device's OS.
+     * @apiParam {String} username                                User unique username.
+     * @apiParam {String} password                                User's  password.
+     * @apiParam {String} device_token                            User's device's token for firebase notifications.
+     * @apiParam {String} os_type                                 Type of the user's device's OS android or ios.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {String} token  Token.
-     * @apiSuccess {String} token  Token.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     * @apiSuccess {String}    response.token                     Token.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
-     *       "response":
-     *       {
+     *     HTTP/1.1 200 OK {
+     *       "version": 1.0,
+     *       "response": {
      *          "token": "e9cf23a55429aa79c3c1651fe698ed7b",
-     *          "version": 1.0,
-     *          "status": true
      *       }
+     *       "status": true
      *   }
      *
-     * @apiErrorExample Error-Response:
-     *
-     *     {
+     * @apiErrorExample Error-Response: {
      *       "error": "Incorrect username or password",
      *       "version": 1.0,
      *       "Status" : false
@@ -927,20 +971,20 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/deletedevicetoken  deleteUserDeviceToken
+     * @api {post} index.php?route=module/apimodule/deletedevicetoken  Delete user device token
      * @apiName deleteUserDeviceToken
-     * @apiGroup All
+     * @apiDescription Deletes the old user's token
+     * @apiGroup Token
      *
-     * @apiParam {String} old_token User's device's token for firebase notifications.
+     * @apiParam   {String}    old_token                    User's device's token for firebase notifications.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Boolean} status  true.
+     * @apiSuccess {Array[]}   response                     Array with content response
+     * @apiSuccess {Number}    response.version             Current API version.
+     * @apiSuccess {Boolean}   response.status              true.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
-     *       "response":
-     *       {
+     *     HTTP/1.1 200 OK {
+     *       "response":  {
      *          "status": true,
      *          "version": 1.0
      *       }
@@ -975,29 +1019,27 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/updatedevicetoken  updateUserDeviceToken
+     * @api {post} index.php?route=module/apimodule/updatedevicetoken  Update user device token
      * @apiName updateUserDeviceToken
-     * @apiGroup All
+     * @apiDescription Updating the old user's token to a new one
+     * @apiGroup Token
      *
-     * @apiParam {String} new_token User's device's new token for firebase notifications.
-     * @apiParam {String} old_token User's device's old token for firebase notifications.
+     * @apiParam {String} new_token                         User's device's new token for firebase notifications.
+     * @apiParam {String} old_token                         User's device's old token for firebase notifications.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Boolean} status  true.
+     * @apiSuccess {Array[]}   response                     Array with content response
+     * @apiSuccess {Number}    response.version             Current API version.
+     * @apiSuccess {Boolean}   response.status              true.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
-     *       "response":
-     *       {
+     *     HTTP/1.1 200 OK {
+     *       "response": {
      *          "status": true,
      *          "version": 1.0
      *       }
      *   }
      *
-     * @apiErrorExample Error-Response:
-     *
-     *     {
+     * @apiErrorExample Error-Response: {
      *       "error": "Missing some params",
      *       "version": 1.0,
      *       "Status" : false
@@ -1109,28 +1151,30 @@ class ControllerExtensionModuleApimodule extends Controller
         curl_close($ch);
     }
 
-
     /**
-     * @api {get} index.php?route=module/apimodule/statistic  getDashboardStatistic
-     * @apiName getDashboardStatistic
-     * @apiGroup All
+     * @api {post} index.php?route=module/apimodule/statistic  getDashboardStatistic
+     * @apiName          getDashboardStatistic
+     * @apiDescription   Get full statistics on the selected filter
+     * @apiGroup         Statistic
      *
-     * @apiParam {String} filter Period for filter(day/week/month/year).
-     * @apiParam {Token} token your unique token.
+     * @apiParam   {String} filter Period for filter(day/week/month/year).
+     * @apiParam   {Token}  token your unique token.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Array} xAxis Period of the selected filter.
-     * @apiSuccess {Array} Clients Clients for the selected period.
-     * @apiSuccess {Array} Orders Orders for the selected period.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} total_sales  Sum of sales of the shop.
-     * @apiSuccess {Number} sale_year_total  Sum of sales of the current year.
-     * @apiSuccess {Number} orders_total  Total orders of the shop.
-     * @apiSuccess {Number} clients_total  Total clients of the shop.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {Array[]}   response.xAxis               Period of the selected filter.
+     * @apiSuccess {Array[]}   response.clients             Clients for the selected period.
+     * @apiSuccess {Array[]}   response.orders              Orders for the selected period.
+     * @apiSuccess {String}    response.currency_code       Default currency of the shop.
+     * @apiSuccess {Number}    response.total_sales         Sum of sales of the shop.
+     * @apiSuccess {String}    response.sale_year_total     Sum of sales of the current year.
+     * @apiSuccess {String}    response.orders_total        Total orders of the shop.
+     * @apiSuccess {String}    response.clients_total       Total clients of the shop.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *   {
+     *     HTTP/1.1 200 OK {
      *           "response": {
      *               "xAxis": [
      *                  1,
@@ -1178,7 +1222,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *     }
      *
      */
-
     public function statistic()
     {
         header("Access-Control-Allow-Origin: *");
@@ -1261,7 +1304,7 @@ class ControllerExtensionModuleApimodule extends Controller
                     }
 
                 } elseif ($_REQUEST['filter'] == 'week') {
-                                        $start = new DateTime( date('Y-m-d') );
+                    $start = new DateTime( date('Y-m-d') );
                     $start->modify( '-6 day' );
                     $end = new DateTime( date('Y-m-d') );
                     $end->modify( '+1 day' );
@@ -1332,7 +1375,7 @@ class ControllerExtensionModuleApimodule extends Controller
 
             $sale_total = $this->model_extension_module_apimodule->getTotalSales();
 
-           // $data['total_sales'] = number_format($sale_total, 2, '.', '');
+            // $data['total_sales'] = number_format($sale_total, 2, '.', '');
             $currency = $this->model_extension_module_apimodule->getUserCurrency();
             if(empty($currency)){
                 $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
@@ -1384,11 +1427,11 @@ class ControllerExtensionModuleApimodule extends Controller
         return $error;
     }
 
-
     /**
-     * @api {get} index.php?route=module/apimodule/clients  getClients
+     * @api {post} index.php?route=module/apimodule/clients  Get list of the all clients
      * @apiName GetClients
-     * @apiGroup All
+     * @apiDescription Get a list of all clients for a specific filter
+     * @apiGroup Client
      *
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} page number of the page.
@@ -1396,18 +1439,19 @@ class ControllerExtensionModuleApimodule extends Controller
      * @apiParam {String} fio full name of the client.
      * @apiParam {String} sort param for sorting clients(sum/quantity/date_added).
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} client_id  ID of the client.
-     * @apiSuccess {String} fio     Client's FIO.
-     * @apiSuccess {Number} total  Total sum of client's orders.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} quantity  Total quantity of client's orders.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+
+     * @apiSuccess {String} response.client_id                    ID of the client.
+     * @apiSuccess {String} response.fio                          Client's FIO.
+     * @apiSuccess {Number} response.total                        Total sum of client's orders.
+     * @apiSuccess {String} response.currency_code                Default currency of the shop.
+     * @apiSuccess {String} response.quantity                     Total quantity of client's orders.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response"
-     *   {
+     *     HTTP/1.1 200 OK {
+     *     "Response" {
      *     "clients"
      *      {
      *          {
@@ -1429,8 +1473,7 @@ class ControllerExtensionModuleApimodule extends Controller
      *    "Status" : true,
      *    "version": 1.0
      * }
-     * @apiErrorExample Error-Response:
-     * {
+     * @apiErrorExample Error-Response: {
      *      "Error" : "Not one client found",
      *      "version": 1.0,
      *      "Status" : false
@@ -1504,29 +1547,32 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/clientinfo  getClientInfo
+     * @api {post} index.php?route=module/apimodule/clientinfo  Get detailed customer information
      * @apiName getClientInfo
-     * @apiGroup All
+     * @apiDescription Get detailed customer information
+     * @apiGroup Client
      *
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} client_id unique client ID.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} client_id  ID of the client.
-     * @apiSuccess {String} fio     Client's FIO.
-     * @apiSuccess {Number} total  Total sum of client's orders.
-     * @apiSuccess {Number} quantity  Total quantity of client's orders.
-     * @apiSuccess {String} email  Client's email.
-     * @apiSuccess {String} telephone  Client's telephone.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} cancelled  Total quantity of cancelled orders.
-     * @apiSuccess {Number} completed  Total quantity of completed orders.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     *
+     * @apiSuccess {String} response.client_id                    ID of the client.
+     * @apiSuccess {String} response.fio                          Client's FIO.
+     * @apiSuccess {String} response.total                        Total sum of client's orders.
+     * @apiSuccess {String} response.quantity                     Total quantity of client's orders.
+     * @apiSuccess {String} response.email                        Client's email.
+     * @apiSuccess {String} response.telephone                    Client's telephone.
+     * @apiSuccess {String} response.currency_code                Default currency of the shop.
+     * @apiSuccess {String} response.cancelled                    Total quantity of cancelled orders.
+     * @apiSuccess {String} response.completed                    Total quantity of completed orders.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response"
-     *   {
+     *     HTTP/1.1 200 OK {
+     *     "Response" {
      *         "client_id" : "88",
      *         "fio" : "Anton Kiselev",
      *         "total" : "1006.00",
@@ -1600,27 +1646,30 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {get} index.php?route=module/apimodule/clientorders  getClientOrders
+     * @api {post} index.php?route=module/apimodule/clientorders  Get the orders of the customer
      * @apiName getClientOrders
-     * @apiGroup All
+     * @apiDescription Get a list of sales orders by id
+     * @apiGroup Client
      *
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} client_id unique client ID.
      * @apiParam {String} sort param for sorting orders(total/date_added/completed/cancelled).
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} order_id  ID of the order.
-     * @apiSuccess {Number} order_number  Number of the order.
-     * @apiSuccess {String} status  Status of the order.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} total  Total sum of the order.
-     * @apiSuccess {Date} date_added  Date added of the order.
+     * @apiSuccess {Array[]}   response                           Array with content response.
+     * @apiSuccess {Number}    version                            Current API version.
+     * @apiSuccess {Bool}      status                             Response status.
+     *
+     * @apiSuccess {Array[]} response.orders                      Array of sales orders.
+     * @apiSuccess {String}  response.orders.order_id             ID of the order.
+     * @apiSuccess {String}  response.orders.order_number         Number of the order.
+     * @apiSuccess {String}  response.orders.status               Status of the order.
+     * @apiSuccess {String}  response.orders.currency_code        Default currency of the shop.
+     * @apiSuccess {String}  response.orders.total                Total sum of the order.
+     * @apiSuccess {String}  response.orders.date_added           Date added of the order.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response"
-     *   {
+     *     HTTP/1.1 200 OK {
+     *     "Response" {
      *       "orders":
      *          {
      *             "order_id" : "1",
@@ -1651,7 +1700,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
     public function clientorders()
     {
         header("Access-Control-Allow-Origin: *");
@@ -1718,34 +1766,37 @@ class ControllerExtensionModuleApimodule extends Controller
         }
     }
 
-
     /**
-     * @api {get} index.php?route=module/apimodule/products  getProductsList
+     * @api {post} index.php?route=module/apimodule/products  Products List
      * @apiName getProductsList
-     * @apiGroup All
+     * @apiDescription Get a list of products
+     * @apiGroup Product
      *
      * @apiParam {Token} token your unique token.
      * @apiParam {Number} page number of the page.
      * @apiParam {Number} limit limit of the orders for the page.
      * @apiParam {String} name name of the product for search.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {String} model     Model of the product.
-     * @apiSuccess {String} name  Name of the product.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} price  Price of the product.
-     * @apiSuccess {Number} quantity  Actual quantity of the product.
-     * @apiSuccess {Url} image  Url to the product image.
+     *
+     * @apiSuccess {Array[]}   response                              Array with content response.
+     * @apiSuccess {Number}    version                               Current API version.
+     * @apiSuccess {Bool}      status                                Response status.
+     *
+     * @apiSuccess {Array[]}   response.products                     Array of products.
+     * @apiSuccess {String}    response.products.product_id          ID of the product.
+     * @apiSuccess {String}    response.products.model               Model of the product.
+     * @apiSuccess {String}    response.products.name                Name of the product.
+     * @apiSuccess {String}    response.products.currency_code       Default currency of the shop.
+     * @apiSuccess {String}    response.products.price               Price of the product.
+     * @apiSuccess {String}    response.products.quantity            Actual quantity of the product.
+     * @apiSuccess {String}    response.products.image               Url to the product image.
+     * @apiSuccess {String}    response.products.category            The category to which the product belongs.
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response":
-     *   {
-     *      "products":
-     *      {
+     *     HTTP/1.1 200 OK {
+     *     "Response": {
+     *      "products": {
      *           {
      *             "product_id" : "1",
      *             "model" : "Black",
@@ -1753,7 +1804,8 @@ class ControllerExtensionModuleApimodule extends Controller
      *             "price" : "100.00",
      *             "currency_code": "UAH",
      *             "quantity" : "83",
-     *             "image" : "http://site-url/image/catalog/demo/htc_touch_hd_1.jpg"
+     *             "image" : "http://site-url/image/catalog/demo/htc_touch_hd_1.jpg",
+     *             "category": "Cameras"
      *           },
      *           {
      *             "product_id" : "2",
@@ -1763,6 +1815,7 @@ class ControllerExtensionModuleApimodule extends Controller
      *             "currency_code": "UAH",
      *             "quantity" : "30",
      *             "image" : "http://site-url/image/catalog/demo/iphone_1.jpg"
+     *             "category": ""
      *           }
      *      }
      *   },
@@ -1778,7 +1831,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
     public function products()
     {
         header("Access-Control-Allow-Origin: *");
@@ -1819,7 +1871,7 @@ class ControllerExtensionModuleApimodule extends Controller
             //$data['price'] = number_format($product['price'], 2, '.', '');
 
 
-	    $currency = $this->model_extension_module_apimodule->getUserCurrency();
+            $currency = $this->model_extension_module_apimodule->getUserCurrency();
             if(empty($currency)){
                 $currency = $this->model_extension_module_apimodule->getDefaultCurrency();
             }
@@ -1844,28 +1896,52 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/productinfo  getProductInfo
+     * @api {post} index.php?route=module/apimodule/productinfo  Get product info
      * @apiName getProductInfo
-     * @apiGroup All
+     * @apiDescription Ger full product info by product_id
+     * @apiGroup Product
      *
-     * @apiParam {Token} token your unique token.
-     * @apiParam {Number} product_id unique product ID.
+     * @apiParam {Token} token                                  Your unique token.
+     * @apiParam {Number} product_id                            Unique product ID.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Number} product_id  ID of the product.
-     * @apiSuccess {String} model     Model of the product.
-     * @apiSuccess {String} name  Name of the product.
-     * @apiSuccess {Number} price  Price of the product.
-     * @apiSuccess {String} currency_code  Default currency of the shop.
-     * @apiSuccess {Number} quantity  Actual quantity of the product.
-     * @apiSuccess {String} description     Detail description of the product.
-     * @apiSuccess {Array} images  Array of the images of the product.
+     * @apiSuccess {Array[]}  response                          Array with content response.
+     * @apiSuccess {Number}   version                           Current API version.
+     * @apiSuccess {Bool}     status                            Response status.
+     *
+     *
+     * @apiSuccess {String}   response.product_id               ID of the product.
+     * @apiSuccess {String}   response.model                    Model of the product.
+     * @apiSuccess {String}   response.quantity                 Actual quantity of the product.
+     * @apiSuccess {String}   response.sku                      Actual SKU of the product.
+     * @apiSuccess {String}   response.stock_status_name        Stock status name of the product.
+     * @apiSuccess {String}   response.name                     Name of the product.
+     * @apiSuccess {String}   response.description              Detail description of the product.
+     * @apiSuccess {String}   response.currency_code            Default currency of the shop.
+     * @apiSuccess {String}   response.price                    Price of the product.
+     * @apiSuccess {String}   response.status_name              Status name ( Enabled / Disabled )
+     *
+     * @apiSuccess {Array[]}  response.images                   Array of the images of the product.
+     * @apiSuccess {String}   response.images.image             Image Link.
+     * @apiSuccess {Number}   response.images.image_id          Image id. If the image is set as the main thing then its id (-1)
+     *
+     * @apiSuccess {Array[]}  response.stock_statuses           Array of the stock statuses of the product.
+     * @apiSuccess {String}   response.stock_statuses.name      Stock status name.
+     * @apiSuccess {String}   response.stock_statuses.status_id Stock status id.
+     *
+     * @apiSuccess {Array[]}  response.categories               Array of the categories of the product.
+     * @apiSuccess {String}   response.categories.name          Category name.
+     * @apiSuccess {String}   response.categories.category_id   Category id.
+     *
+     * @apiSuccess {Array[]}  response.options                  Array of the options of the product.
+     * @apiSuccess {String}   response.options.option_id        Option id.
+     * @apiSuccess {String}   response.options.option_name      Option name.
+     * @apiSuccess {String}   response.options.option_value_id  Option value id.
+     * @apiSuccess {String}   response.options.option_value_name Option value name.
+     * @apiSuccess {String}   response.options.language_id      Language id of options and option values.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Response":
-     *   {
+     *     HTTP/1.1 200 OK {
+     *     "Response": {
      *       "product_id" : "1",
      *       "model" : "Black",
      *       "name" : "HTC Touch HD",
@@ -1874,25 +1950,62 @@ class ControllerExtensionModuleApimodule extends Controller
      *       "status": "Enabled",
      *       "stock_status_name": "In Stock",
      *       "currency_code": "UAH",
+     *       "status_name": "Enabled",
      *       "quantity" : "83",
      *       "description" : "Revolutionary multi-touch interface.↵ iPod touch features the same multi-touch screen technology as iPhone.",
-     *       "images" :
-     *       [
-     *           "http://site-url/image/catalog/demo/htc_iPhone_1.jpg",
-     *           "http://site-url/image/catalog/demo/htc_iPhone_2.jpg",
-     *           "http://site-url/image/catalog/demo/htc_iPhone_3.jpg"
-     *       ],
-     *       "stock_statuses":
-     *       [
+     *       "images" : [
      *          {
-     *              "stock_status_id":"7",
+     *               "image": "http://opencart3000.pixy.pro/image/cache/catalog/demo/htc_touch_hd_1-600x800.jpg",
+     *               "image_id": -1
+     *           },
+     *           {
+     *               "image": "http://opencart3000.pixy.pro/image/cache/catalog/demo/htc_touch_hd_3-600x800.jpg",
+     *               "image_id": 2034
+     *           }
+     *       ],
+     *       "stock_statuses": [
+     *          {
+     *              "status_id":"7",
      *              "name":"In Stock"
      *          },
      *          {
-     *              "stock_status_id":"9",
+     *              "status_id":"9",
      *              "name":"Out Of Stock"
      *          }
-     *       ]
+     *       ],
+     *       "categories": [
+     *          {
+     *              "name":"Cameras",
+     *              "category_id":"9"
+     *          },
+     *          {
+     *              "name":"Tablets",
+     *              "category_id":"25"
+     *          }
+     *       ],
+     *       "options": [
+     *          {
+     *            "option_id": "5",
+     *            "option_value_id": "39",
+     *            "option_value_name": "Красный",
+     *            "language_id": "1",
+     *            "option_name": "Список"
+     *          },
+     *          {
+     *            "option_id": "5",
+     *            "option_value_id": "42",
+     *            "option_value_name": "Желтый",
+     *            "language_id": "1",
+     *            "option_name": "Список"
+     *          },
+     *          {
+     *            "option_id": "5",
+     *            "option_value_id": "40",
+     *            "option_value_name": "Синий",
+     *            "language_id": "1",
+     *            "option_name": "Список"
+     *          }
+     *        ]
      *   },
      *   "Status" : true,
      *   "version": 1.0
@@ -1906,7 +2019,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
     public function productinfo()
     {
         header("Access-Control-Allow-Origin: *");
@@ -1938,14 +2050,14 @@ class ControllerExtensionModuleApimodule extends Controller
                 $response['currency_code'] = $currency;
                 //$response['price'] = $this->calculatePrice($product['price'], $currency);
 
-		        $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
+                $response['price'] = $this->calculatePriceProduct($product['price'], $product['tax_class_id'], $currency);
 
                 $this->load->model('tool/image');
                 $product_img = $this->model_extension_module_apimodule->getProductImages($id);
                 $response['images'] = [];
                 if (count($product_img['images']) > 0) {
                     $response['images'] = [];
-                    
+
                     foreach ($product_img['images'] as $key => $image) {
                         $product_img['images'][$key]['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
 
@@ -2010,8 +2122,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
-
     public function setQuantity()
     {
         header("Access-Control-Allow-Origin: *");
@@ -2034,31 +2144,58 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/updateProduct  updateProduct
+     * @api {post} index.php?route=module/apimodule/updateProduct  Update product
      * @apiName updateProduct
-     * @apiGroup All
+     * @apiDescription Updating the product by its id
+     * @apiGroup Product
      *
-     * @apiParam {Token} token your unique token.
-     * @apiParam {Number} product_id unique product ID.
-     * @apiParam {String} quantity new quantity for the product.
-     * @apiParam {Number} language_id new language_id for the product.
-     * @apiParam {String} name name of the product.
-     * @apiParam {String} description description of the product.
-     * @apiParam {Number} model model of the product.
-     * @apiParam {Sku} sku SKU of the product.
-     * @apiParam {Status} 1:0 Status of the product.
-     * @apiParam {substatus} substatus stock status id of the product.
+     * @apiParam {Token}      token             Your unique token.
+     * @apiParam {Number}     product_id        Unique product ID. If you do not send the product id, then a new product will be created
+     * @apiParam {Number}     quantity          New quantity for the product.
+     * @apiParam {Array[]}    image             Adding new pictures for the product.
+     * @apiParam {Array[]}    categories        New array of product categories.
+     * @apiParam {Array[]}    options           New array of product options. The form of POST parameters of the options array is "options[--option id--][] = --option value id--" for each pair of option id and the corresponding option value id.
+     * @apiParam {Number}     language_id       New language_id for the product.
+     * @apiParam {String}     name              Name of the product.
+     * @apiParam {String}     description       Description of the product.
+     * @apiParam {String}     model             Model of the product.
+     * @apiParam {String}     sku               SKU of the product.
+     * @apiParam {Number}     status            Status of the product.
+     * @apiParam {String}     price             Product price.
+     * @apiParam {String}     substatus         Stock status id of the product.
      *
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Boolean} status Status of the product update.
+     * @apiSuccess {Array[]}  response                   Array with content response.
+     * @apiSuccess {Number}   version                    Current API version.
+     * @apiSuccess {Bool}     status                     Response status.
      *
+     * @apiSuccess {String}   response.product_id        Unique product ID.
+     *
+     * @apiSuccess {Array[]}  response.images            Array images of the product.
+     * @apiSuccess {String}   response.images.image             Link image.
+     * @apiSuccess {Number}   response.images.image_id          Image id.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Status" : true,
-     *   "version": 1.0
+     *     HTTP/1.1 200 OK {
+     *      "version": 0,
+     *       "status": true,
+     *       "response": {
+     *           "product_id": "28",
+     *           "images": [
+     *               {
+     *                   "image": null,
+     *                   "image_id": -1
+     *               },
+     *               {
+     *                   "image": "http://opencart3000.pixy.pro/image/cache/catalog/demo/htc_touch_hd_3-600x800.jpg",
+     *                   "image_id": 2034
+     *               },
+     *               {
+     *                   "image": "http://opencart3000.pixy.pro/image/cache/catalog/youtube-embed-600x800.png",
+     *                   "image_id": 2352
+     *               }
+     *           ]
+     *       }
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -2069,7 +2206,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
     public function updateProduct()
     {
         header("Access-Control-Allow-Origin: *");
@@ -2078,8 +2214,8 @@ class ControllerExtensionModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
-                                                    'error' => $error,
-                                                    'status' => false]));
+                'error' => $error,
+                'status' => false]));
             return;
         }
 
@@ -2093,7 +2229,7 @@ class ControllerExtensionModuleApimodule extends Controller
                 $tmp_name = $_FILES['image']["tmp_name"][$key];
 
                 if (move_uploaded_file($tmp_name, DIR_IMAGE."catalog/$name")){
-                     $images[] = "catalog/$name";
+                    $images[] = "catalog/$name";
                 }
             }
         }
@@ -2131,7 +2267,7 @@ class ControllerExtensionModuleApimodule extends Controller
                         }
                     }
                 }
-                
+
                 $price = (float)$_REQUEST['price']/(float)$result['value'];
                 $data['price'] = $price;
             }else{
@@ -2164,67 +2300,66 @@ class ControllerExtensionModuleApimodule extends Controller
                 $product_id = $this->model_extension_module_apimodule->addProduct($data);
             }
 
-            
-   /*         if(!empty($new_images)){
-                $this->model_extension_module_apimodule->addProductImages($new_images, $product_id);
-            }
-             if(isset($main_image)){
-               $this->model_extension_module_apimodule->setMainImage($main_image, $product_id);
-            }
-            if(!empty($_REQUEST['removed_image'])){
-                $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
-                $this->model_extension_module_apimodule->removeProductImages($removed_image, $product_id);
-            }*/
+
+            /*         if(!empty($new_images)){
+                         $this->model_extension_module_apimodule->addProductImages($new_images, $product_id);
+                     }
+                      if(isset($main_image)){
+                        $this->model_extension_module_apimodule->setMainImage($main_image, $product_id);
+                     }
+                     if(!empty($_REQUEST['removed_image'])){
+                         $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
+                         $this->model_extension_module_apimodule->removeProductImages($removed_image, $product_id);
+                     }*/
 
             $images = [];
             $product_img = $this->model_extension_module_apimodule->getProductImages($product_id);
-                $this->load->model('tool/image');
-                if (count($product_img['images']) > 0) {                   
+            $this->load->model('tool/image');
+            if (count($product_img['images']) > 0) {
 
-                    foreach ($product_img['images'] as $key => $image) {
-                        $img = [];
-                        $img['image'] = !is_null($this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800)) ? $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800) : '';
-                        $img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
-                       $images[] = $img;
-                    }
-                   
-                } else {
-                    $images = [];
+                foreach ($product_img['images'] as $key => $image) {
+                    $img = [];
+                    $img['image'] = !is_null($this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800)) ? $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800) : '';
+                    $img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
+                    $images[] = $img;
                 }
+
+            } else {
+                $images = [];
+            }
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
-                                                    'status' => true,
-                                                    'response' =>[
-                                                            'product_id'=>$product_id,
-                                                            'images' => $images
-                                                            ]
-                                                        ]
-                                                        ));
+                    'status' => true,
+                    'response' =>[
+                        'product_id'=>$product_id,
+                        'images' => $images
+                    ]
+                ]
+            ));
         } else {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
-             'error' => 'You have not specified ID', 
-             'status' => false]));
+                'error' => 'You have not specified ID',
+                'status' => false]));
         }
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/deleteImage  deleteImage
+     * @api {post} index.php?route=module/apimodule/deleteImage  Delete image
      * @apiName deleteImage
-     * @apiGroup All
+     * @apiDescription Delete image by image_id
+     * @apiGroup Image
      *
-     * @apiParam {Token} token your unique token.
-     * @apiParam {Number} product_id unique product ID.
-     * @apiParam {Number} image_id unique image ID.
+     * @apiParam {Token}  token         Your unique token.
+     * @apiParam {Number} product_id    Unique product ID.
+     * @apiParam {Number} image_id      Unique image ID.
      *
-     *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Boolean} status Status of the product update.
+     * @apiSuccess {Number}   version                    Current API version.
+     * @apiSuccess {Bool}     status                     Response status.
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Status" : true,
-     *   "version": 1.0
+     *     HTTP/1.1 200 OK {
+     *     "Status" : true,
+     *     "version": 1.0
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -2235,7 +2370,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
     public function deleteImage(){
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
@@ -2262,25 +2396,25 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/mainImage  mainImage
+     * @api {post} index.php?route=module/apimodule/mainImage  Set main image
      * @apiName mainImage
-     * @apiGroup All
+     * @apiDescription Set main image for product
+     * @apiGroup Image
      *
-     * @apiParam {Token} token your unique token.
+     * @apiParam {Token}  token your unique token.
      * @apiParam {Number} product_id unique product ID.
      * @apiParam {Number} image_id unique image ID.
      *
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Boolean} status Status of the product update.
+     * @apiSuccess {Number}  version  Current API version.
+     * @apiSuccess {Bool} status Status of the product update.
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Status" : true,
-     *   "version": 1.0
-     * }
+     *     HTTP/1.1 200 OK {
+     *     "Status" : true,
+     *     "version": 1.0
+     *     }
      * @apiErrorExample Error-Response:
      * {
      *      "Error" : "Can not found category with id = 10",
@@ -2290,7 +2424,6 @@ class ControllerExtensionModuleApimodule extends Controller
      *
      *
      */
-
     public function mainImage(){
         header("Access-Control-Allow-Origin: *");
         $this->response->addHeader('Content-Type: application/json');
@@ -2314,24 +2447,51 @@ class ControllerExtensionModuleApimodule extends Controller
     }
 
     /**
-     * @api {post} index.php?route=module/apimodule/getCategories  getCategories
+     * @api {post} index.php?route=module/apimodule/getCategories  Get categories
      * @apiName getCategories
-     * @apiGroup All
+     * @apiDescription Get list categories
+     * @apiGroup Category
      *
-     * @apiParam {Token} token your unique token.
+     * @apiParam {Token}  token your unique token.
      * @apiParam {Number} category_id unique category ID.
      *
+     * @apiSuccess {Array[]}  response                           Array with content response.
+     * @apiSuccess {Number}   version                            Current API version.
+     * @apiSuccess {Bool}     status                             Response status.
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Array} categories  array of categories.
-     * @apiSuccess {Boolean} status Status of the product update.
+     * @apiSuccess {Array[]}  response.categories                Array of categories.
+     * @apiSuccess {string}   response.categories.name           Category name.
+     * @apiSuccess {string}   response.categories.category_id    Category id.
      *
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Status" : true,
-     *   "version": 1.0
+     *     HTTP/1.1 200 OK {
+     *      "version": 2,
+     *       "response": {
+     *          "categories": [
+     *               {
+     *                   "name": "Monitors",
+     *                   "category_id": "28"
+     *               },
+     *               {
+     *                   "name": "Mice and Trackballs",
+     *                   "category_id": "29"
+     *               },
+     *               {
+     *                   "name": "Printers",
+     *                   "category_id": "30"
+     *               },
+     *               {
+     *                   "name": "Scanners",
+     *                   "category_id": "31"
+     *               },
+     *               {
+     *                   "name": "Web Cameras",
+     *                   "category_id": "32"
+     *               }
+     *           ]
+     *       },
+     *       "status": true
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -2363,24 +2523,47 @@ class ControllerExtensionModuleApimodule extends Controller
         $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 'response' => ['categories' => $categories], 'status' => true]));
     }
 
-
     /**
-     * @api {post} index.php?route=module/apimodule/getSubstatus  getSubstatus
+     * @api {post} index.php?route=module/apimodule/getSubstatus  Get substatuses
      * @apiName getSubstatus
-     * @apiGroup All
+     * @apiDescription Get list substatuses
+     * @apiGroup Status
      *
      * @apiParam {Token} token your unique token.
      *
      *
-     * @apiSuccess {Number} version  Current API version.
-     * @apiSuccess {Boolean} status Status of the product update.
+     * @apiSuccess {Array[]}  response                           Array with content response.
+     * @apiSuccess {Number}   version                            Current API version.
+     * @apiSuccess {Bool}     status                             Response status.
      *
+     * @apiSuccess {Array[]}  response.stock_statuses                     Array stock statuses.
+     * @apiSuccess {String}   response.stock_statuses.name                Stock status name.
+     * @apiSuccess {String}   response.stock_statuses.stock_status_id     Stock statuses id.
      *
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     * {
-     *   "Status" : true,
-     *   "version": 1.0
+     *     HTTP/1.1 200 OK {
+     *      "version": 0,
+     *       "response": {
+     *           "stock_statuses": [
+     *               {
+     *                   "name": "In Stock",
+     *                   "stock_status_id": "7"
+     *               },
+     *               {
+     *                   "name": "Pre-Order",
+     *                   "stock_status_id": "8"
+     *               },
+     *               {
+     *                   "name": "Out Of Stock",
+     *                   "stock_status_id": "5"
+     *               },
+     *               {
+     *                   "name": "2-3 Days",
+     *                   "stock_status_id": "6"
+     *               }
+     *           ]
+     *       },
+     *       "status": true
      * }
      * @apiErrorExample Error-Response:
      * {
@@ -2405,7 +2588,7 @@ class ControllerExtensionModuleApimodule extends Controller
 
         $categories = $this->model_extension_module_apimodule->getSubstatus();
 
-        $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 
+        $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
             'response' => ['stock_statuses' => $categories], 'status' => true]));
     }
 
@@ -2450,8 +2633,3 @@ class ControllerExtensionModuleApimodule extends Controller
 
     }
 }
-
-
-
-
-
