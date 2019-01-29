@@ -2149,20 +2149,23 @@ class ControllerExtensionModuleApimodule extends Controller
      * @apiDescription Updating the product by its id
      * @apiGroup Product
      *
-     * @apiParam {Token}      token             Your unique token.
-     * @apiParam {Number}     product_id        Unique product ID. If you do not send the product id, then a new product will be created
-     * @apiParam {Number}     quantity          New quantity for the product.
-     * @apiParam {Array[]}    image             Adding new pictures for the product.
-     * @apiParam {Array[]}    categories        New array of product categories.
-     * @apiParam {Array[]}    options           New array of product options. The form of POST parameters of the options array is "options[--option id--][] = --option value id--" for each pair of option id and the corresponding option value id.
-     * @apiParam {Number}     language_id       New language_id for the product.
-     * @apiParam {String}     name              Name of the product.
-     * @apiParam {String}     description       Description of the product.
-     * @apiParam {String}     model             Model of the product.
-     * @apiParam {String}     sku               SKU of the product.
-     * @apiParam {Number}     status            Status of the product.
-     * @apiParam {String}     price             Product price.
-     * @apiParam {String}     substatus         Stock status id of the product.
+     * @apiParam {Token}      token                                                                 Your unique token.
+     * @apiParam {Number}     product_id                                                            Unique product ID. If you do not send the product id, then a new product will be created
+     * @apiParam {Number}     quantity                                                              New quantity for the product.
+     * @apiParam {Array[]}    image                                                                 Adding new pictures for the product.
+     * @apiParam {Array[]}    categories                                                            New array of product categories.
+     * @apiParam {Array[]}    options                                                               New array of product options. The form of POST parameters of the options array is "options[--option id--][] = --option value id--" for each pair of option id and the corresponding option value id.
+     * @apiParam {Number}     language_id                                                           New language_id for the product.
+     * @apiParam {String}     name                                                                  Name of the product.
+     * @apiParam {String}     description                                                           Description of the product.
+     * @apiParam {String}     model                                                                 Model of the product.
+     * @apiParam {String}     sku                                                                   SKU of the product.
+     * @apiParam {Number}     status                                                                Status of the product.
+     * @apiParam {String}     price                                                                 Product price.
+     * @apiParam {String}     substatus                                                             Stock status id of the product.
+     * @apiParam {Array[]}    attributes                                                            Array attributes..
+     * @apiParam {String}     attributes.index.attribute_id                                         Attribute id.
+     * @apiParam {String}     attributes.index.product_attribute_description.index_desc.text        Product attribute description text. attributes[0][product_attribute_description][0][text]
      *
      *
      * @apiSuccess {Array[]}  response                   Array with content response.
@@ -2274,22 +2277,48 @@ class ControllerExtensionModuleApimodule extends Controller
                 $data['price'] = 0;
             }
 
-            if (isset($_REQUEST['model'])) {  $data['model'] = $_REQUEST['model'];  }else{    $data['model'] = "";  }
-            if (isset($_REQUEST['sku'])) {  $data['sku'] = $_REQUEST['sku'];  }else{   $data['sku'] = '';  }
-            if (isset($_REQUEST['quantity'])) {  $data['quantity'] = $_REQUEST['quantity'];  }else{  $data['quantity'] = 0;  }
-            if (isset($_REQUEST['status'])) { $data['status'] = $_REQUEST['status'];  }else{    $data['status'] = 0;   }
-            if (isset($_REQUEST['substatus'])) {   $data['stock_status_id'] = $_REQUEST['substatus'];  }else{   $data['stock_status_id'] = 7; }
-            if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
+            $data['model'] = "";
+            if ( isset($_REQUEST['model']) ) {
+                $data['model'] = $_REQUEST['model'];
+            }
 
-            if (!empty($_REQUEST['options'])){ $data['product_option'] = $_REQUEST['options']; }
+            $data['sku'] = '';
+            if ( isset($_REQUEST['sku']) ) {
+                $data['sku'] = $_REQUEST['sku'];
+            }
 
-            if (!empty($_REQUEST['product_id'])) {
+            $data['quantity'] = 0;
+            if ( isset($_REQUEST['quantity']) ) {
+                $data['quantity'] = $_REQUEST['quantity'];
+            }
+
+            $data['status'] = 0;
+            if ( isset($_REQUEST['status']) ) {
+                $data['status'] = $_REQUEST['status'];
+            }
+
+            $data['stock_status_id'] = 7;
+            if ( isset($_REQUEST['substatus']) ) {
+                $data['stock_status_id'] = $_REQUEST['substatus'];
+            }
+
+            if ( !empty($_REQUEST['categories']) ) {
+                $data['product_category'] = $_REQUEST['categories'];
+            }
+
+            if ( !empty($_REQUEST['options']) ){
+                $data['product_option'] = $_REQUEST['options'];
+            }
+
+            if ( !empty($_REQUEST['attributes']) ){
+                $data['product_attribute'] = $_REQUEST['attributes'];
+            }
+
+            if ( !empty($_REQUEST['product_id']) ) {
                 $product_id = $_REQUEST['product_id'];
-
                 $data['product_image'] = $images;
                 $this->model_extension_module_apimodule->editProduct($product_id,$data);
-
-            }else{
+            } else {
                 $data['product_id'] = 0;
                 if(!empty($images[0])){
                     $data['image'] = $images[0];
@@ -2299,18 +2328,6 @@ class ControllerExtensionModuleApimodule extends Controller
                 $data['product_store'] = $this->config->get('module_apimodule_store');
                 $product_id = $this->model_extension_module_apimodule->addProduct($data);
             }
-
-
-            /*         if(!empty($new_images)){
-                         $this->model_extension_module_apimodule->addProductImages($new_images, $product_id);
-                     }
-                      if(isset($main_image)){
-                        $this->model_extension_module_apimodule->setMainImage($main_image, $product_id);
-                     }
-                     if(!empty($_REQUEST['removed_image'])){
-                         $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
-                         $this->model_extension_module_apimodule->removeProductImages($removed_image, $product_id);
-                     }*/
 
             $images = [];
             $product_img = $this->model_extension_module_apimodule->getProductImages($product_id);
@@ -2340,6 +2357,107 @@ class ControllerExtensionModuleApimodule extends Controller
                 'error' => 'You have not specified ID',
                 'status' => false]));
         }
+    }
+
+
+    /**
+     * @api {post} index.php?route=module/apimodule/productAttributes  List product attributes
+     * @apiName productAttributes
+     * @apiDescription Get list product attributes
+     * @apiGroup Product
+     *
+     * @apiParam {Token}      token                                     Your unique token.
+     *
+     *
+     * @apiSuccess {Array[]}  response                                  Array with content response.
+     * @apiSuccess {Number}   version                                   Current API version.
+     * @apiSuccess {Bool}     status                                    Response status.
+     *
+     * @apiSuccess {String}   response.attributes                       Array attributes.
+     *
+     * @apiSuccess {Array[]}  response.attributes.group                 Array of attributes of this group.
+     * @apiSuccess {String}   response.attributes.group.attribute_id    Attribute id.
+     * @apiSuccess {String}   response.attributes.group.attribute       Attribute.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK {
+     *      "version": 0,
+     *       "status": true,
+     *       "response": {
+     *         "attributes": {
+     *               "Processor": [
+     *                   {
+     *                       "attribute_id": "1",
+     *                       "attribute": "Description"
+     *                   },
+     *                   {
+     *                       "attribute_id": "2",
+     *                       "attribute": "No. of Cores"
+     *                   },
+     *                   {
+     *                       "attribute_id": "3",
+     *                       "attribute": "Clockspeed"
+     *                   }
+     *               ],
+     *               "Memory": [
+     *                   {
+     *                       "attribute_id": "9",
+     *                       "attribute": "test 6"
+     *                   },
+     *                   {
+     *                       "attribute_id": "10",
+     *                       "attribute": "test 7"
+     *                   },
+     *                   {
+     *                       "attribute_id": "11",
+     *                       "attribute": "test 8"
+     *                   }
+     *               ]
+     *           }
+     *       }
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error": "You need to be logged!",
+     *      "version": 2,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+    public function productAttributes()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $this->response->addHeader('Content-Type: application/json');
+
+        $error = $this->valid();
+        if ($error != null) {
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+                'error' => $error,
+                'status' => false]));
+            return;
+        }
+
+        $this->load->model('extension/module/apimodule');
+        $attributes = $this->model_extension_module_apimodule->getDefaultProductAttributes();
+
+        $listAttributes = [];
+
+        foreach ( $attributes as $key => $value ) {
+            $listAttributes[$value['category']][] = [
+                'attribute_id' => $value['attribute_id'],
+                'attribute' => $value['attribute']
+            ];
+        }
+
+        $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'status' => true,
+                'response' =>[
+                    'attributes' => $listAttributes
+                ]
+            ]
+        ));
     }
 
     /**
@@ -2633,3 +2751,8 @@ class ControllerExtensionModuleApimodule extends Controller
 
     }
 }
+
+
+
+
+
