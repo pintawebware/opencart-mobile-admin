@@ -2186,4 +2186,18 @@ class ModelModuleApimodule extends Model
         return $query->rows;
     }
 
+    public function getDefaultProductAttributes() {
+
+        $query = $this->db->query("SELECT od.attribute_id as attribute_id, od.name as attribute, ogd.name as category
+        FROM 
+            `". DB_PREFIX ."attribute` oa
+            JOIN `". DB_PREFIX ."attribute_description` od ON oa.`attribute_id` = od.`attribute_id`
+            JOIN `". DB_PREFIX ."attribute_group_description` ogd ON oa.`attribute_group_id` = ogd.`attribute_group_id`
+        WHERE 
+            od.`language_id` = ". (int)$this->config->get('config_language_id') ." AND
+            ogd.`language_id` = " . (int)$this->config->get('config_language_id'));
+
+        return $query->rows;
+    }
+
 }

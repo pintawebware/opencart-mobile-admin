@@ -2181,6 +2181,10 @@ class ControllerModuleApimodule extends Controller
             }
             if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
 
+            if ( !empty($_REQUEST['attributes']) ){
+                $data['product_attribute'] = $_REQUEST['attributes'];
+            }
+
             if (!empty($_REQUEST['options'])){ $data['product_option'] = $_REQUEST['options']; }
 
             if (!empty($_REQUEST['product_id'])) {
@@ -2238,6 +2242,106 @@ class ControllerModuleApimodule extends Controller
                 'error' => 'You have not specified ID',
                 'status' => false]));
         }
+    }
+
+    /**
+     * @api {post} index.php?route=module/apimodule/productAttributes  List product attributes
+     * @apiName productAttributes
+     * @apiDescription Get list product attributes
+     * @apiGroup Product
+     *
+     * @apiParam {Token}      token                                     Your unique token.
+     *
+     *
+     * @apiSuccess {Array[]}  response                                  Array with content response.
+     * @apiSuccess {Number}   version                                   Current API version.
+     * @apiSuccess {Bool}     status                                    Response status.
+     *
+     * @apiSuccess {String}   response.attributes                       Array attributes.
+     *
+     * @apiSuccess {Array[]}  response.attributes.group                 Array of attributes of this group.
+     * @apiSuccess {String}   response.attributes.group.attribute_id    Attribute id.
+     * @apiSuccess {String}   response.attributes.group.attribute       Attribute.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK {
+     *      "version": 0,
+     *       "status": true,
+     *       "response": {
+     *         "attributes": {
+     *               "Processor": [
+     *                   {
+     *                       "attribute_id": "1",
+     *                       "attribute": "Description"
+     *                   },
+     *                   {
+     *                       "attribute_id": "2",
+     *                       "attribute": "No. of Cores"
+     *                   },
+     *                   {
+     *                       "attribute_id": "3",
+     *                       "attribute": "Clockspeed"
+     *                   }
+     *               ],
+     *               "Memory": [
+     *                   {
+     *                       "attribute_id": "9",
+     *                       "attribute": "test 6"
+     *                   },
+     *                   {
+     *                       "attribute_id": "10",
+     *                       "attribute": "test 7"
+     *                   },
+     *                   {
+     *                       "attribute_id": "11",
+     *                       "attribute": "test 8"
+     *                   }
+     *               ]
+     *           }
+     *       }
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error": "You need to be logged!",
+     *      "version": 2,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+    public function productAttributes()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $this->response->addHeader('Content-Type: application/json');
+
+        $error = $this->valid();
+        if ($error != null) {
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+                'error' => $error,
+                'status' => false]));
+            return;
+        }
+
+        $this->load->model('module/apimodule');
+        $attributes = $this->model_module_apimodule->getDefaultProductAttributes();
+
+        $listAttributes = [];
+
+        foreach ( $attributes as $key => $value ) {
+            $listAttributes[$value['category']][] = [
+                'attribute_id' => $value['attribute_id'],
+                'attribute' => $value['attribute']
+            ];
+        }
+
+        $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'status' => true,
+                'response' =>[
+                    'attributes' => $listAttributes
+                ]
+            ]
+        ));
     }
 
     /**

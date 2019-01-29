@@ -199,8 +199,8 @@ class ControllerModuleApimodule extends Controller
             $data['currency_code'] = $order['currency_code'];
             $orders_to_response[] = $data;
         }
-        
-        
+
+
         $response['total_quantity'] = $orders->quantity;
         $response['total_sum'] = $this->calculatePrice($orders->totalsumm, $currency);
         //$response['total_sum'] = number_format($orders->totalsumm, 2, '.', '');
@@ -636,7 +636,7 @@ class ControllerModuleApimodule extends Controller
             $this->load->model('module/apimodule');
             $products = $this->model_module_apimodule->getOrderProducts($id);
 
-
+            $this->load->model('catalog/product');
             if (count($products) > 0) {
                 $data = array();
                 $total_discount_sum = 0;
@@ -691,6 +691,9 @@ class ControllerModuleApimodule extends Controller
 
                     $product_options = $this->model_module_apimodule->getProductOptionsByID($products[$i]['product_id']);
                     $product['options'] = $product_options;
+
+                    $attributes = $this->model_catalog_product->getProductAttributes($products[$i]['product_id']);
+                    $product['attributes'] = $attributes;
 
                     $data['products'][] = $product;
                 }
@@ -1342,7 +1345,7 @@ class ControllerModuleApimodule extends Controller
 
             $sale_total = $this->model_module_apimodule->getTotalSales();
 
-           // $data['total_sales'] = number_format($sale_total, 2, '.', '');
+            // $data['total_sales'] = number_format($sale_total, 2, '.', '');
             $currency = $this->model_module_apimodule->getUserCurrency();
             if(empty($currency)){
                 $currency = $this->model_module_apimodule->getDefaultCurrency();
@@ -1954,7 +1957,7 @@ class ControllerModuleApimodule extends Controller
                 $response['images'] = [];
                 if (count($product_img['images']) > 0) {
                     $response['images'] = [];
-                    
+
                     foreach ($product_img['images'] as $key => $image) {
                         $image = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
                         $product_img['images'][$key]['image'] = !empty($image) ? $image : '';
@@ -2088,8 +2091,8 @@ class ControllerModuleApimodule extends Controller
         $error = $this->valid();
         if ($error != null) {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
-                                                    'error' => $error,
-                                                    'status' => false]));
+                'error' => $error,
+                'status' => false]));
             return;
         }
 
@@ -2103,7 +2106,7 @@ class ControllerModuleApimodule extends Controller
                 $tmp_name = $_FILES['image']["tmp_name"][$key];
 
                 if (move_uploaded_file($tmp_name, DIR_IMAGE."catalog/$name")){
-                     $images[] = "catalog/$name";
+                    $images[] = "catalog/$name";
                 }
             }
         }
@@ -2141,7 +2144,7 @@ class ControllerModuleApimodule extends Controller
                         }
                     }
                 }
-                
+
                 $price = (float)$_REQUEST['price']/(float)$result['value'];
                 $data['price'] = $price;
             }else{
@@ -2154,6 +2157,11 @@ class ControllerModuleApimodule extends Controller
             if (isset($_REQUEST['status'])) { $data['status'] = $_REQUEST['status'];  }else{    $data['status'] = 0;   }
             if (isset($_REQUEST['substatus'])) {   $data['stock_status_id'] = $_REQUEST['substatus'];  }else{   $data['stock_status_id'] = 7; }
             if (!empty($_REQUEST['categories'])){ $data['product_category'] = $_REQUEST['categories'];  }
+
+
+            if ( !empty($_REQUEST['attributes']) ){
+                $data['product_attribute'] = $_REQUEST['attributes'];
+            }
 
             if (!empty($_REQUEST['options'])){ $data['product_option'] = $_REQUEST['options']; }
 
@@ -2174,46 +2182,146 @@ class ControllerModuleApimodule extends Controller
                 $product_id = $this->model_module_apimodule->addProduct($data);
             }
 
-            
-   /*         if(!empty($new_images)){
-                $this->model_module_apimodule->addProductImages($new_images, $product_id);
-            }
-             if(isset($main_image)){
-               $this->model_module_apimodule->setMainImage($main_image, $product_id);
-            }
-            if(!empty($_REQUEST['removed_image'])){
-                $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
-                $this->model_module_apimodule->removeProductImages($removed_image, $product_id);
-            }*/
+
+            /*         if(!empty($new_images)){
+                         $this->model_module_apimodule->addProductImages($new_images, $product_id);
+                     }
+                      if(isset($main_image)){
+                        $this->model_module_apimodule->setMainImage($main_image, $product_id);
+                     }
+                     if(!empty($_REQUEST['removed_image'])){
+                         $removed_image = str_replace($server.'image/cache/', '', $_REQUEST['removed_image']);
+                         $this->model_module_apimodule->removeProductImages($removed_image, $product_id);
+                     }*/
 
             $images = [];
             $product_img = $this->model_module_apimodule->getProductImages($product_id);
-                $this->load->model('tool/image');
-                if (count($product_img['images']) > 0) {                   
+            $this->load->model('tool/image');
+            if (count($product_img['images']) > 0) {
 
-                    foreach ($product_img['images'] as $key => $image) {
-                        $img = [];
-                        $img['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
-                        $img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
-                       $images[] = $img;
-                    }
-                   
-                } else {
-                    $images = [];
+                foreach ($product_img['images'] as $key => $image) {
+                    $img = [];
+                    $img['image'] = $this->model_tool_image->resize($product_img['images'][$key]['image'], 600, 800);
+                    $img['image_id'] = (int)$product_img['images'][$key]['product_image_id'];
+                    $images[] = $img;
                 }
+
+            } else {
+                $images = [];
+            }
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
-                                                    'status' => true,
-                                                    'response' =>[
-                                                            'product_id'=>$product_id,
-                                                            'images' => $images
-                                                            ]
-                                                        ]
-                                                        ));
+                    'status' => true,
+                    'response' =>[
+                        'product_id'=>$product_id,
+                        'images' => $images
+                    ]
+                ]
+            ));
         } else {
             $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
-             'error' => 'You have not specified ID', 
-             'status' => false]));
+                'error' => 'You have not specified ID',
+                'status' => false]));
         }
+    }
+
+    /**
+     * @api {post} index.php?route=module/apimodule/productAttributes  List product attributes
+     * @apiName productAttributes
+     * @apiDescription Get list product attributes
+     * @apiGroup Product
+     *
+     * @apiParam {Token}      token                                     Your unique token.
+     *
+     *
+     * @apiSuccess {Array[]}  response                                  Array with content response.
+     * @apiSuccess {Number}   version                                   Current API version.
+     * @apiSuccess {Bool}     status                                    Response status.
+     *
+     * @apiSuccess {String}   response.attributes                       Array attributes.
+     *
+     * @apiSuccess {Array[]}  response.attributes.group                 Array of attributes of this group.
+     * @apiSuccess {String}   response.attributes.group.attribute_id    Attribute id.
+     * @apiSuccess {String}   response.attributes.group.attribute       Attribute.
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK {
+     *      "version": 0,
+     *       "status": true,
+     *       "response": {
+     *         "attributes": {
+     *               "Processor": [
+     *                   {
+     *                       "attribute_id": "1",
+     *                       "attribute": "Description"
+     *                   },
+     *                   {
+     *                       "attribute_id": "2",
+     *                       "attribute": "No. of Cores"
+     *                   },
+     *                   {
+     *                       "attribute_id": "3",
+     *                       "attribute": "Clockspeed"
+     *                   }
+     *               ],
+     *               "Memory": [
+     *                   {
+     *                       "attribute_id": "9",
+     *                       "attribute": "test 6"
+     *                   },
+     *                   {
+     *                       "attribute_id": "10",
+     *                       "attribute": "test 7"
+     *                   },
+     *                   {
+     *                       "attribute_id": "11",
+     *                       "attribute": "test 8"
+     *                   }
+     *               ]
+     *           }
+     *       }
+     * }
+     * @apiErrorExample Error-Response:
+     * {
+     *      "Error": "You need to be logged!",
+     *      "version": 2,
+     *      "Status" : false
+     * }
+     *
+     *
+     */
+    public function productAttributes()
+    {
+        header("Access-Control-Allow-Origin: *");
+        $this->response->addHeader('Content-Type: application/json');
+
+        $error = $this->valid();
+        if ($error != null) {
+            $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
+                'error' => $error,
+                'status' => false]));
+            return;
+        }
+
+        $this->load->model('extension/module/apimodule');
+        $attributes = $this->model_extension_module_apimodule->getDefaultProductAttributes();
+
+        $listAttributes = [];
+
+        foreach ( $attributes as $key => $value ) {
+            $listAttributes[$value['category']][] = [
+                'attribute_id' => $value['attribute_id'],
+                'attribute' => $value['attribute']
+            ];
+        }
+
+        $this->response->setOutput(json_encode([
+                'version' => $this->API_VERSION,
+                'status' => true,
+                'response' =>[
+                    'attributes' => $listAttributes
+                ]
+            ]
+        ));
     }
 
     /**
@@ -2415,7 +2523,7 @@ class ControllerModuleApimodule extends Controller
 
         $categories = $this->model_module_apimodule->getSubstatus();
 
-        $this->response->setOutput(json_encode(['version' => $this->API_VERSION, 
+        $this->response->setOutput(json_encode(['version' => $this->API_VERSION,
             'response' => ['stock_statuses' => $categories], 'status' => true]));
     }
 
@@ -2451,11 +2559,11 @@ class ControllerModuleApimodule extends Controller
         $languages = $this->model_module_apimodule->getLanguages();
 
         $this->response->setOutput(json_encode([
-            'version' => $this->API_VERSION,
-            'response' => [
-                'languages' => $languages
-            ],
-        	'status' => true]
+                'version' => $this->API_VERSION,
+                'response' => [
+                    'languages' => $languages
+                ],
+                'status' => true]
         ));
 
     }
